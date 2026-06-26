@@ -1,0 +1,115 @@
+import React from 'react';
+import { ArrowLeft, Calendar, Clock, BookOpen, Quote } from 'lucide-react';
+import { type Article, mockArticles } from '../data/mockData';
+
+interface ArticleDetailsPageProps {
+  article: Article;
+  onBack: () => void;
+  onNavigateToArticle: (article: Article) => void;
+}
+
+export const ArticleDetailsPage: React.FC<ArticleDetailsPageProps> = ({
+  article,
+  onBack,
+  onNavigateToArticle,
+}) => {
+  
+  // Find related articles (excluding the active one)
+  const relatedArticles = mockArticles.filter(art => art.id !== article.id).slice(0, 2);
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+      
+      {/* Back button */}
+      <button
+        onClick={onBack}
+        className="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
+      >
+        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+        Back to News
+      </button>
+
+      {/* Main layout grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+        
+        {/* Left Column: Full article body */}
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* Article Header info */}
+          <div className="space-y-4">
+            <span className="text-[9px] font-black uppercase tracking-wider text-zinc-400 bg-zinc-900 border border-zinc-800 rounded px-2.5 py-1">
+              {article.category}
+            </span>
+
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight">
+              {article.title}
+            </h1>
+
+            {/* Author meta row */}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-3 border-y border-zinc-950 py-4 text-xs font-semibold text-zinc-500">
+              <div className="flex items-center gap-2">
+                <img src={article.authorAvatar} alt={article.author} className="h-7 w-7 rounded-full border border-zinc-800 object-cover" />
+                <span className="text-white font-bold">{article.author}</span>
+              </div>
+              <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-zinc-700" /> Published {article.date}</span>
+              <span className="flex items-center gap-1.5"><Clock className="h-4 w-4 text-zinc-700" /> {article.readTime}</span>
+            </div>
+          </div>
+
+          {/* Featured Image */}
+          <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-900 shadow-xl">
+            <img src={article.image} alt={article.title} className="h-full w-full object-cover" />
+          </div>
+
+          {/* Article Content paragraphs */}
+          <div className="space-y-6 text-sm text-zinc-400 font-semibold leading-relaxed">
+            {article.content.map((p, idx) => (
+              <p key={idx}>{p}</p>
+            ))}
+          </div>
+
+          {/* Decorative quote */}
+          <div className="rounded-xl border border-zinc-900 bg-zinc-950/20 p-6 flex gap-4">
+            <Quote className="h-8 w-8 text-zinc-700 flex-shrink-0" />
+            <p className="text-zinc-500 font-display italic font-semibold leading-relaxed">
+              "Running teaches us that we are capable of so much more than we ever imagined. Rules of form, training miles, and recovery build the engine, but community builds the spirit."
+            </p>
+          </div>
+
+        </div>
+
+        {/* Right Column: Related Articles sidebar */}
+        <div className="space-y-6 lg:sticky lg:top-24">
+          <h3 className="font-display text-base font-black text-white tracking-tight uppercase border-b border-zinc-950 pb-4 flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-zinc-500" />
+            Related Articles
+          </h3>
+
+          <div className="space-y-6">
+            {relatedArticles.map((art) => (
+              <div
+                key={art.id}
+                onClick={() => onNavigateToArticle(art)}
+                className="rounded-xl border border-zinc-900 hover:border-zinc-800 bg-[#0c0c0d]/60 p-4 transition-colors cursor-pointer group flex gap-4"
+              >
+                <div className="h-16 w-20 rounded bg-zinc-900 border border-zinc-950 overflow-hidden flex-shrink-0">
+                  <img src={art.image} alt={art.title} className="h-full w-full object-cover" />
+                </div>
+                <div>
+                  <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">{art.category}</span>
+                  <h4 className="text-xs font-bold text-white group-hover:text-zinc-200 mt-1 line-clamp-2 leading-snug">
+                    {art.title}
+                  </h4>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+};
+export default ArticleDetailsPage;
