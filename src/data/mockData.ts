@@ -105,7 +105,7 @@ export const mockEvents: EventItem[] = [
         '07:00 PM - Awarding Ceremony & Afterparty'
       ],
       perks: [
-        'Premium AthleRun Tech Tee',
+        'Premium Runnicle Tech Tee',
         'Finisher Medal',
         'RFID Timing Chip',
         'Sponsor Goodie Bag',
@@ -153,13 +153,13 @@ export const mockEvents: EventItem[] = [
   },
   {
     id: 'event-3',
-    title: 'Winter Championship Cup',
+    title: 'Amihan Year-End Championship Cup',
     badge: 'SOLD OUT',
     distances: ['10K'],
     date: 'Dec 05, 2026',
     deadline: 'Nov 20, 2026',
     location: 'Bacolod City',
-    description: 'The final leg of the winter championship. A high-stakes race where elite athletes and enthusiasts go head-to-head for the year-end cup.',
+    description: 'The final leg of the local championship series. A high-stakes race where Bacolod\'s top elite athletes and running groups go head-to-head for the year-end cup.',
     highlights: ['Championship point-scaling race', 'Cash prizes for top 3 in all age groups', 'Custom limited edition jersey'],
     details: {
       time: '06:00 AM',
@@ -203,13 +203,13 @@ export const mockEvents: EventItem[] = [
     iconType: 'compass',
     image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80',
     results: [
-      { bib: '241', name: 'Marcus Aurelius', rank: 1, category: '10K', finishTime: '00:32:14', pace: '3:13/km' },
-      { bib: '108', name: 'Sarah Connor', rank: 2, category: '10K', finishTime: '00:35:45', pace: '3:34/km' },
-      { bib: '315', name: 'Alex Johnson', rank: 3, category: '10K', finishTime: '00:36:10', pace: '3:37/km' },
-      { bib: '412', name: 'Daniel Park', rank: 4, category: '10K', finishTime: '00:38:12', pace: '3:49/km' },
-      { bib: '502', name: 'Clara Oswald', rank: 5, category: '10K', finishTime: '00:40:02', pace: '4:00/km' },
-      { bib: '142', name: 'James Carter', rank: 1, category: '5K', finishTime: '00:15:32', pace: '3:06/km' },
-      { bib: '89', name: 'Jessica Alba', rank: 2, category: '5K', finishTime: '00:17:41', pace: '3:32/km' }
+      { bib: '241', name: 'Marc Villanueva', rank: 1, category: '10K', finishTime: '00:32:14', pace: '3:13/km' },
+      { bib: '108', name: 'Sarah Geronimo', rank: 2, category: '10K', finishTime: '00:35:45', pace: '3:34/km' },
+      { bib: '315', name: 'Alex Gonzaga', rank: 3, category: '10K', finishTime: '00:36:10', pace: '3:37/km' },
+      { bib: '412', name: 'Daniel Padilla', rank: 4, category: '10K', finishTime: '00:38:12', pace: '3:49/km' },
+      { bib: '502', name: 'Clara Benin', rank: 5, category: '10K', finishTime: '00:40:02', pace: '4:00/km' },
+      { bib: '142', name: 'Jaime Cardenas', rank: 1, category: '5K', finishTime: '00:15:32', pace: '3:06/km' },
+      { bib: '89', name: 'Jess Diaz', rank: 2, category: '5K', finishTime: '00:17:41', pace: '3:32/km' }
     ]
   },
   {
@@ -232,11 +232,11 @@ export const mockEvents: EventItem[] = [
     iconType: 'mountain',
     image: 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?auto=format&fit=crop&w=800&q=80',
     results: [
-      { bib: '302', name: 'Dominic Toretto', rank: 1, category: '15K', finishTime: '00:49:12', pace: '3:16/km' },
-      { bib: '115', name: 'Mia Wallace', rank: 2, category: '15K', finishTime: '00:52:45', pace: '3:31/km' },
-      { bib: '280', name: 'Luke Hobbs', rank: 3, category: '15K', finishTime: '00:55:02', pace: '3:40/km' },
-      { bib: '101', name: 'Arthur Dent', rank: 1, category: '10K', finishTime: '00:33:12', pace: '3:19/km' },
-      { bib: '44', name: 'Ford Prefect', rank: 2, category: '10K', finishTime: '00:34:55', pace: '3:29/km' }
+      { bib: '302', name: 'Dom Yulo', rank: 1, category: '15K', finishTime: '00:49:12', pace: '3:16/km' },
+      { bib: '115', name: 'Mia Aquino', rank: 2, category: '15K', finishTime: '00:52:45', pace: '3:31/km' },
+      { bib: '280', name: 'Lucas Fernandez', rank: 3, category: '15K', finishTime: '00:55:02', pace: '3:40/km' },
+      { bib: '101', name: 'Art De Leon', rank: 1, category: '10K', finishTime: '00:33:12', pace: '3:19/km' },
+      { bib: '44', name: 'Juan dela Cruz', rank: 2, category: '10K', finishTime: '00:34:55', pace: '3:29/km' }
     ]
   }
 ];
@@ -244,7 +244,7 @@ export const mockEvents: EventItem[] = [
 export const mockProducts: Product[] = [
   {
     id: 'prod-1',
-    name: 'AthleRun Carbon Elite 4',
+    name: 'Runnicle Carbon Elite 4',
     category: 'Accessories', // Actually footwear, let's keep it Accessories or Apparel
     price: 12495.00,
     image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80',
@@ -266,7 +266,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: 'prod-3',
-    name: 'AthleRun Pace Race Kit',
+    name: 'Runnicle Pace Race Kit',
     category: 'Race Kits',
     price: 1495.00,
     image: 'https://images.unsplash.com/photo-1519042508741-7f99be9a6857?auto=format&fit=crop&w=400&q=80',
@@ -288,7 +288,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: 'prod-5',
-    name: 'AthleRun Aero Cap',
+    name: 'Runnicle Aero Cap',
     category: 'Accessories',
     price: 995.00,
     image: 'https://images.unsplash.com/photo-1534215754734-18e55d13e346?auto=format&fit=crop&w=400&q=80',
@@ -311,13 +311,13 @@ export const mockProducts: Product[] = [
 ];
 
 export const mockCalendarEvents = [
-  { date: 'Oct 10, 2026', title: 'AthleRun Pre-Season Briefing', type: 'coaching' },
+  { date: 'Oct 10, 2026', title: 'Runnicle Pre-Season Briefing', type: 'coaching' },
   { date: 'Oct 24, 2026', title: 'MegaWorld Fun Run (5K/10K)', type: 'race' },
-  { date: 'Nov 01, 2026', title: 'Winter Marathon Training Block Starts', type: 'training' },
+  { date: 'Nov 01, 2026', title: 'Amihan Marathon Training Block Starts', type: 'training' },
   { date: 'Nov 12, 2026', title: 'Coastal Expressway Marathon (Full/10K)', type: 'race' },
   { date: 'Nov 20, 2026', title: 'Elite Performance Webinar with Coach Dan', type: 'coaching' },
-  { date: 'Dec 05, 2026', title: 'Winter Championship Cup (10K)', type: 'race' },
-  { date: 'Dec 15, 2026', title: 'AthleRun Year-End Gear Expo', type: 'equipment' },
+  { date: 'Dec 05, 2026', title: 'Amihan Year-End Championship Cup (10K)', type: 'race' },
+  { date: 'Dec 15, 2026', title: 'Runnicle Year-End Gear Expo', type: 'equipment' },
 ];
 
 export const mockCommunityPosts: CommunityPost[] = [
@@ -326,7 +326,7 @@ export const mockCommunityPosts: CommunityPost[] = [
     username: 'alex_runs_fast',
     userAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80',
     image: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80',
-    caption: 'Nothing beats early morning miles. Melted the asphalt today! 🏃‍♂️⚡️ #AthleRunPro #runlife',
+    caption: 'Nothing beats early morning miles. Melted the asphalt today! 🏃‍♂️⚡️ #RunniclePro #runlife',
     likes: 248,
     commentsCount: 2,
     comments: [
@@ -340,7 +340,7 @@ export const mockCommunityPosts: CommunityPost[] = [
     username: 'marathon_mindset',
     userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80',
     image: 'https://images.unsplash.com/photo-1502224562085-639556652f33?auto=format&fit=crop&w=800&q=80',
-    caption: 'Lacing up for the Coastal Expressway Marathon. Getting those hill repeats done. ⛰️ #AthleRunPro #marathontraining',
+    caption: 'Lacing up for the Coastal Expressway Marathon. Getting those hill repeats done. ⛰️ #RunniclePro #marathontraining',
     likes: 312,
     commentsCount: 2,
     comments: [
@@ -354,7 +354,7 @@ export const mockCommunityPosts: CommunityPost[] = [
     username: 'run_with_heart',
     userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80',
     image: 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=800&q=80',
-    caption: 'Felt the community vibes at the local 10k! Rule the road together. 👥🖤 #AthleRunPro #community',
+    caption: 'Felt the community vibes at the local 10k! Rule the road together. 👥🖤 #RunniclePro #community',
     likes: 185,
     commentsCount: 1,
     comments: [
@@ -399,7 +399,7 @@ export const mockArticles: Article[] = [
   },
   {
     id: 'art-3',
-    title: 'AthleRun Partner and Gear Sponsor Announcements',
+    title: 'Runnicle Partner and Gear Sponsor Announcements',
     category: 'Sponsors',
     date: 'Jun 15, 2026',
     author: 'Marketing Board',
@@ -408,7 +408,7 @@ export const mockArticles: Article[] = [
     readTime: '4 min read',
     image: 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=800&q=80',
     content: [
-      'AthleRun is proud to announce its strategic partnership with Apex Nutrition, the leading organic endurance sports brand.',
+      'Runnicle is proud to announce its strategic partnership with Apex Nutrition, the leading organic endurance sports brand.',
       'Apex will set up dedicated electrolyte fuel zones every 5 kilometers. In addition to clean purified water, runners will be provided with custom isotonic citrus drinks and berry-flavored energy gels.',
       'This partnership ensures our runners stay properly fueled, decreasing injury spikes and supporting peak performance. Specialized recovery packs will also be waiting at finish line lounges.'
     ]
@@ -419,7 +419,7 @@ export const mockGalleryItems: GalleryItem[] = [
   { id: 'g-1', title: 'Marathon Wave Start', category: 'Race Day', type: 'photo', image: 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=800&q=80' },
   { id: 'g-2', title: 'Runner at Sunset', category: 'Community', type: 'photo', image: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80' },
   { id: 'g-3', title: 'Training Camp Group', category: 'Behind the Scenes', type: 'photo', image: 'https://images.unsplash.com/photo-1502224562085-639556652f33?auto=format&fit=crop&w=800&q=80' },
-  { id: 'g-4', title: 'AthleRun Gear Expo', category: 'Expo', type: 'photo', image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80' },
+  { id: 'g-4', title: 'Runnicle Gear Expo', category: 'Expo', type: 'photo', image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80' },
   { id: 'g-5', title: 'Elite Finishers Line', category: 'Race Day', type: 'photo', image: 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?auto=format&fit=crop&w=800&q=80' },
   { id: 'g-6', title: 'Stretching & Dynamic Prep', category: 'Behind the Scenes', type: 'photo', image: 'https://images.unsplash.com/photo-1486218119243-13883505764c?auto=format&fit=crop&w=800&q=80' },
   { id: 'g-7', title: 'Post Race Concert Crowd', category: 'Community', type: 'photo', image: 'https://images.unsplash.com/photo-1532444458054-01a7dd3e9fca?auto=format&fit=crop&w=800&q=80' },

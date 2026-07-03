@@ -1,21 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-  --font-display: "Outfit", system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Bebas Neue", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-brand: #f97316;
+  --color-brand-hover: #ea580c;
+  --color-brand-glow: rgba(249, 115, 22, 0.15);
+  --color-bg-dark: #ffffff;
 }
 
 @layer base {
   body {
     font-family: var(--font-sans);
-    background-color: #080808;
-    color: #a1a1aa;
+    background-color: #ffffff;
+    color: #27272a;
     overflow-x: hidden;
   }
   
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    color: #ffffff;
+    color: #09090b;
   }
 }
 
@@ -25,16 +31,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #080808;
+  background: #ffffff;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: #e4e4e7;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: #cbd5e1;
 }
 
 /* Class for counting cards or grid boxes */

@@ -24,36 +24,36 @@ export const EventsPage: React.FC<EventsPageProps> = ({
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
       {/* Title */}
-      <div className="border-b border-zinc-900 pb-6 mb-8 text-center max-w-3xl mx-auto">
-        <span className="rounded-full bg-white/10 px-4 py-1 text-xs font-extrabold tracking-widest text-white uppercase">
-          ATHLERUN EVENTS
+      <div className="border-b border-zinc-200 pb-6 mb-8 text-center max-w-3xl mx-auto">
+        <span className="rounded-full bg-orange-50 px-4 py-1 text-xs font-extrabold tracking-widest text-orange-600 border border-orange-200 uppercase">
+          RUNNICLE EVENTS
         </span>
-        <h1 className="mt-6 font-display text-4xl font-black leading-tight text-white sm:text-5xl">
+        <h1 className="mt-6 font-display text-4xl font-black leading-tight text-zinc-900 sm:text-5xl">
           Conquer the Streets.
         </h1>
-        <p className="mt-4 text-zinc-400 text-sm leading-relaxed">
+        <p className="mt-4 text-zinc-500 text-sm leading-relaxed">
           From competitive marathons to lively evening neon fun runs, choose your race challenges and rule the road.
         </p>
       </div>
 
       {/* Tab selectors */}
-      <div className="flex justify-center border-b border-zinc-950 pb-5 mb-10 gap-2">
+      <div className="flex justify-center border-b border-zinc-200 pb-5 mb-8 gap-2">
         <button
           onClick={() => setActiveTab('upcoming')}
-          className={`rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border ${
+          className={`rounded-full px-5 py-2 text-xs font-mono font-black uppercase tracking-widest transition-all cursor-pointer border ${
             activeTab === 'upcoming'
-              ? 'bg-white text-black border-white'
-              : 'border-zinc-900 text-zinc-500 hover:border-zinc-700 hover:text-white'
+              ? 'bg-brand text-white border-brand shadow-md shadow-brand/10'
+              : 'border-zinc-200 text-zinc-600 hover:border-zinc-350 hover:text-brand bg-white'
           }`}
         >
           Upcoming Races ({upcomingEvents.length})
         </button>
         <button
           onClick={() => setActiveTab('past')}
-          className={`rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border ${
+          className={`rounded-full px-5 py-2 text-xs font-mono font-black uppercase tracking-widest transition-all cursor-pointer border ${
             activeTab === 'past'
-              ? 'bg-white text-black border-white'
-              : 'border-zinc-900 text-zinc-500 hover:border-zinc-700 hover:text-white'
+              ? 'bg-brand text-white border-brand shadow-md shadow-brand/10'
+              : 'border-zinc-200 text-zinc-600 hover:border-zinc-350 hover:text-brand bg-white'
           }`}
         >
           Past Events ({pastEvents.length})
@@ -61,75 +61,76 @@ export const EventsPage: React.FC<EventsPageProps> = ({
       </div>
 
       {/* Events loop */}
-      <div className="space-y-12">
+      <div className="space-y-6 max-w-4xl mx-auto">
         {activeTab === 'upcoming' ? (
           upcomingEvents.map((event) => (
             <div
               key={event.id}
-              className="rounded-2xl border border-zinc-800 bg-[#0c0c0d]/60 overflow-hidden shadow-2xl flex flex-col lg:flex-row hover:border-zinc-700 transition-colors"
+              className="rounded-3xl border border-zinc-200 bg-white overflow-hidden shadow-sm flex flex-col md:flex-row hover:border-brand transition-all duration-300 group"
             >
               {/* Event image */}
-              <div className="lg:w-2/5 aspect-video lg:aspect-auto min-h-[250px] relative bg-zinc-900">
+              <div className="md:w-1/3 aspect-video md:aspect-auto min-h-[160px] md:min-h-full relative bg-zinc-150">
                 <img
                   src={event.image}
                   alt={event.title}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover scale-100 group-hover:scale-102 transition-transform duration-500"
+                  loading="lazy"
                 />
-                <span className="absolute top-4 left-4 rounded-sm bg-white px-2 py-0.5 text-[9px] font-black tracking-widest text-black uppercase">
+                <span className="absolute top-4 left-4 rounded-sm bg-zinc-900 px-2 py-0.5 text-[8px] font-mono font-black tracking-widest text-white uppercase">
                   {event.badge}
                 </span>
               </div>
 
               {/* Event Info content */}
-              <div className="lg:w-3/5 p-6 md:p-10 flex flex-col justify-between space-y-6">
-                <div className="space-y-4">
-                  <div className="flex flex-wrap gap-2">
+              <div className="md:w-2/3 p-5 md:p-6 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {event.distances.map((dist) => (
                       <span
                         key={dist}
-                        className="rounded-sm border border-zinc-800 bg-zinc-950 px-2 py-0.5 text-[9px] font-black text-white uppercase tracking-wider"
+                        className="rounded-sm border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[8px] font-mono font-black text-zinc-500 uppercase tracking-widest"
                       >
                         {dist}
                       </span>
                     ))}
                   </div>
 
-                  <h3 className="font-display text-2xl font-black text-white tracking-tight leading-tight">
+                  <h3 className="font-display text-xl font-black text-zinc-900 tracking-tight leading-none uppercase group-hover:text-brand transition-colors">
                     {event.title}
                   </h3>
 
-                  <p className="text-xs text-zinc-400 font-semibold leading-relaxed line-clamp-3">
+                  <p className="text-xs text-zinc-500 font-semibold leading-relaxed line-clamp-2">
                     {event.description}
                   </p>
 
-                  <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-zinc-400 pt-2">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-zinc-600 flex-shrink-0" />
+                  <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-zinc-500 pt-1 font-mono">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5 text-zinc-400 flex-shrink-0" />
                       <span>{event.date}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-zinc-600 flex-shrink-0" />
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-zinc-400 flex-shrink-0" />
                       <span className="truncate">{event.location}</span>
                     </div>
                   </div>
 
-                  <p className="text-[10px] text-zinc-500 font-semibold">
-                    Registration Deadline: <span className="text-zinc-300 font-bold">{event.deadline}</span>
+                  <p className="text-[9px] text-zinc-400 font-mono font-bold uppercase pt-1">
+                    Registration Deadline: <span className="text-zinc-800">{event.deadline}</span>
                   </p>
                 </div>
 
                 {/* Actions row */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-900/60">
+                <div className="flex flex-col sm:flex-row gap-2.5 pt-3.5 border-t border-zinc-150">
                   <button
                     disabled={event.badge === 'SOLD OUT'}
                     onClick={() => onRegisterClick(event)}
-                    className="flex-1 rounded-md bg-white py-3 text-center text-xs font-bold text-black hover:bg-zinc-200 active:scale-98 transition-all duration-200 cursor-pointer uppercase tracking-wider disabled:opacity-30"
+                    className="flex-1 rounded-full bg-brand hover:bg-brand-hover py-2 text-center text-[10px] font-mono font-black text-white active:scale-98 transition-all duration-200 cursor-pointer uppercase tracking-widest disabled:opacity-30 shadow-sm shadow-brand/10"
                   >
                     {event.badge === 'SOLD OUT' ? 'Sold Out' : 'Register Now'}
                   </button>
                   <button
                     onClick={() => onLearnMoreClick(event)}
-                    className="flex-1 rounded-md border border-zinc-800 bg-zinc-950/20 py-3 text-center text-xs font-bold text-white hover:bg-zinc-900 hover:border-zinc-700 active:scale-98 transition-all duration-200 cursor-pointer uppercase tracking-wider"
+                    className="flex-1 rounded-full border border-zinc-200 bg-white py-2 text-center text-[10px] font-mono font-black text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 active:scale-98 transition-all duration-200 cursor-pointer uppercase tracking-widest"
                   >
                     Learn More
                   </button>
@@ -141,35 +142,36 @@ export const EventsPage: React.FC<EventsPageProps> = ({
           pastEvents.map((event) => (
             <div
               key={event.id}
-              className="rounded-2xl border border-zinc-900 bg-[#070708]/40 overflow-hidden flex flex-col lg:flex-row hover:border-zinc-800 transition-colors"
+              className="rounded-3xl border border-zinc-200 bg-zinc-50/50 overflow-hidden flex flex-col md:flex-row hover:border-brand/40 transition-all duration-300 group"
             >
               {/* Event image */}
-              <div className="lg:w-2/5 aspect-video lg:aspect-auto min-h-[220px] relative bg-zinc-900">
+              <div className="md:w-1/3 aspect-video md:aspect-auto min-h-[160px] md:min-h-full relative bg-zinc-150">
                 <img
                   src={event.image}
                   alt={event.title}
-                  className="h-full w-full object-cover filter grayscale"
+                  className="h-full w-full object-cover filter grayscale scale-100 group-hover:scale-102 transition-transform duration-500"
+                  loading="lazy"
                 />
-                <span className="absolute top-4 left-4 rounded-sm bg-zinc-900/80 border border-zinc-800 px-2 py-0.5 text-[9px] font-black tracking-widest text-zinc-500 uppercase">
+                <span className="absolute top-4 left-4 rounded-sm bg-zinc-900/80 border border-zinc-850 px-2 py-0.5 text-[8px] font-mono font-black tracking-widest text-zinc-400 uppercase">
                   Past Event
                 </span>
               </div>
 
               {/* Event Info content */}
-              <div className="lg:w-3/5 p-6 md:p-8 flex flex-col justify-between space-y-6">
-                <div className="space-y-3.5">
-                  <div className="flex gap-2">
+              <div className="md:w-2/3 p-5 md:p-6 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <div className="flex gap-1.5">
                     {event.distances.map((dist) => (
                       <span
                         key={dist}
-                        className="rounded-sm border border-zinc-900 px-2 py-0.5 text-[9px] font-black text-zinc-500 uppercase tracking-wider"
+                        className="rounded-sm border border-zinc-200 px-2 py-0.5 text-[8px] font-mono font-black text-zinc-500 uppercase tracking-widest"
                       >
                         {dist}
                       </span>
                     ))}
                   </div>
 
-                  <h3 className="font-display text-xl font-black text-zinc-300 tracking-tight leading-tight">
+                  <h3 className="font-display text-lg font-black text-zinc-800 tracking-tight leading-none uppercase group-hover:text-brand transition-colors">
                     {event.title}
                   </h3>
 
@@ -177,25 +179,25 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                     {event.description}
                   </p>
 
-                  <div className="flex gap-4 text-xs font-semibold text-zinc-500">
-                    <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-zinc-700" /> {event.date}</span>
-                    <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4 text-zinc-700" /> {event.location}</span>
+                  <div className="flex gap-4 text-xs font-semibold text-zinc-500 font-mono">
+                    <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-zinc-400" /> {event.date}</span>
+                    <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-zinc-400" /> {event.location}</span>
                   </div>
                 </div>
 
                 {/* Results triggers */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-900/40">
+                <div className="flex flex-col sm:flex-row gap-2.5 pt-3.5 border-t border-zinc-150">
                   {event.results && event.results.length > 0 ? (
                     <button
                       onClick={() => onViewResultsClick(event)}
-                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-bold text-white py-3 transition-colors cursor-pointer uppercase tracking-wider"
+                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-brand hover:bg-brand-hover text-[10px] font-mono font-black text-white py-2 transition-colors cursor-pointer uppercase tracking-widest shadow-sm shadow-brand/10"
                     >
-                      <History className="h-4 w-4 text-zinc-400" />
+                      <History className="h-3.5 w-3.5 text-white/80" />
                       View Race Results
-                      <ChevronRight className="h-4 w-4 text-zinc-400" />
+                      <ChevronRight className="h-3.5 w-3.5 text-white/80" />
                     </button>
                   ) : (
-                    <span className="text-xs text-zinc-600 font-semibold italic py-2">Results table unavailable</span>
+                    <span className="text-[10px] font-mono text-zinc-400 font-bold uppercase italic py-2">Results table unavailable</span>
                   )}
                 </div>
               </div>

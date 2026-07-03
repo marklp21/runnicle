@@ -37,7 +37,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/85 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
           />
 
           {/* Modal content container */}
@@ -46,16 +46,16 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', duration: 0.5 }}
-            className="relative w-full max-w-2xl overflow-hidden rounded-xl border border-zinc-800 bg-[#121212] shadow-2xl z-10 max-h-[90vh] flex flex-col"
+            className="relative w-full max-w-2xl overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl z-10 max-h-[90vh] flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-zinc-800 p-5">
-              <h3 className="text-xl font-bold text-white tracking-tight">
+            <div className="flex items-center justify-between border-b border-zinc-150 p-5">
+              <h3 className="text-xl font-bold text-zinc-950 tracking-tight">
                 {title}
               </h3>
               <button
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors duration-200"
+                className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200"
                 aria-label="Close modal"
               >
                 <X className="h-5 w-5" />
@@ -63,7 +63,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
             </div>
 
             {/* Scrollable Body */}
-            <div className="flex-1 overflow-y-auto p-6 text-zinc-300">
+            <div className="flex-1 overflow-y-auto p-6 text-zinc-750">
               {children}
             </div>
           </motion.div>

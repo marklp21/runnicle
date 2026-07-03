@@ -37,15 +37,15 @@ export const CartPage: React.FC<CartPageProps> = ({
       {/* Back button */}
       <button
         onClick={onBackToStore}
-        className="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
+        className="inline-flex items-center gap-2 text-xs font-bold text-zinc-505 hover:text-orange-505 uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
         Back to Store
       </button>
 
       {/* Main layout */}
-      <div className="border-b border-zinc-900 pb-5 mb-8">
-        <h1 className="font-display text-4xl font-black text-white tracking-tight">
+      <div className="border-b border-zinc-200 pb-5 mb-8">
+        <h1 className="font-display text-4xl font-black text-zinc-900 tracking-tight">
           Your Shopping Cart
         </h1>
         <p className="mt-2 text-sm text-zinc-500 font-medium">
@@ -54,13 +54,13 @@ export const CartPage: React.FC<CartPageProps> = ({
       </div>
 
       {cartItems.length === 0 ? (
-        <div className="text-center py-20 rounded-xl border border-zinc-900 bg-[#070708]/30">
-          <ShoppingBag className="h-12 w-12 text-zinc-700 mx-auto mb-4" />
-          <h3 className="text-white font-bold text-lg">Your cart is empty</h3>
-          <p className="text-zinc-500 text-xs mt-1.5 font-medium mb-6">You haven\'t added any items to your shopping cart yet.</p>
+        <div className="text-center py-20 rounded-xl border border-zinc-200 bg-zinc-50">
+          <ShoppingBag className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
+          <h3 className="text-zinc-800 font-bold text-lg">Your cart is empty</h3>
+          <p className="text-zinc-550 text-xs mt-1.5 font-medium mb-6">You haven't added any items to your shopping cart yet.</p>
           <button
             onClick={onBackToStore}
-            className="rounded-md bg-white px-6 py-3.5 text-xs font-bold text-black hover:bg-zinc-200 transition-colors uppercase tracking-wider cursor-pointer"
+            className="rounded-md bg-orange-500 px-6 py-3.5 text-xs font-bold text-white hover:bg-orange-600 transition-colors uppercase tracking-wider cursor-pointer"
           >
             Start Shopping
           </button>
@@ -73,16 +73,16 @@ export const CartPage: React.FC<CartPageProps> = ({
             {cartItems.map((item, idx) => (
               <div
                 key={idx}
-                className="flex items-center gap-4 p-4 rounded-xl border border-zinc-900 bg-zinc-950/20 hover:border-zinc-800 transition-colors"
+                className="flex items-center gap-4 p-4 rounded-xl border border-zinc-200 bg-white hover:border-orange-200 hover:shadow-sm transition-colors shadow-sm"
               >
                 {/* Product image */}
-                <div className="h-20 w-20 rounded-lg overflow-hidden bg-zinc-900 flex-shrink-0 flex items-center justify-center border border-zinc-950">
+                <div className="h-20 w-20 rounded-lg overflow-hidden bg-zinc-50 flex-shrink-0 flex items-center justify-center border border-zinc-100">
                   <img src={item.product.image} alt={item.product.name} className="h-full w-full object-cover" />
                 </div>
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-bold text-white truncate">{item.product.name}</h3>
+                  <h3 className="text-sm font-bold text-zinc-900 truncate">{item.product.name}</h3>
                   <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-zinc-500 mt-1 font-semibold">
                     <span>Color: {item.color}</span>
                     <span>•</span>
@@ -96,14 +96,14 @@ export const CartPage: React.FC<CartPageProps> = ({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => onUpdateQuantity(idx, -1)}
-                        className="p-1 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white cursor-pointer"
+                        className="p-1 rounded bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-zinc-700 cursor-pointer"
                       >
                         <Minus className="h-3 w-3" />
                       </button>
-                      <span className="text-xs font-bold text-white px-1">{item.quantity}</span>
+                      <span className="text-xs font-bold text-zinc-900 px-1">{item.quantity}</span>
                       <button
                         onClick={() => onUpdateQuantity(idx, 1)}
-                        className="p-1 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white cursor-pointer"
+                        className="p-1 rounded bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-zinc-700 cursor-pointer"
                       >
                         <Plus className="h-3 w-3" />
                       </button>
@@ -111,7 +111,7 @@ export const CartPage: React.FC<CartPageProps> = ({
 
                     <button
                       onClick={() => onRemoveItem(idx)}
-                      className="text-zinc-600 hover:text-red-500 transition-colors p-1.5 cursor-pointer"
+                      className="text-zinc-400 hover:text-red-500 transition-colors p-1.5 cursor-pointer"
                       aria-label="Remove item"
                     >
                       <Trash2 className="h-4.5 w-4.5" />
@@ -125,28 +125,28 @@ export const CartPage: React.FC<CartPageProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => onUpdateQuantity(idx, -1)}
-                      className="p-1 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white transition-colors cursor-pointer"
+                      className="p-1 rounded bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-zinc-700 transition-colors cursor-pointer"
                     >
                       <Minus className="h-3.5 w-3.5" />
                     </button>
-                    <span className="text-xs font-bold text-white w-5 text-center">{item.quantity}</span>
+                    <span className="text-xs font-bold text-zinc-900 w-5 text-center">{item.quantity}</span>
                     <button
                       onClick={() => onUpdateQuantity(idx, 1)}
-                      className="p-1 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white transition-colors cursor-pointer"
+                      className="p-1 rounded bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-zinc-700 transition-colors cursor-pointer"
                     >
                       <Plus className="h-3.5 w-3.5" />
                     </button>
                   </div>
 
                   {/* Total price */}
-                  <span className="text-sm font-bold text-white w-20 text-right font-display">
+                  <span className="text-sm font-bold text-zinc-900 w-20 text-right font-display">
                     ₱{(item.product.price * item.quantity).toLocaleString()}
                   </span>
 
                   {/* Trash action */}
                   <button
                     onClick={() => onRemoveItem(idx)}
-                    className="text-zinc-600 hover:text-red-500 transition-colors p-1.5 cursor-pointer"
+                    className="text-zinc-400 hover:text-red-500 transition-colors p-1.5 cursor-pointer"
                     aria-label="Remove item"
                   >
                     <Trash2 className="h-4.5 w-4.5" />
@@ -158,44 +158,44 @@ export const CartPage: React.FC<CartPageProps> = ({
           </div>
 
           {/* Checkout Card Summary */}
-          <div className="rounded-xl border border-zinc-800 bg-[#0c0c0d] p-6 shadow-2xl space-y-6">
-            <h3 className="font-display text-base font-black text-white tracking-tight uppercase border-b border-zinc-950 pb-4">
+          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-6">
+            <h3 className="font-display text-base font-black text-zinc-900 tracking-tight uppercase border-b border-zinc-200 pb-4">
               Order Summary
             </h3>
 
-            <div className="space-y-3.5 text-xs font-semibold text-zinc-400">
+            <div className="space-y-3.5 text-xs font-semibold text-zinc-500">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span className="text-white">₱{subtotal.toLocaleString()}</span>
+                <span className="text-zinc-900">₱{subtotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping Est.</span>
-                <span className="text-white">
+                <span className="text-zinc-900">
                   {shipping === 0 ? 'Free Shipping' : `₱${shipping.toLocaleString()}`}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Estimated VAT (12%)</span>
-                <span className="text-white">₱{tax.toLocaleString()}</span>
+                <span className="text-zinc-900">₱{tax.toLocaleString()}</span>
               </div>
               
-              <div className="border-t border-zinc-900 pt-4 flex justify-between text-sm font-bold">
-                <span className="text-white">Total Est.</span>
-                <span className="text-white font-display">₱{total.toLocaleString()}</span>
+              <div className="border-t border-zinc-200 pt-4 flex justify-between text-sm font-bold">
+                <span className="text-zinc-900">Total Est.</span>
+                <span className="text-orange-600 font-display font-bold">₱{total.toLocaleString()}</span>
               </div>
             </div>
 
             <button
               onClick={onCheckout}
-              className="w-full rounded-md bg-white py-4 mt-6 text-sm font-black text-black hover:bg-zinc-200 active:scale-98 transition-all duration-200 uppercase tracking-wider cursor-pointer inline-flex items-center justify-center gap-2"
+              className="w-full rounded-md bg-orange-500 py-4 mt-6 text-sm font-black text-white hover:bg-orange-605 active:scale-98 transition-all duration-200 uppercase tracking-wider cursor-pointer inline-flex items-center justify-center gap-2 shadow-md shadow-orange-500/10"
             >
               <CreditCard className="h-4 w-4" />
               Proceed to Checkout
             </button>
 
             {shipping > 0 && (
-              <p className="text-[10px] text-zinc-500 text-center font-medium leading-relaxed">
-                Add <span className="text-white font-bold">₱{(3000 - subtotal).toLocaleString()}</span> more to qualify for Free Shipping!
+              <p className="text-[10px] text-zinc-550 text-center font-medium leading-relaxed">
+                Add <span className="text-zinc-800 font-bold">₱{(3000 - subtotal).toLocaleString()}</span> more to qualify for Free Shipping!
               </p>
             )}
           </div>
