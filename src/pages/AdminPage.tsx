@@ -595,6 +595,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               )}
             </button>
             <button
+              onClick={() => onNavigate('admin-events')}
+              className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
+                view === 'events' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
+              }`}
+            >
+              Events ({events.length})
+              {view === 'events' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
+              )}
+            </button>
+            <button
               onClick={() => onNavigate('admin-create-event')}
               className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
                 view === 'create-event' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
