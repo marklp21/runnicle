@@ -1144,7 +1144,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
         {view === 'events' && !editingEvent && (
           <div className="space-y-6 animate-fade-in">
-            <div className="flex justify-between items-center bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm gap-4">
               <div>
                 <h2 className="font-display text-2xl font-black text-zinc-900 uppercase tracking-tight">
                   Active Race Events
@@ -1180,7 +1180,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   setFormStep(1);
                   onNavigate('admin-create-event');
                 }}
-                className="rounded-full bg-brand hover:bg-brand-hover text-white text-xs font-mono font-black uppercase tracking-widest py-3 px-6 cursor-pointer transition-colors shadow-sm"
+                className="w-full sm:w-auto rounded-full bg-brand hover:bg-brand-hover text-white text-xs font-mono font-black uppercase tracking-widest py-3 px-6 cursor-pointer transition-colors shadow-sm text-center whitespace-nowrap"
               >
                 + Create Event
               </button>
