@@ -11,12 +11,22 @@
   --color-bg-dark: #ffffff;
 }
 
+html {
+  max-width: 100vw;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+  scroll-behavior: smooth;
+}
+
 @layer base {
   body {
     font-family: var(--font-sans);
     background-color: #ffffff;
     color: #27272a;
+    max-width: 100vw;
     overflow-x: hidden;
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
   }
   
   h1, h2 {
