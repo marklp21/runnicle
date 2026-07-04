@@ -540,12 +540,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 [R]
               </span>
             </div>
-            <div className="pl-5 border-l border-zinc-200 h-6 flex items-center gap-2.5">
+            <div className="pl-5 border-l border-zinc-200 h-6 flex items-center">
               <span className="font-mono text-[10px] font-black text-zinc-900 tracking-widest uppercase">
                 ADMIN CONSOLE
-              </span>
-              <span className="text-[9px] text-zinc-400 font-bold bg-zinc-100 rounded px-1.5 py-0.5 border border-zinc-200/50">
-                v1.2.0
               </span>
             </div>
           </div>
