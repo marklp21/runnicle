@@ -14,7 +14,9 @@ import {
   Sparkles,
   Image as ImageIcon,
   Eye,
-  EyeOff
+  EyeOff,
+  Printer,
+  ArrowLeft
 } from 'lucide-react';
 import { type EventItem } from '../data/mockData';
 
@@ -43,7 +45,8 @@ const coverPresets = [
 ];
 
 interface AdminPageProps {
-  view: 'login' | 'registrations' | 'create-event';
+  view: 'login' | 'registrations' | 'create-event' | 'registration-details';
+  selectedRegId?: string | null;
   events: EventItem[];
   onAddEvent: (event: EventItem) => void;
   registrations: any[];
@@ -51,6 +54,7 @@ interface AdminPageProps {
   onBackToHome: () => void;
   onNavigate: (page: string) => void;
   onLoginSuccess: () => void;
+  onSelectReg?: (id: string | null) => void;
 }
 
 export const sha256 = async (text: string): Promise<string> => {
@@ -62,13 +66,15 @@ export const sha256 = async (text: string): Promise<string> => {
 
 export const AdminPage: React.FC<AdminPageProps> = ({
   view,
+  selectedRegId,
   events,
   onAddEvent,
   registrations,
   onUpdateRegistrations,
   onBackToHome,
   onNavigate,
-  onLoginSuccess
+  onLoginSuccess,
+  onSelectReg
 }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -463,31 +469,47 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           </div>
         </div>
 
-        {/* Tab Controls */}
-        <div className="flex border-b border-zinc-200 pb-px gap-6">
-          <button
-            onClick={() => onNavigate('admin-registrations')}
-            className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
-              view === 'registrations' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
-            }`}
-          >
-            Runner Registrations ({registrations.length})
-            {view === 'registrations' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
-            )}
-          </button>
-          <button
-            onClick={() => onNavigate('admin-create-event')}
-            className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
-              view === 'create-event' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
-            }`}
-          >
-            Create New Event
-            {view === 'create-event' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
-            )}
-          </button>
-        </div>
+        {/* Tab Controls / Breadcrumbs */}
+        {view === 'registration-details' ? (
+          <div className="flex items-center gap-2 text-xs font-mono select-none">
+            <button 
+              onClick={() => onNavigate('admin-registrations')}
+              className="text-zinc-400 hover:text-brand transition-colors uppercase font-bold flex items-center gap-1.5"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Runner Registrations
+            </button>
+            <span className="text-zinc-300">/</span>
+            <span className="text-zinc-800 font-extrabold uppercase">
+              Runner Details
+            </span>
+          </div>
+        ) : (
+          <div className="flex border-b border-zinc-200 pb-px gap-6">
+            <button
+              onClick={() => onNavigate('admin-registrations')}
+              className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
+                view === 'registrations' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
+              }`}
+            >
+              Runner Registrations ({registrations.length})
+              {view === 'registrations' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
+              )}
+            </button>
+            <button
+              onClick={() => onNavigate('admin-create-event')}
+              className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
+                view === 'create-event' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
+              }`}
+            >
+              Create New Event
+              {view === 'create-event' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Success Alert Toast */}
         {successToast && (
@@ -654,7 +676,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       </tr>
                     ) : (
                       filteredRegistrations.map((reg) => (
-                        <tr key={reg.id} className="hover:bg-zinc-50/50 transition-colors font-mono">
+                        <tr 
+                          key={reg.id} 
+                          onClick={() => {
+                            if (onSelectReg) onSelectReg(reg.id);
+                            onNavigate('admin-registration-details');
+                          }}
+                          className="hover:bg-zinc-50/50 transition-colors font-mono cursor-pointer"
+                        >
                           {/* Bib */}
                           <td className="px-5 py-4 border-r border-zinc-200 font-bold text-zinc-900">
                             {reg.registeredBib ? `[${reg.registeredBib}]` : '—'}
@@ -711,7 +740,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                             <div className="flex gap-2 justify-end">
                               {reg.status !== 'Verified' && (
                                 <button
-                                  onClick={() => handleVerifyStatus(reg.id, 'Verified')}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleVerifyStatus(reg.id, 'Verified');
+                                  }}
                                   title="Verify Runner"
                                   className="h-7 w-7 rounded-lg border border-zinc-200 bg-white hover:border-emerald-500 hover:text-emerald-600 flex items-center justify-center transition-colors cursor-pointer text-zinc-400"
                                 >
@@ -720,7 +752,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                               )}
                               {reg.status !== 'Cancelled' && (
                                 <button
-                                  onClick={() => handleVerifyStatus(reg.id, 'Cancelled')}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleVerifyStatus(reg.id, 'Cancelled');
+                                  }}
                                   title="Cancel Registration"
                                   className="h-7 w-7 rounded-lg border border-zinc-200 bg-white hover:border-red-500 hover:text-red-500 flex items-center justify-center transition-colors cursor-pointer text-zinc-400"
                                 >
@@ -728,7 +763,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                                 </button>
                               )}
                               <button
-                                onClick={() => handleDeleteRegistration(reg.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteRegistration(reg.id);
+                                }}
                                 title="Delete Record"
                                 className="h-7 w-7 rounded-lg border border-zinc-200 bg-white hover:border-zinc-900 hover:text-zinc-900 flex items-center justify-center transition-colors cursor-pointer text-zinc-400"
                               >
@@ -1022,6 +1060,279 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </form>
           </div>
         )}
+
+        {view === 'registration-details' && (() => {
+          const selectedReg = registrations.find(r => r.id === selectedRegId);
+          if (!selectedReg) return null;
+          return (
+            <div className="space-y-6">
+              <style dangerouslySetInnerHTML={{__html: `
+                @media print {
+                  body * {
+                    visibility: hidden !important;
+                  }
+                  #printable-pass-card, #printable-pass-card * {
+                    visibility: visible !important;
+                  }
+                  #printable-pass-card {
+                    position: absolute !important;
+                    left: 50% !important;
+                    top: 50% !important;
+                    transform: translate(-50%, -50%) !important;
+                    width: 450px !important;
+                    border: 2px solid #e4e4e7 !important;
+                    border-radius: 24px !important;
+                    box-shadow: none !important;
+                    margin: 0 !important;
+                    padding: 24px !important;
+                    background-color: white !important;
+                  }
+                }
+              `}} />
+
+              <div className="flex flex-col lg:flex-row gap-8 items-start">
+                
+                {/* Left Column: Timing Pass card */}
+                <div className="w-full lg:w-96 flex-shrink-0 space-y-4">
+                  <div 
+                    id="printable-pass-card"
+                    className="bg-white rounded-3xl border border-zinc-200 shadow-sm p-6 relative overflow-hidden"
+                  >
+                    {/* Decorative brand accent */}
+                    <div className="absolute top-0 left-0 right-0 h-4 bg-brand" />
+                    
+                    <div className="text-center pt-2 pb-6 border-b border-dashed border-zinc-200">
+                      <span className="font-mono text-[9px] font-black text-brand tracking-widest uppercase">
+                        RUNNICLE OFFICIAL TIMING PASS
+                      </span>
+                      <h2 className="font-display text-lg font-black text-zinc-900 mt-0.5 uppercase tracking-tight truncate">
+                        {selectedReg.eventTitle || 'Early-Bird Runner'}
+                      </h2>
+                    </div>
+
+                    {/* Large BIB Display */}
+                    <div className="py-8 text-center bg-zinc-50 rounded-2xl border border-zinc-100 my-6">
+                      <span className="font-mono text-xs text-zinc-400 font-bold uppercase tracking-wider block">
+                        RACE BIB NUMBER
+                      </span>
+                      <span className="font-mono text-6xl font-black text-zinc-900 mt-2 block tracking-tight">
+                        {selectedReg.registeredBib ? `#${selectedReg.registeredBib}` : 'UNASSIGNED'}
+                      </span>
+                    </div>
+
+                    <div className="space-y-4 font-mono text-xs text-zinc-650 pb-6 border-b border-dashed border-zinc-200">
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400 font-bold uppercase text-[10px]">ATHLETE</span>
+                        <span className="font-sans font-extrabold text-zinc-900 text-right text-xs">
+                          {selectedReg.firstName} {selectedReg.lastName}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400 font-bold uppercase text-[10px]">DISTANCE</span>
+                        <span className="font-black text-brand text-right">{selectedReg.distance}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400 font-bold uppercase text-[10px]">SIZE</span>
+                        <span className="font-bold text-zinc-900 text-right">
+                          {selectedReg.size ? selectedReg.size.replace('Unisex - ', '') : '—'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400 font-bold uppercase text-[10px]">VERIFIED</span>
+                        <span className={`font-black text-right ${selectedReg.status === 'Verified' ? 'text-emerald-600' : 'text-yellow-600'}`}>
+                          {selectedReg.status || 'Pending'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Mock Barcode rendering */}
+                    <div className="pt-6 flex flex-col items-center">
+                      <div className="flex items-center justify-center gap-[1.5px] h-10 bg-white px-2 select-none">
+                        {[1, 3, 2, 1, 4, 1, 2, 3, 1, 4, 2, 1, 3, 1, 2, 1, 4, 2, 1, 3, 1, 4, 1, 2, 1, 3, 2].map((w, idx) => (
+                          <div 
+                            key={idx} 
+                            className="bg-black h-full" 
+                            style={{ width: `${w}px` }} 
+                          />
+                        ))}
+                      </div>
+                      <span className="font-mono text-[9px] text-zinc-400 mt-2 tracking-widest font-semibold">
+                        *{selectedReg.referenceNumber || selectedReg.id}*
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => window.print()}
+                    className="w-full rounded-full bg-zinc-900 hover:bg-black py-3 text-center text-xs font-mono font-black text-white transition-colors uppercase tracking-widest cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <Printer className="h-4 w-4" />
+                    Print Timing Pass
+                  </button>
+                </div>
+
+                {/* Right Column: Detailed Profiles */}
+                <div className="flex-1 w-full space-y-6">
+                  
+                  {/* Personal Information */}
+                  <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm p-6 space-y-4">
+                    <h3 className="font-mono text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100 pb-2">
+                      Runner Information
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">First Name</span>
+                        <span className="font-sans font-extrabold text-zinc-900 text-[13px] mt-1 block">
+                          {selectedReg.firstName}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">Last Name</span>
+                        <span className="font-sans font-extrabold text-zinc-900 text-[13px] mt-1 block">
+                          {selectedReg.lastName}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">Email Address</span>
+                        <span className="text-zinc-800 font-semibold mt-1 block">
+                          {selectedReg.email}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">Phone Number</span>
+                        <span className="text-zinc-800 font-semibold mt-1 block">
+                          {selectedReg.phone || '—'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">Gender Category</span>
+                        <span className="text-zinc-800 font-bold mt-1 block uppercase">
+                          {selectedReg.gender || '—'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">T-Shirt Size</span>
+                        <span className="text-zinc-800 font-bold mt-1 block">
+                          {selectedReg.size || '—'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Transaction & System Data */}
+                  <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm p-6 space-y-4">
+                    <h3 className="font-mono text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100 pb-2">
+                      Payment & Registration Metadata
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">Payment Method</span>
+                        <span className="text-zinc-800 font-bold mt-1 block">
+                          {selectedReg.paymentMethod}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">Reference Code</span>
+                        <span className="text-zinc-900 font-black mt-1 block tracking-wider">
+                          {selectedReg.referenceNumber || '—'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">Registration Date</span>
+                        <span className="text-zinc-800 font-semibold mt-1 block">
+                          {selectedReg.registrationDate 
+                            ? new Date(selectedReg.registrationDate).toLocaleString() 
+                            : '—'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">Assigned BIB</span>
+                        <span className="text-brand font-black mt-1 block text-sm">
+                          {selectedReg.registeredBib ? `BIB #${selectedReg.registeredBib}` : 'UNASSIGNED'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Emergency Contact & Legal */}
+                  <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm p-6 space-y-4">
+                    <h3 className="font-mono text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100 pb-2">
+                      Emergency Contact & Legal
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">Emergency Person</span>
+                        <span className="font-sans font-bold text-zinc-900 mt-1 block">
+                          {selectedReg.emergencyName || 'Maria Dela Cruz'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">Emergency Contact Phone</span>
+                        <span className="text-zinc-800 font-bold mt-1 block">
+                          {selectedReg.emergencyPhone || '09187654321'}
+                        </span>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <span className="text-zinc-400 font-bold uppercase text-[9px] block">Liability Waiver Agreement</span>
+                        <div className="flex items-center gap-1.5 text-emerald-600 font-bold mt-1">
+                          <Check className="h-4 w-4" />
+                          <span>Signed and Agreed to Runnicle Liability Waiver & Policy</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status Toggles & Management */}
+                  <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm p-6 space-y-4">
+                    <h3 className="font-mono text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100 pb-2">
+                      Registration Management
+                    </h3>
+                    <div className="flex flex-wrap gap-3">
+                      {selectedReg.status !== 'Verified' && (
+                        <button
+                          onClick={() => {
+                            handleVerifyStatus(selectedReg.id, 'Verified');
+                            showToast(`Successfully verified runner "${selectedReg.firstName}"`);
+                          }}
+                          className="rounded-full bg-emerald-600 hover:bg-emerald-700 px-5 py-2.5 text-xs font-mono font-black text-white transition-colors uppercase tracking-widest cursor-pointer flex items-center gap-2 shadow-sm"
+                        >
+                          <Check className="h-4 w-4" />
+                          Verify Payment
+                        </button>
+                      )}
+                      {selectedReg.status !== 'Cancelled' && (
+                        <button
+                          onClick={() => {
+                            handleVerifyStatus(selectedReg.id, 'Cancelled');
+                            showToast(`Successfully cancelled registration for "${selectedReg.firstName}"`);
+                          }}
+                          className="rounded-full bg-yellow-500 hover:bg-yellow-600 px-5 py-2.5 text-xs font-mono font-black text-white transition-colors uppercase tracking-widest cursor-pointer flex items-center gap-2 shadow-sm"
+                        >
+                          <X className="h-4 w-4" />
+                          Mark as Cancelled
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to permanently delete this registration record?`)) {
+                            handleDeleteRegistration(selectedReg.id);
+                            onNavigate('admin-registrations');
+                          }
+                        }}
+                        className="rounded-full border border-red-200 hover:border-red-650 hover:bg-red-50 px-5 py-2.5 text-xs font-mono font-bold text-red-650 transition-colors uppercase tracking-widest cursor-pointer flex items-center gap-2 shadow-sm ml-auto"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete Record
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+          );
+        })()}
 
       </div>
     </div>

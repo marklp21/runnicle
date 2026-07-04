@@ -53,8 +53,22 @@ export const App: React.FC = () => {
     if (path === '/admin_page') return 'admin-login';
     if (path === '/admin_registrations') return 'admin-registrations';
     if (path === '/admin_create_event') return 'admin-create-event';
+    if (path === '/admin_registration_details') return 'admin-registration-details';
     return 'home';
   });
+
+  const [selectedRegId, setSelectedRegId] = useState<string | null>(() => {
+    return sessionStorage.getItem('runnicle_selected_reg_id');
+  });
+
+  const handleSelectReg = (id: string | null) => {
+    setSelectedRegId(id);
+    if (id) {
+      sessionStorage.setItem('runnicle_selected_reg_id', id);
+    } else {
+      sessionStorage.removeItem('runnicle_selected_reg_id');
+    }
+  };
 
   // Elevate events state (initial load from mockEvents and sync with localStorage)
   const [events, setEvents] = useState<EventItem[]>(() => {
@@ -158,7 +172,7 @@ export const App: React.FC = () => {
     // Sync path with page state & implement Auth Guard
     const currentPath = window.location.pathname;
     const isLoggedIn = sessionStorage.getItem('runnicle_admin_logged') === 'true' || localStorage.getItem('runnicle_admin_logged') === 'true';
-    const isAdminView = ['admin-login', 'admin-registrations', 'admin-create-event'].includes(page);
+    const isAdminView = ['admin-login', 'admin-registrations', 'admin-create-event', 'admin-registration-details'].includes(page);
 
     if (isAdminView && !isLoggedIn && page !== 'admin-login') {
       setPage('admin-login');
@@ -177,6 +191,10 @@ export const App: React.FC = () => {
       if (currentPath !== '/admin_create_event') {
         window.history.pushState(null, '', '/admin_create_event');
       }
+    } else if (page === 'admin-registration-details') {
+      if (currentPath !== '/admin_registration_details') {
+        window.history.pushState(null, '', '/admin_registration_details');
+      }
     } else if (page === 'home') {
       if (currentPath !== '/') {
         window.history.pushState(null, '', '/');
@@ -193,6 +211,8 @@ export const App: React.FC = () => {
         setPage('admin-registrations');
       } else if (path === '/admin_create_event') {
         setPage('admin-create-event');
+      } else if (path === '/admin_registration_details') {
+        setPage('admin-registration-details');
       } else if (path === '/') {
         setPage('home');
       }
@@ -443,7 +463,7 @@ export const App: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-white text-zinc-800 antialiased selection:bg-orange-500 selection:text-white">
       
       {}
-      {!['admin-login', 'admin-registrations', 'admin-create-event'].includes(page) && (
+      {!['admin-login', 'admin-registrations', 'admin-create-event', 'admin-registration-details'].includes(page) && (
         <Navbar
           activeTab={getNavbarActiveTab()}
           setActiveTab={handleTabChange}
@@ -934,6 +954,7 @@ export const App: React.FC = () => {
                 onBackToHome={() => setPage('home')}
                 onNavigate={(route) => setPage(route)}
                 onLoginSuccess={() => setPage('admin-registrations')}
+                onSelectReg={handleSelectReg}
               />
             )}
 
@@ -947,6 +968,7 @@ export const App: React.FC = () => {
                 onBackToHome={() => setPage('home')}
                 onNavigate={(route) => setPage(route)}
                 onLoginSuccess={() => setPage('admin-registrations')}
+                onSelectReg={handleSelectReg}
               />
             )}
 
@@ -960,6 +982,22 @@ export const App: React.FC = () => {
                 onBackToHome={() => setPage('home')}
                 onNavigate={(route) => setPage(route)}
                 onLoginSuccess={() => setPage('admin-registrations')}
+                onSelectReg={handleSelectReg}
+              />
+            )}
+
+            {page === 'admin-registration-details' && (
+              <AdminPage
+                view="registration-details"
+                selectedRegId={selectedRegId}
+                events={events}
+                onAddEvent={handleAddEvent}
+                registrations={registrations}
+                onUpdateRegistrations={handleUpdateRegistrations}
+                onBackToHome={() => setPage('home')}
+                onNavigate={(route) => setPage(route)}
+                onLoginSuccess={() => setPage('admin-registrations')}
+                onSelectReg={handleSelectReg}
               />
             )}
 
@@ -968,7 +1006,7 @@ export const App: React.FC = () => {
       </main>
 
       {}
-      {!['admin-login', 'admin-registrations', 'admin-create-event'].includes(page) && (
+      {!['admin-login', 'admin-registrations', 'admin-create-event', 'admin-registration-details'].includes(page) && (
         <Footer onPlatformClick={(item) => {
           if (item === 'Event Calendar') setPage('events');
           else if (item === 'Contact Us') setPage('contact');
