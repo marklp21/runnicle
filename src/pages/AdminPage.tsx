@@ -526,30 +526,29 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white rounded-3xl border border-zinc-200 p-6 shadow-sm gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white rounded-2xl border border-zinc-200/80 p-6 shadow-sm gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-mono text-[9px] font-black text-brand tracking-widest uppercase">
-                TIMING PORTAL CONNECTED
-              </span>
+            <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 select-none">
+              <span>Admin Portal</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-zinc-300" />
+              <span className="text-[10px] text-zinc-500 font-bold bg-zinc-100 rounded-md px-1.5 py-0.5 border border-zinc-200/60">v1.2.0</span>
             </div>
-            <h1 className="font-display text-3xl font-black text-zinc-900 mt-1 uppercase tracking-tight">
-              Runnicle Admin Dashboard
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 mt-2 font-sans">
+              Runnicle Dashboard
             </h1>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={onBackToHome}
-              className="rounded-full border border-zinc-200 bg-white hover:border-zinc-900 px-5 py-2.5 text-xs font-mono font-bold text-zinc-700 hover:text-zinc-900 transition-colors uppercase tracking-widest cursor-pointer shadow-sm"
+              className="rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 px-4.5 py-2 text-xs font-semibold text-zinc-700 hover:text-zinc-900 transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
             >
               Portal View
             </button>
             <button
               onClick={handleLogout}
-              className="rounded-full bg-zinc-900 hover:bg-black px-5 py-2.5 text-xs font-mono font-black text-white transition-colors uppercase tracking-widest cursor-pointer flex items-center gap-2 shadow-sm"
+              className="rounded-xl border border-red-200 hover:border-red-650 hover:bg-red-50/50 bg-white px-4.5 py-2 text-xs font-semibold text-red-650 hover:text-red-750 transition-all cursor-pointer flex items-center gap-2 shadow-sm"
             >
-              <LogOut className="h-4.5 w-4.5" />
+              <LogOut className="h-4 w-4" />
               Logout
             </button>
           </div>
@@ -571,49 +570,49 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </span>
           </div>
         ) : (
-          <div className="flex border-b border-zinc-200 pb-px gap-6">
+          <div className="flex border-b border-zinc-200 pb-px gap-6 select-none">
             <button
               onClick={() => onNavigate('admin-dashboard')}
-              className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
-                view === 'dashboard' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
+              className={`pb-3.5 text-[13px] font-semibold transition-colors cursor-pointer relative ${
+                view === 'dashboard' ? 'text-brand font-bold' : 'text-zinc-400 hover:text-zinc-650'
               }`}
             >
               Dashboard
               {view === 'dashboard' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
+                <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brand rounded-full" />
               )}
             </button>
             <button
               onClick={() => onNavigate('admin-registrations')}
-              className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
-                view === 'registrations' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
+              className={`pb-3.5 text-[13px] font-semibold transition-colors cursor-pointer relative ${
+                view === 'registrations' ? 'text-brand font-bold' : 'text-zinc-400 hover:text-zinc-650'
               }`}
             >
               Runner Registrations ({registrations.length})
               {view === 'registrations' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
+                <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brand rounded-full" />
               )}
             </button>
             <button
               onClick={() => onNavigate('admin-events')}
-              className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
-                view === 'events' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
+              className={`pb-3.5 text-[13px] font-semibold transition-colors cursor-pointer relative ${
+                view === 'events' ? 'text-brand font-bold' : 'text-zinc-400 hover:text-zinc-650'
               }`}
             >
               Events ({events.length})
               {view === 'events' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
+                <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brand rounded-full" />
               )}
             </button>
             <button
               onClick={() => onNavigate('admin-create-event')}
-              className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
-                view === 'create-event' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
+              className={`pb-3.5 text-[13px] font-semibold transition-colors cursor-pointer relative ${
+                view === 'create-event' ? 'text-brand font-bold' : 'text-zinc-400 hover:text-zinc-650'
               }`}
             >
               Create New Event
               {view === 'create-event' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
+                <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brand rounded-full" />
               )}
             </button>
           </div>
