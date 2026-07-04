@@ -1963,6 +1963,23 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           {selectedReg.registeredBib ? `BIB #${selectedReg.registeredBib}` : 'UNASSIGNED'}
                         </span>
                       </div>
+                      {selectedReg.paymentProof && (
+                        <div className="sm:col-span-2 mt-2 pt-3 border-t border-zinc-100">
+                          <span className="text-zinc-450 font-bold uppercase text-[9.5px] block mb-2 font-mono">Proof of Payment Screenshot</span>
+                          <div className="relative rounded-2xl border border-zinc-200 overflow-hidden bg-zinc-50 max-w-xs shadow-sm group">
+                            <img src={selectedReg.paymentProof} alt="Proof of Payment" className="w-full object-contain max-h-60" />
+                            <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <a
+                                href={selectedReg.paymentProof}
+                                download={`Proof_${selectedReg.firstName}_${selectedReg.lastName}.png`}
+                                className="rounded-full bg-brand hover:bg-brand-hover text-white text-[10px] font-mono font-black uppercase tracking-wider px-4 py-2 transition-colors cursor-pointer shadow text-center"
+                              >
+                                Download Proof
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 

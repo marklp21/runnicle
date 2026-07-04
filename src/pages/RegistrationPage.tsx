@@ -18,6 +18,8 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   const [step, setStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState('GCash');
   const [referenceNumber, setReferenceNumber] = useState('');
+  const [paymentProof, setPaymentProof] = useState<string>('');
+  const [proofError, setProofError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -556,18 +558,67 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                       </div>
                     )}
 
-                    {}
                     {paymentMethod !== 'Card' && (
-                      <div className="mt-4 pt-2">
-                        <label className="block text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">Reference Number</label>
-                        <input
-                          type="text"
-                          required
-                          value={referenceNumber}
-                          onChange={(e) => setReferenceNumber(e.target.value.replace(/\D/g, ''))}
-                          placeholder="Reference Number (e.g. 1234567890123)"
-                          className="w-full rounded border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono"
-                        />
+                      <div className="mt-4 pt-2 space-y-4">
+                        <div>
+                          <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-widest mb-1.5 font-mono">Reference Number <span className="text-brand">*</span></label>
+                          <input
+                            type="text"
+                            required
+                            value={referenceNumber}
+                            onChange={(e) => setReferenceNumber(e.target.value.replace(/\D/g, ''))}
+                            placeholder="Reference Number (e.g. 1234567890123)"
+                            className="w-full rounded border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-widest mb-1.5 font-mono">
+                            Upload Proof of Payment <span className="text-brand">*</span>
+                          </label>
+                          
+                          {paymentProof ? (
+                            <div className="relative h-44 rounded-xl border border-zinc-200 overflow-hidden group shadow-sm bg-white">
+                              <img src={paymentProof} alt="Payment Proof" className="h-full w-full object-contain p-2" />
+                              <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                <button
+                                  type="button"
+                                  onClick={() => setPaymentProof('')}
+                                  className="rounded-full bg-red-655 hover:bg-red-700 text-white font-mono text-[9px] font-black uppercase tracking-wider px-3.5 py-2 cursor-pointer transition-colors shadow"
+                                >
+                                  Remove Proof
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="border-2 border-dashed border-zinc-200 hover:border-brand rounded-xl p-6 text-center transition-colors cursor-pointer relative bg-white hover:bg-brand/[0.01] group h-40 flex flex-col justify-center items-center">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                required
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      if (typeof reader.result === 'string') {
+                                        setPaymentProof(reader.result);
+                                        setProofError(null);
+                                      }
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              />
+                              <span className="text-xs font-bold text-zinc-700 block">Browse or Upload Screenshot / Receipt</span>
+                              <span className="text-[9px] text-zinc-500 block mt-1">PNG, JPG, or WEBP (Required)</span>
+                            </div>
+                          )}
+                          {proofError && (
+                            <p className="text-[10px] text-red-600 font-mono mt-1 font-bold">{proofError}</p>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -585,6 +636,18 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   <button
                     type="button"
                     onClick={() => {
+                      if (paymentMethod !== 'Card') {
+                        if (!referenceNumber) {
+                          alert('Please enter your transaction reference number.');
+                          return;
+                        }
+                        if (!paymentProof) {
+                          setProofError('Proof of payment screenshot/receipt is required.');
+                          alert('Please upload your proof of payment.');
+                          return;
+                        }
+                      }
+
                       const randomBib = Math.floor(100 + Math.random() * 900).toString();
                       setRegisteredName(`${formData.firstName} ${formData.lastName}`);
                       setRegisteredBib(randomBib);
@@ -603,6 +666,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                           eventTitle: eventTitle,
                           paymentMethod: paymentMethod,
                           referenceNumber: referenceNumber || 'CARD-PAID',
+                          paymentProof: paymentProof || '',
                           registeredBib: randomBib
                         });
                       }
