@@ -75,15 +75,15 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
       {}
-      <div className="max-w-md mx-auto mb-10 font-mono text-[9px] font-black tracking-widest text-zinc-400 uppercase select-none">
+      <div className="max-w-md w-full mx-auto mb-10 font-mono text-[10px] sm:text-xs font-black tracking-widest text-zinc-500 uppercase select-none px-4">
         <div className="flex justify-between items-center relative">
           
           {}
-          <div className="absolute top-3 left-6 right-6 h-[1px] bg-zinc-200 -z-0" />
-          <div className="absolute top-3 left-6 h-[1px] bg-orange-500 transition-all duration-300 -z-0" style={{ width: step === 2 ? '50%' : step === 3 ? '100%' : '0%' }} />
+          <div className="absolute top-[13px] left-6 right-6 h-[1px] bg-zinc-200 -z-0" />
+          <div className="absolute top-[13px] left-6 h-[1px] bg-orange-500 transition-all duration-300 -z-0" style={{ width: step === 2 ? '50%' : step === 3 ? '100%' : '0%' }} />
 
           {}
-          <div className={`flex flex-col items-center gap-1.5 z-10 ${step >= 1 ? 'text-orange-500' : ''}`}>
+          <div className={`flex flex-col items-center gap-1.5 z-10 transition-colors duration-200 ${step >= 1 ? 'text-orange-600 font-extrabold' : 'text-zinc-550'}`}>
             <div className={`h-6.5 w-6.5 rounded-full border flex items-center justify-center transition-all ${
               step === 1 ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/10' : step > 1 ? 'bg-zinc-100 border-zinc-300 text-zinc-900' : 'bg-white border-zinc-200 text-zinc-400'
             }`}>
@@ -93,7 +93,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
           </div>
 
           {}
-          <div className={`flex flex-col items-center gap-1.5 z-10 ${step >= 2 ? 'text-orange-500' : ''}`}>
+          <div className={`flex flex-col items-center gap-1.5 z-10 transition-colors duration-200 ${step >= 2 ? 'text-orange-600 font-extrabold' : 'text-zinc-550'}`}>
             <div className={`h-6.5 w-6.5 rounded-full border flex items-center justify-center transition-all ${
               step === 2 ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/10' : step > 2 ? 'bg-zinc-100 border-zinc-300 text-zinc-900' : 'bg-white border-zinc-200 text-zinc-400'
             }`}>
@@ -103,7 +103,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
           </div>
 
           {}
-          <div className={`flex flex-col items-center gap-1.5 z-10 ${step >= 3 ? 'text-orange-500' : ''}`}>
+          <div className={`flex flex-col items-center gap-1.5 z-10 transition-colors duration-200 ${step >= 3 ? 'text-orange-600 font-extrabold' : 'text-zinc-550'}`}>
             <div className={`h-6.5 w-6.5 rounded-full border flex items-center justify-center transition-all ${
               step === 3 ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/10' : 'bg-white border-zinc-200 text-zinc-400'
             }`}>
