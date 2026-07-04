@@ -77,10 +77,8 @@ export interface GalleryItem {
   category: 'Race Day' | 'Expo' | 'Behind the Scenes' | 'Community';
   type: 'photo' | 'video';
   image: string;
-  videoUrl?: string; // YouTube or placeholder
+  videoUrl?: string; 
 }
-
-// ==================== MOCK DATA SETS ====================
 
 export const mockEvents: EventItem[] = [
   {
@@ -245,7 +243,7 @@ export const mockProducts: Product[] = [
   {
     id: 'prod-1',
     name: 'Runnicle Carbon Elite 4',
-    category: 'Accessories', // Actually footwear, let's keep it Accessories or Apparel
+    category: 'Accessories', 
     price: 12495.00,
     image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80',
     description: 'Engineered with a full-length carbon fiber plate and responsive foam to maximize energy return. Designed specifically for breaking personal records on the road.',

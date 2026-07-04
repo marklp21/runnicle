@@ -19,13 +19,37 @@
     overflow-x: hidden;
   }
   
-  h1, h2, h3, h4, h5, h6 {
+  h1, h2 {
     font-family: var(--font-display);
+    color: #09090b;
+  }
+  
+  h3, h4, h5, h6 {
+    font-family: var(--font-sans);
     color: #09090b;
   }
 }
 
-/* Custom styles for aesthetic scrollbars and clean animations */
+@layer utilities {
+  .font-display.text-xs,
+  .font-display.text-sm,
+  .font-display.text-base,
+  .font-display.text-lg,
+  .font-display.text-xl,
+  .font-display.text-\[8px\],
+  .font-display.text-\[9px\],
+  .font-display.text-\[10px\],
+  .font-display.text-\[11px\],
+  .text-xs .font-display,
+  .text-sm .font-display,
+  .text-base .font-display,
+  .text-lg .font-display,
+  .text-xl .font-display {
+    font-family: var(--font-sans) !important;
+    letter-spacing: normal !important;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -43,7 +67,6 @@
   background: #cbd5e1;
 }
 
-/* Class for counting cards or grid boxes */
 .border-grid-item {
   position: relative;
 }

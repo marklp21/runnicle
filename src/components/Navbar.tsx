@@ -17,7 +17,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onJoinC
     <nav className="sticky top-0 z-50 w-full h-16 bg-white border-b border-zinc-200 select-none">
       <div className="w-full h-full flex items-center justify-between pl-0 pr-0">
         
-        {/* Left: Orange Brand Block */}
+        {}
         <div 
           onClick={() => setActiveTab('Community')}
           className="flex-shrink-0 h-full bg-brand text-white px-6 flex items-center justify-center cursor-pointer hover:bg-brand-hover transition-colors"
@@ -27,7 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onJoinC
           </span>
         </div>
 
-        {/* Center Links (Desktop) */}
+        {}
         <div className="hidden xl:flex items-center space-x-6">
           {navItems.map((item) => (
             <button
@@ -45,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onJoinC
           ))}
         </div>
 
-        {/* Right: Social Indicators & Register Action */}
+        {}
         <div className="hidden xl:flex items-center h-full gap-6">
           <div className="flex items-center gap-4 text-zinc-400 hover:text-zinc-900 font-mono text-[9px] font-black tracking-widest transition-colors">
             <a href="#" className="hover:text-zinc-900 transition-colors">DIS</a>
@@ -61,7 +61,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onJoinC
           </button>
         </div>
 
-        {/* Mobile Menu Button */}
+        {}
         <div className="flex xl:hidden pr-4">
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -73,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onJoinC
         </div>
       </div>
 
-      {/* Mobile Menu Panel */}
+      {}
       <AnimatePresence>
         {isOpen && (
           <motion.div

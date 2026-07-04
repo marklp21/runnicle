@@ -12,7 +12,7 @@ export const CommunityPulse: React.FC<CommunityPulseProps> = ({ onPostClick }) =
     <section className="py-24 bg-zinc-50/30">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* Header */}
+        {}
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl font-black tracking-tight text-zinc-900 sm:text-4xl uppercase">
             Community inspired
@@ -22,7 +22,7 @@ export const CommunityPulse: React.FC<CommunityPulseProps> = ({ onPostClick }) =
           </p>
         </div>
 
-        {/* Sleek spaced gallery card deck flex layout */}
+        {}
         <div className="flex flex-wrap gap-4 justify-center">
           {mockCommunityPosts.slice(0, 12).map((post) => (
             <motion.div
@@ -32,7 +32,7 @@ export const CommunityPulse: React.FC<CommunityPulseProps> = ({ onPostClick }) =
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Direct image rendering */}
+              {}
               <img
                 src={post.image}
                 alt={post.caption}
@@ -40,7 +40,7 @@ export const CommunityPulse: React.FC<CommunityPulseProps> = ({ onPostClick }) =
                 loading="lazy"
               />
 
-              {/* Overlay with stats on hover */}
+              {}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-3.5 z-10 rounded-2xl">
                 <span className="text-[10px] font-bold text-white tracking-wider truncate">
                   @{post.username}

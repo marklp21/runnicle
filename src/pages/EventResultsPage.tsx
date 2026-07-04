@@ -16,7 +16,7 @@ export const EventResultsPage: React.FC<EventResultsPageProps> = ({
 
   const results = event.results || [];
   
-  // Extract category chips
+  
   const categories = ['all', ...Array.from(new Set(results.map(r => r.category)))];
 
   const filteredResults = results.filter((res) => {
@@ -29,7 +29,7 @@ export const EventResultsPage: React.FC<EventResultsPageProps> = ({
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Back link */}
+      {}
       <button
         onClick={onBack}
         className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-orange-500 uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
@@ -38,7 +38,7 @@ export const EventResultsPage: React.FC<EventResultsPageProps> = ({
         Back to Events
       </button>
 
-      {/* Header */}
+      {}
       <div className="border-b border-zinc-200 pb-6 mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
           <span className="text-[10px] font-black text-zinc-450 uppercase tracking-widest block">Race Leaderboards</span>
@@ -50,7 +50,7 @@ export const EventResultsPage: React.FC<EventResultsPageProps> = ({
           </p>
         </div>
 
-        {/* Search */}
+        {}
         <div className="relative w-full md:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
           <input
@@ -63,7 +63,7 @@ export const EventResultsPage: React.FC<EventResultsPageProps> = ({
         </div>
       </div>
 
-      {/* Category filters */}
+      {}
       <div className="flex gap-2 flex-wrap border-b border-zinc-200 pb-5 mb-8">
         {categories.map((cat) => (
           <button
@@ -72,7 +72,7 @@ export const EventResultsPage: React.FC<EventResultsPageProps> = ({
             className={`rounded px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer border ${
               activeCategory === cat
                 ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/10'
-                : 'border-zinc-200 text-zinc-655 hover:border-zinc-350 hover:text-orange-500 bg-white'
+                : 'border-zinc-200 text-zinc-600 hover:border-zinc-350 hover:text-orange-500 bg-white'
             }`}
           >
             {cat === 'all' ? 'All Divisions' : `${cat} Division`}
@@ -80,7 +80,7 @@ export const EventResultsPage: React.FC<EventResultsPageProps> = ({
         ))}
       </div>
 
-      {/* Results table */}
+      {}
       {filteredResults.length === 0 ? (
         <div className="text-center py-20 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-500">
           <User className="h-10 w-10 text-zinc-400 mx-auto mb-4" />
@@ -108,11 +108,11 @@ export const EventResultsPage: React.FC<EventResultsPageProps> = ({
                 >
                   <td className="px-6 py-4 font-bold">
                     {res.rank === 1 ? (
-                      <span className="flex items-center gap-1 text-yellow-600"><Trophy className="h-4.5 w-4.5" /> 1</span>
+                      <span className="flex items-center gap-1 text-yellow-600"><Trophy className="h-4 w-4" /> 1</span>
                     ) : res.rank === 2 ? (
-                      <span className="flex items-center gap-1 text-zinc-450"><Medal className="h-4.5 w-4.5" /> 2</span>
+                      <span className="flex items-center gap-1 text-zinc-400"><Medal className="h-4 w-4" /> 2</span>
                     ) : res.rank === 3 ? (
-                      <span className="flex items-center gap-1 text-amber-600"><Medal className="h-4.5 w-4.5" /> 3</span>
+                      <span className="flex items-center gap-1 text-amber-600"><Medal className="h-4 w-4" /> 3</span>
                     ) : (
                       res.rank
                     )}
@@ -120,7 +120,7 @@ export const EventResultsPage: React.FC<EventResultsPageProps> = ({
                   <td className="px-6 py-4 text-zinc-400">#{res.bib}</td>
                   <td className="px-6 py-4 text-zinc-900 font-bold">{res.name}</td>
                   <td className="px-6 py-4">
-                    <span className="rounded bg-orange-50 border border-orange-100 text-[9px] px-2 py-0.5 text-orange-605 uppercase tracking-widest">
+                    <span className="rounded bg-orange-50 border border-orange-100 text-[9px] px-2 py-0.5 text-orange-600 uppercase tracking-widest">
                       {res.category}
                     </span>
                   </td>

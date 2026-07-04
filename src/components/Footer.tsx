@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-
 interface FooterProps {
   onPlatformClick: (page: string) => void;
 }
@@ -19,10 +18,10 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
     <footer className="bg-zinc-50 text-zinc-600 pt-16 pb-8 border-t border-zinc-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* Main Columns Grid */}
+        {}
         <div className="grid grid-cols-1 gap-10 md:grid-cols-4 sm:grid-cols-2 mb-16">
           
-          {/* Brand Info */}
+          {}
           <div className="md:col-span-1">
             <span className="font-display text-lg font-black tracking-[0.25em] text-zinc-900 block uppercase">
               RUNNICLE
@@ -32,7 +31,7 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
             </p>
           </div>
 
-          {/* Platform Links */}
+          {}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-900 mb-5">
               Platform
@@ -51,7 +50,7 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
             </ul>
           </div>
 
-          {/* Legal Links */}
+          {}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-900 mb-5">
               Legal
@@ -70,13 +69,13 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
             </ul>
           </div>
 
-          {/* Social Icons & Localization */}
+          {}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-900 mb-5">
               Social
             </h4>
             
-            {/* Social Icons Row */}
+            {}
             <div className="flex gap-4 mb-8">
               <a
                 href="https://facebook.com/runnicle"
@@ -114,9 +113,9 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
               </a>
             </div>
 
-            {/* Region / Language Dropdowns */}
+            {}
             <div className="space-y-3.5 text-[11px] font-bold text-zinc-500 font-mono">
-              {/* Region Selector */}
+              {}
               <div className="relative">
                 <button
                   onClick={() => {
@@ -148,7 +147,7 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
                 )}
               </div>
 
-              {/* Language Selector */}
+              {}
               <div className="relative">
                 <button
                   onClick={() => {
@@ -184,7 +183,7 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
           </div>
         </div>
 
-        {/* Divider line */}
+        {}
         <div className="border-t border-zinc-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-semibold text-zinc-500">
           <span>&copy; {new Date().getFullYear()} Runnicle Performance. All rights reserved.</span>
           <div className="flex gap-6">

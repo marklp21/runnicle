@@ -14,30 +14,30 @@ export const ArticleDetailsPage: React.FC<ArticleDetailsPageProps> = ({
   onNavigateToArticle,
 }) => {
   
-  // Find related articles (excluding the active one)
+  
   const relatedArticles = mockArticles.filter(art => art.id !== article.id).slice(0, 2);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Back button */}
+      {}
       <button
         onClick={onBack}
-        className="inline-flex items-center gap-2 text-xs font-bold text-zinc-505 hover:text-orange-505 uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
+        className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-orange-500 uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
         Back to News
       </button>
 
-      {/* Main layout grid */}
+      {}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
         
-        {/* Left Column: Full article body */}
+        {}
         <div className="lg:col-span-2 space-y-8">
           
-          {/* Article Header info */}
+          {}
           <div className="space-y-4">
-            <span className="text-[9px] font-black uppercase tracking-wider text-orange-605 bg-orange-50 border border-orange-100 rounded px-2.5 py-1">
+            <span className="text-[9px] font-black uppercase tracking-wider text-orange-600 bg-orange-50 border border-orange-100 rounded px-2.5 py-1">
               {article.category}
             </span>
 
@@ -45,8 +45,8 @@ export const ArticleDetailsPage: React.FC<ArticleDetailsPageProps> = ({
               {article.title}
             </h1>
 
-            {/* Author meta row */}
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-3 border-y border-zinc-200 py-4 text-xs font-semibold text-zinc-550">
+            {}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-3 border-y border-zinc-200 py-4 text-xs font-semibold text-zinc-500">
               <div className="flex items-center gap-2">
                 <img src={article.authorAvatar} alt={article.author} className="h-7 w-7 rounded-full border border-zinc-200 object-cover" />
                 <span className="text-zinc-900 font-bold">{article.author}</span>
@@ -56,19 +56,19 @@ export const ArticleDetailsPage: React.FC<ArticleDetailsPageProps> = ({
             </div>
           </div>
 
-          {/* Featured Image */}
+          {}
           <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-50 border border-zinc-200 shadow-sm">
             <img src={article.image} alt={article.title} className="h-full w-full object-cover" />
           </div>
 
-          {/* Article Content paragraphs */}
+          {}
           <div className="space-y-6 text-sm text-zinc-700 font-semibold leading-relaxed">
             {article.content.map((p, idx) => (
               <p key={idx}>{p}</p>
             ))}
           </div>
 
-          {/* Decorative quote */}
+          {}
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 flex gap-4">
             <Quote className="h-8 w-8 text-orange-500 flex-shrink-0" />
             <p className="text-zinc-600 font-display italic font-semibold leading-relaxed">
@@ -78,7 +78,7 @@ export const ArticleDetailsPage: React.FC<ArticleDetailsPageProps> = ({
 
         </div>
 
-        {/* Right Column: Related Articles sidebar */}
+        {}
         <div className="space-y-6 lg:sticky lg:top-24">
           <h3 className="font-display text-base font-black text-zinc-900 tracking-tight uppercase border-b border-zinc-200 pb-4 flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-orange-500" />
@@ -96,8 +96,8 @@ export const ArticleDetailsPage: React.FC<ArticleDetailsPageProps> = ({
                   <img src={art.image} alt={art.title} className="h-full w-full object-cover" />
                 </div>
                 <div>
-                  <span className="text-[8px] font-black text-zinc-450 uppercase tracking-widest block">{art.category}</span>
-                  <h4 className="text-xs font-bold text-zinc-900 group-hover:text-orange-655 mt-1 line-clamp-2 leading-snug">
+                  <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest block">{art.category}</span>
+                  <h4 className="text-xs font-bold text-zinc-900 group-hover:text-orange-600 mt-1 line-clamp-2 leading-snug">
                     {art.title}
                   </h4>
                 </div>

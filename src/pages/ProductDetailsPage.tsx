@@ -18,7 +18,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Back button */}
+      {}
       <button
         onClick={onBack}
         className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-orange-500 uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
@@ -27,10 +27,10 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
         Back to Equipment
       </button>
 
-      {/* Main product columns */}
+      {}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         
-        {/* Left: Product Images Visualizer */}
+        {}
         <div className="space-y-6">
           <div className="aspect-square bg-zinc-50 rounded-2xl overflow-hidden border border-zinc-200 flex items-center justify-center relative shadow-sm">
             <img
@@ -56,10 +56,10 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
           </div>
         </div>
 
-        {/* Right: Specifications & Options */}
+        {}
         <div className="space-y-8">
           
-          {/* Header titles */}
+          {}
           <div className="border-b border-zinc-200 pb-5 space-y-3">
             <h1 className="font-display text-3xl font-black text-zinc-900 tracking-tight leading-tight">
               {product.name}
@@ -76,13 +76,13 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
               <span className="text-zinc-500">42 Customer Reviews</span>
             </div>
 
-            <span className="text-2xl font-display font-black text-zinc-900 block mt-3">₱{product.price.toLocaleString()}</span>
+            <span className="text-2xl font-mono font-bold text-zinc-900 block mt-3">₱{product.price.toLocaleString()}</span>
           </div>
 
-          {/* Description */}
+          {}
           <div className="space-y-4">
             <h4 className="text-xs font-extrabold uppercase text-zinc-900 tracking-wider">Product Overview</h4>
-            <p className="text-zinc-650 text-sm leading-relaxed font-semibold">
+            <p className="text-zinc-600 text-sm leading-relaxed font-semibold">
               {product.description}
             </p>
             <p className="text-zinc-500 text-xs leading-relaxed font-semibold">
@@ -90,7 +90,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
             </p>
           </div>
 
-          {/* Colors selector */}
+          {}
           <div className="space-y-3">
             <h4 className="text-xs font-extrabold uppercase text-zinc-900 tracking-wider">Select Color</h4>
             <div className="flex gap-2.5">
@@ -110,7 +110,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
             </div>
           </div>
 
-          {/* Sizes selector */}
+          {}
           <div className="space-y-3">
             <h4 className="text-xs font-extrabold uppercase text-zinc-900 tracking-wider">Select Size</h4>
             <div className="flex flex-wrap gap-2.5">
@@ -130,7 +130,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
             </div>
           </div>
 
-          {/* Action CTA */}
+          {}
           <div className="pt-4 border-t border-zinc-200">
             <button
               onClick={onAddToCart}
@@ -141,7 +141,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
             </button>
           </div>
 
-          {/* Policy cards */}
+          {}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-[10px] text-zinc-500 font-bold border-t border-zinc-200 pt-6">
             <div className="flex gap-2 items-start">
               <Truck className="h-4.5 w-4.5 text-zinc-400 flex-shrink-0" />

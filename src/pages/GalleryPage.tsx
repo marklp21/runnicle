@@ -19,7 +19,7 @@ export const GalleryPage: React.FC = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Title */}
+      {}
       <div className="border-b border-zinc-200 pb-6 mb-8 text-center max-w-3xl mx-auto">
         <span className="rounded-full bg-orange-50 px-4 py-1 text-xs font-extrabold tracking-widest text-orange-600 border border-orange-200 uppercase">
           EVENT GALLERY
@@ -32,7 +32,7 @@ export const GalleryPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Category filters */}
+      {}
       <div className="flex justify-center gap-2 flex-wrap border-b border-zinc-200 pb-5 mb-10">
         {categories.map((cat) => (
           <button
@@ -49,9 +49,9 @@ export const GalleryPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Grid photos layout */}
+      {}
       <div className="space-y-12">
-        {/* Photo Gallery */}
+        {}
         {photos.length > 0 && (
           <div>
             <h2 className="font-display text-2xl font-black text-zinc-900 mb-6 flex items-center gap-2 tracking-tight">
@@ -89,7 +89,7 @@ export const GalleryPage: React.FC = () => {
           </div>
         )}
 
-        {/* Video stream panel */}
+        {}
         {videos.length > 0 && (
           <div>
             <h2 className="font-display text-2xl font-black text-zinc-900 mb-6 flex items-center gap-2 tracking-tight">
@@ -110,7 +110,7 @@ export const GalleryPage: React.FC = () => {
                     className="h-full w-full object-cover scale-100 group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />
-                  {/* Overlay play button */}
+                  {}
                   <div className="absolute inset-0 bg-black/45 flex items-center justify-center">
                     <div className="h-14 w-14 rounded-full bg-white text-orange-500 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                       <Play className="h-6 w-6 fill-orange-500 translate-x-[2px]" />
@@ -132,9 +132,9 @@ export const GalleryPage: React.FC = () => {
         )}
       </div>
 
-      {/* -------------------- DYNAMIC MEDIA LIGHTBOX OVERLAYS -------------------- */}
+      {}
 
-      {/* Photo Lightbox */}
+      {}
       {selectedPhoto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div onClick={() => setSelectedPhoto(null)} className="fixed inset-0 bg-black/80 backdrop-blur-sm" />
@@ -164,7 +164,7 @@ export const GalleryPage: React.FC = () => {
         </div>
       )}
 
-      {/* Video Player Lightbox */}
+      {}
       {playingVideo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div onClick={() => setPlayingVideo(null)} className="fixed inset-0 bg-black/80 backdrop-blur-sm" />

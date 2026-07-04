@@ -32,7 +32,7 @@ export const StorePage: React.FC<StorePageProps> = ({
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Header banner */}
+      {}
       <div className="border-b border-zinc-200 pb-6 mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
         <div>
           <span className="rounded-full bg-orange-50 px-4 py-1 text-xs font-extrabold tracking-widest text-orange-600 border border-orange-200 uppercase">
@@ -46,7 +46,7 @@ export const StorePage: React.FC<StorePageProps> = ({
           </p>
         </div>
 
-        {/* Search & Cart Actions */}
+        {}
         <div className="flex items-center gap-4 w-full md:max-w-md justify-between md:justify-end">
           <div className="relative flex-1 md:max-w-xs">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
@@ -74,7 +74,7 @@ export const StorePage: React.FC<StorePageProps> = ({
         </div>
       </div>
 
-      {/* Categories chips */}
+      {}
       <div className="flex gap-2 flex-wrap border-b border-zinc-200 pb-5 mb-8">
         {categories.map((cat) => (
           <button
@@ -91,7 +91,7 @@ export const StorePage: React.FC<StorePageProps> = ({
         ))}
       </div>
 
-      {/* Catalog items grid */}
+      {}
       {filteredProducts.length === 0 ? (
         <div className="text-center py-20 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-500">
           <Info className="h-10 w-10 text-zinc-400 mx-auto mb-4" />
@@ -106,7 +106,7 @@ export const StorePage: React.FC<StorePageProps> = ({
               className="rounded-xl border border-zinc-200 bg-white hover:border-orange-200 hover:shadow-md transition-all flex flex-col justify-between overflow-hidden group cursor-pointer shadow-sm"
               onClick={() => onProductClick(prod)}
             >
-              {/* Product Visual Container */}
+              {}
               <div className="relative aspect-square overflow-hidden bg-zinc-50 flex items-center justify-center border-b border-zinc-100">
                 <img
                   src={prod.image}
@@ -118,17 +118,17 @@ export const StorePage: React.FC<StorePageProps> = ({
                 </span>
               </div>
 
-              {/* Product Info */}
+              {}
               <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                 <div>
                   <div className="flex justify-between items-start mb-2 gap-4">
-                    <h3 className="font-display text-base font-black text-zinc-900 group-hover:text-orange-655 transition-colors">
+                    <h3 className="font-sans text-base font-bold text-zinc-900 group-hover:text-orange-600 transition-colors">
                       {prod.name}
                     </h3>
-                    <span className="text-sm font-bold text-zinc-900 font-display">₱{prod.price.toLocaleString()}</span>
+                    <span className="text-sm font-bold text-zinc-900 font-mono">₱{prod.price.toLocaleString()}</span>
                   </div>
                   
-                  {/* Reviews */}
+                  {}
                   <div className="flex items-center gap-1 text-[10px] text-zinc-500 mb-3.5">
                     <div className="flex text-orange-500">
                       <Star className="h-3.5 w-3.5 fill-orange-500 stroke-none" />
@@ -141,7 +141,7 @@ export const StorePage: React.FC<StorePageProps> = ({
                   </p>
                 </div>
                 
-                {/* Add to Cart button */}
+                {}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

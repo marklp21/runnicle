@@ -9,7 +9,6 @@ import {
   ShoppingBag
 } from 'lucide-react';
 
-// Components
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import UpcomingEvents from './components/UpcomingEvents';
@@ -18,13 +17,11 @@ import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import Modal from './components/Modal';
 
-// Pages
 import EventDetailsPage from './pages/EventDetailsPage';
 import RegistrationPage from './pages/RegistrationPage';
 import CoachBookingPage from './pages/CoachBookingPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
 
-// Expanded Feature Pages
 import EventsPage from './pages/EventsPage';
 import EventResultsPage from './pages/EventResultsPage';
 import StorePage from './pages/StorePage';
@@ -36,7 +33,6 @@ import NewsPage from './pages/NewsPage';
 import ArticleDetailsPage from './pages/ArticleDetailsPage';
 import ContactPage from './pages/ContactPage';
 
-// Centralized Database
 import {
   mockEvents,
   mockProducts,
@@ -50,32 +46,32 @@ import {
 import { mockCommunityPosts } from './data/mockData';
 
 export const App: React.FC = () => {
-  // Page Routing State
+  
   const [page, setPage] = useState<string>('home');
 
-  // Scroll to top on page change
+  
   React.useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [page]);
   
-  // Shopping Cart state
+  
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   
-  // Detail context states
+  
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedCoach, setSelectedCoach] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
-  // E-Commerce Order Confirmation details state
+  
   const [confirmedOrder, setConfirmedOrder] = useState<any | null>(null);
 
-  // Lightweight post comment lightbox overlay (Community pulse)
+  
   const [selectedPost, setSelectedPost] = useState<CommunityPost | null>(null);
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>(mockCommunityPosts);
   const [newCommentText, setNewCommentText] = useState<string>('');
 
-  // Training Plan Generator state
+  
   const [planDistance, setPlanDistance] = useState<string>('5K');
   const [planLevel, setPlanLevel] = useState<string>('Beginner');
   const [generatedPlan, setGeneratedPlan] = useState<any[] | null>(null);
@@ -167,12 +163,12 @@ export const App: React.FC = () => {
     setGeneratedPlan(plansData[planDistance]?.[planLevel] || null);
   };
 
-  // Dynamically calculate nearest upcoming event from database for Countdown
+  
   const getNearestUpcomingEvent = () => {
     const now = new Date().getTime();
     const upcoming = mockEvents.filter(e => e.badge !== 'PAST EVENT');
     
-    // Sort chronological
+    
     const sorted = [...upcoming].sort((a, b) => {
       const timeA = new Date(a.date).getTime();
       const timeB = new Date(b.date).getTime();
@@ -185,7 +181,7 @@ export const App: React.FC = () => {
 
   const nearestEvent = getNearestUpcomingEvent();
 
-  // Helper determining active navbar tab highlighted state
+  
   const getNavbarActiveTab = () => {
     if (page === 'home') return 'Community';
     if (['events', 'event-details', 'event-results', 'register'].includes(page)) return 'Events';
@@ -194,7 +190,7 @@ export const App: React.FC = () => {
     return 'Community';
   };
 
-  // Nav tab clicked handler
+  
   const handleTabChange = (tab: string) => {
     if (tab === 'Community') setPage('home');
     else if (tab === 'Events') setPage('events');
@@ -202,7 +198,7 @@ export const App: React.FC = () => {
     else if (tab === 'Contact') setPage('contact');
   };
 
-  // Add Item to Cart
+  
   const handleAddToCart = (product: Product, size?: string, color?: string) => {
     const itemSize = size || product.sizes[0] || 'Standard';
     const itemColor = color || product.colors[0] || 'Default';
@@ -222,7 +218,7 @@ export const App: React.FC = () => {
     });
   };
 
-  // Update Cart Qty
+  
   const handleUpdateCartQuantity = (idx: number, delta: number) => {
     setCartItems((prev) => {
       const copy = [...prev];
@@ -237,12 +233,12 @@ export const App: React.FC = () => {
     });
   };
 
-  // Remove item
+  
   const handleRemoveCartItem = (idx: number) => {
     setCartItems((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // Submit dynamic comment inside lightbox modal
+  
   const handleAddComment = (postId: string) => {
     if (!newCommentText.trim()) return;
 
@@ -262,7 +258,7 @@ export const App: React.FC = () => {
 
     setCommunityPosts(updated);
     
-    // Update selectedPost view
+    
     const postToUpdate = updated.find(p => p.id === postId);
     if (postToUpdate) {
       setSelectedPost(postToUpdate);
@@ -271,7 +267,7 @@ export const App: React.FC = () => {
     setNewCommentText('');
   };
 
-  // Toggle like inside lightbox
+  
   const handleToggleLike = (postId: string) => {
     const updated = communityPosts.map((post) => {
       if (post.id === postId) {
@@ -292,13 +288,13 @@ export const App: React.FC = () => {
     }
   };
 
-  // Cart total items count
+  
   const cartTotalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-zinc-800 antialiased selection:bg-orange-500 selection:text-white">
       
-      {/* Dynamic Navbar */}
+      {}
       <Navbar
         activeTab={getNavbarActiveTab()}
         setActiveTab={handleTabChange}
@@ -308,7 +304,7 @@ export const App: React.FC = () => {
         }}
       />
 
-      {/* Cart Badge float */}
+      {}
       {cartTotalItems > 0 && page !== 'cart' && page !== 'checkout' && page !== 'order-confirmation' && (
         <div 
           onClick={() => setPage('cart')}
@@ -321,7 +317,7 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Content router */}
+      {}
       <main className="flex-1">
         <AnimatePresence mode="wait">
           <motion.div
@@ -334,7 +330,7 @@ export const App: React.FC = () => {
             
             {page === 'home' && (
               <>
-                {/* Real-time Event Countdown */}
+                {}
                 <Hero
                   onSecureSlotClick={() => {
                     setSelectedEvent(nearestEvent);
@@ -347,7 +343,7 @@ export const App: React.FC = () => {
                   targetEventTimestamp={new Date(nearestEvent.date).getTime()}
                 />
                 
-                {/* Event previews */}
+                {}
                 <UpcomingEvents
                   onViewDetailsClick={(event) => {
                     setSelectedEvent(event);
@@ -356,7 +352,7 @@ export const App: React.FC = () => {
                   onViewAllClick={() => setPage('events')}
                 />
 
-                {/* Asymmetric Campaign Banner: Mission and Vision */}
+                {}
                 <section className="relative bg-zinc-900 text-white py-24 overflow-hidden select-none">
                   <div className="absolute inset-0 opacity-30">
                     <img
@@ -367,13 +363,13 @@ export const App: React.FC = () => {
                   </div>
                   <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 z-10 flex flex-col items-start text-left max-w-2xl">
                     <span className="font-mono text-[9px] font-black tracking-widest text-brand uppercase">
-                      [ CORE SYSTEM // MISSION & VISION ]
+                      [ CORE SYSTEM 
                     </span>
                     <h2 className="mt-4 font-display text-5xl sm:text-6xl font-black uppercase tracking-tight leading-[0.95] text-white">
                       EMPOWERING EVERY RUNNER.
                     </h2>
                     <p className="mt-4 font-mono text-[10px] tracking-wide text-zinc-300 leading-relaxed uppercase">
-                      // TO CULTIVATE A THRIVING, INCLUSIVE ATHLETIC COMMUNITY ACROSS BACOLOD AND THE PHILIPPINES. WE ARE COMMITTED TO DELIVERING CERTIFIED HIGH-PERFORMANCE RACE TIMING TECHNOLOGY, TAILORED TRAINING PLANS, AND GRASSROOTS RUNNING INITIATIVES THAT EMPOWER EVERY LOCAL ATHLELE TO ACHIEVE THEIR PERSONAL BEST.
+                      
                     </p>
                     <button
                       onClick={() => {
@@ -388,7 +384,7 @@ export const App: React.FC = () => {
                   </div>
                 </section>
                 
-                {/* Image hover feeds */}
+                {}
                 <CommunityPulse
                   onPostClick={(post) => setSelectedPost(post)}
                 />
@@ -480,7 +476,7 @@ export const App: React.FC = () => {
                 onBack={() => setPage('cart')}
                 onOrderSuccess={(order) => {
                   setConfirmedOrder(order);
-                  setCartItems([]); // Clear cart
+                  setCartItems([]); 
                   setPage('order-confirmation');
                 }}
               />
@@ -536,9 +532,9 @@ export const App: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Coaches list */}
+                {}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                  {/* Coach 1 */}
+                  {}
                   <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden p-6 hover:border-orange-200 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
                     <div>
                       <img
@@ -566,7 +562,7 @@ export const App: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Coach 2 */}
+                  {}
                   <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden p-6 hover:border-orange-200 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
                     <div>
                       <img
@@ -594,7 +590,7 @@ export const App: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Coach 3 */}
+                  {}
                   <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden p-6 hover:border-orange-200 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
                     <div>
                       <img
@@ -653,11 +649,11 @@ export const App: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Plan Generator Form UI */}
+                {}
                 <div className="rounded-3xl border border-zinc-200 bg-white p-6 md:p-8 max-w-4xl mx-auto mb-12 shadow-sm">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     
-                    {/* Distance Option */}
+                    {}
                     <div>
                       <label className="block text-xs font-black text-zinc-900 uppercase tracking-widest mb-3">Target Distance</label>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -682,7 +678,7 @@ export const App: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Level Option */}
+                    {}
                     <div>
                       <label className="block text-xs font-black text-zinc-900 uppercase tracking-widest mb-3">Fitness Level</label>
                       <div className="grid grid-cols-3 gap-2.5">
@@ -716,7 +712,7 @@ export const App: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Generated Plan Output */}
+                {}
                 <AnimatePresence>
                   {generatedPlan && (
                     <motion.div
@@ -780,7 +776,7 @@ export const App: React.FC = () => {
         </AnimatePresence>
       </main>
 
-      {/* Footer localization */}
+      {}
       <Footer onPlatformClick={(item) => {
         if (item === 'Event Calendar') setPage('events');
         else if (item === 'Contact Us') setPage('contact');
@@ -789,7 +785,7 @@ export const App: React.FC = () => {
         }
       }} />
 
-      {/* Lightweight comment lightbox modal overlay */}
+      {}
       <Modal
         isOpen={selectedPost !== null}
         onClose={() => setSelectedPost(null)}
@@ -797,7 +793,7 @@ export const App: React.FC = () => {
       >
         {selectedPost && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden">
-            {/* Post image */}
+            {}
             <div className="relative aspect-square rounded-lg overflow-hidden bg-zinc-50 border border-zinc-100 flex items-center justify-center shadow-inner">
               <img
                 src={selectedPost.image}
@@ -806,7 +802,7 @@ export const App: React.FC = () => {
               />
             </div>
 
-            {/* Right side comments */}
+            {}
             <div className="flex flex-col h-full justify-between max-h-[500px]">
               
               <div className="border-b border-zinc-200 pb-4 mb-4">
@@ -826,7 +822,7 @@ export const App: React.FC = () => {
                 </p>
               </div>
 
-              {/* Comments stream */}
+              {}
               <div className="flex-1 overflow-y-auto mb-4 pr-1.5 space-y-3 max-h-[220px]">
                 {selectedPost.comments.length === 0 ? (
                   <p className="text-[11px] text-zinc-500 font-medium py-4 text-center">No comments yet. Be the first to cheer them on!</p>
@@ -840,7 +836,7 @@ export const App: React.FC = () => {
                 )}
               </div>
 
-              {/* Likes and form */}
+              {}
               <div className="border-t border-zinc-150 pt-4 mt-auto">
                 <div className="flex items-center gap-3.5 text-xs text-zinc-900 mb-4">
                   <button

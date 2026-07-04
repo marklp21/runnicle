@@ -41,12 +41,12 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
       const checked = (e.target as HTMLInputElement).checked;
       setFormData((prev) => ({ ...prev, [name]: checked }));
     } else if (name === 'phone' || name === 'emergencyPhone') {
-      // Allow + as first char, then digits only
+      
       const cleaned = value.replace(/(?!^\+)\D/g, '');
-      // Strip everything except leading + and digits
+      
       const hasPlus = cleaned.startsWith('+');
       const digits = cleaned.replace(/\D/g, '');
-      // Cap: 12 digits if starts with 63, 11 digits if starts with 09
+      
       const maxDigits = digits.startsWith('63') ? 12 : digits.startsWith('09') ? 11 : 12;
       const capped = digits.slice(0, maxDigits);
       setFormData((prev) => ({ ...prev, [name]: hasPlus ? '+' + capped : capped }));
@@ -59,12 +59,12 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
     e.preventDefault();
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.waiver) return;
 
-    // Proceed to payment step
+    
     setStep(2);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  // Mock Printing
+  
   const handlePrint = () => {
     window.print();
   };
@@ -72,15 +72,15 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Visual Step Progress Bar */}
+      {}
       <div className="max-w-md mx-auto mb-10 font-mono text-[9px] font-black tracking-widest text-zinc-400 uppercase select-none">
         <div className="flex justify-between items-center relative">
           
-          {/* Connector Line Backdrop */}
+          {}
           <div className="absolute top-3 left-6 right-6 h-[1px] bg-zinc-200 -z-0" />
           <div className="absolute top-3 left-6 h-[1px] bg-orange-500 transition-all duration-300 -z-0" style={{ width: step === 2 ? '50%' : step === 3 ? '100%' : '0%' }} />
 
-          {/* Step 1: Registration */}
+          {}
           <div className={`flex flex-col items-center gap-1.5 z-10 ${step >= 1 ? 'text-orange-500' : ''}`}>
             <div className={`h-6.5 w-6.5 rounded-full border flex items-center justify-center transition-all ${
               step === 1 ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/10' : step > 1 ? 'bg-zinc-100 border-zinc-300 text-zinc-900' : 'bg-white border-zinc-200 text-zinc-400'
@@ -90,7 +90,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
             <span>REGISTRATION</span>
           </div>
 
-          {/* Step 2: Payment */}
+          {}
           <div className={`flex flex-col items-center gap-1.5 z-10 ${step >= 2 ? 'text-orange-500' : ''}`}>
             <div className={`h-6.5 w-6.5 rounded-full border flex items-center justify-center transition-all ${
               step === 2 ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/10' : step > 2 ? 'bg-zinc-100 border-zinc-300 text-zinc-900' : 'bg-white border-zinc-200 text-zinc-400'
@@ -100,7 +100,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
             <span>PAYMENT</span>
           </div>
 
-          {/* Step 3: Finish */}
+          {}
           <div className={`flex flex-col items-center gap-1.5 z-10 ${step >= 3 ? 'text-orange-500' : ''}`}>
             <div className={`h-6.5 w-6.5 rounded-full border flex items-center justify-center transition-all ${
               step === 3 ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/10' : 'bg-white border-zinc-200 text-zinc-400'
@@ -113,7 +113,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
         </div>
       </div>
 
-      {/* Dynamic Render based on success */}
+      {}
       {step === 3 ? (
         <div className="max-w-3xl mx-auto text-center py-10 space-y-8 animate-fade-in">
           
@@ -130,12 +130,12 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
             </p>
           </div>
 
-          {/* Graphic Ticket BIB Display */}
+          {}
           <div className="relative mx-auto max-w-md rounded-2xl border border-zinc-200 bg-zinc-50 p-8 shadow-md overflow-hidden">
             <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-orange-500/5 blur-[50px] pointer-events-none" />
             <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-orange-500/5 blur-[50px] pointer-events-none" />
             
-            {/* Header logos */}
+            {}
             <div className="flex justify-between items-center border-b border-zinc-200 pb-5 mb-5 text-left">
               <div>
                 <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block">Runnicle Race Pass</span>
@@ -147,7 +147,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
               </div>
             </div>
 
-            {/* Athlete Bio details */}
+            {}
             <div className="grid grid-cols-2 gap-4 text-left border-b border-zinc-200 pb-5 mb-5 text-xs font-semibold text-zinc-500">
               <div>
                 <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-0.5">Athlete</span>
@@ -167,7 +167,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
               </div>
             </div>
 
-            {/* Large BIB Number Box */}
+            {}
             <div className="py-6 px-4 bg-white rounded-xl border border-zinc-200 shadow-sm text-center">
               <span className="text-[9px] font-black text-zinc-400 uppercase tracking-wider block">Official Runner Bib</span>
               <span className="font-display text-6xl font-black text-zinc-900 tracking-widest mt-1 block">
@@ -175,11 +175,11 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
               </span>
             </div>
 
-            {/* Decorative cutouts */}
+            {}
             <div className="absolute top-1/2 -left-2.5 h-5 w-5 rounded-full bg-white border-r border-zinc-200" />
             <div className="absolute top-1/2 -right-2.5 h-5 w-5 rounded-full bg-white border-l border-zinc-200" />
             
-            {/* Barcode Graphic */}
+            {}
             <div className="mt-6 border-t border-dashed border-zinc-200 pt-6 flex flex-col items-center">
               <div className="h-10 w-full max-w-[200px] flex gap-[2px] items-center justify-center opacity-70">
                 {Array.from({ length: 30 }).map((_, i) => (
@@ -196,7 +196,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
             </div>
           </div>
 
-          {/* Action buttons */}
+          {}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-sm mx-auto pt-4">
             <button
               onClick={handlePrint}
@@ -218,7 +218,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
         </div>
       ) : (
         <div className="space-y-8">
-          {/* Header */}
+          {}
           <button
             onClick={onBack}
             className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-brand uppercase tracking-wider transition-colors cursor-pointer group"
@@ -236,16 +236,16 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
             </p>
           </div>
 
-          {/* Checkout Grid */}
+          {}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
             
             {step === 1 ? (
-              /* Step 1: Registration Form */
+              
               <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6">
                 
-                {/* Personal Details */}
+                {}
                 <div className="space-y-4">
-                  <h3 className="font-display text-base font-black text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">1. Athlete Profile</h3>
+                  <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">1. Athlete Profile</h3>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -317,9 +317,9 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   </div>
                 </div>
 
-                {/* Event Logistics */}
+                {}
                 <div className="space-y-4 pt-4">
-                  <h3 className="font-display text-base font-black text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">2. Event Logistics</h3>
+                  <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">2. Event Logistics</h3>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -361,9 +361,9 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   </div>
                 </div>
 
-                {/* Emergency Contact */}
+                {}
                 <div className="space-y-4 pt-4">
-                  <h3 className="font-display text-base font-black text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">3. Emergency Contact</h3>
+                  <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">3. Emergency Contact</h3>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -392,7 +392,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   </div>
                 </div>
 
-                {/* Waiver Agreement */}
+                {}
                 <div className="pt-4 space-y-4">
                   <label className="flex items-start gap-3 cursor-pointer text-zinc-500 hover:text-brand transition-colors">
                     <input
@@ -409,7 +409,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   </label>
                 </div>
 
-                {/* Submit CTA */}
+                {}
                 <button
                   type="submit"
                   className="w-full rounded-md bg-brand py-4 text-sm font-mono font-black text-white hover:bg-brand-hover active:scale-98 transition-all duration-200 uppercase tracking-wider cursor-pointer mt-4 shadow-md shadow-brand/10"
@@ -418,16 +418,16 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                 </button>
               </form>
             ) : (
-              /* Step 2: Payment Selector Portal */
+              
               <div className="lg:col-span-2 space-y-6">
                 <div className="space-y-4">
-                  <h3 className="font-display text-base font-black text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">
+                  <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">
                     2. Select Payment Method
                   </h3>
                   
-                  {/* Method selector grid */}
+                  {}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* GCash */}
+                    {}
                     <div
                       onClick={() => setPaymentMethod('GCash')}
                       className={`rounded-xl border p-4 flex items-center justify-between cursor-pointer select-none transition-all ${
@@ -443,7 +443,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                       <span className="text-[9px] font-mono font-bold text-zinc-400">₱0.00 FEE</span>
                     </div>
 
-                    {/* Maya */}
+                    {}
                     <div
                       onClick={() => setPaymentMethod('Maya')}
                       className={`rounded-xl border p-4 flex items-center justify-between cursor-pointer select-none transition-all ${
@@ -459,7 +459,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                       <span className="text-[9px] font-mono font-bold text-zinc-400">₱0.00 FEE</span>
                     </div>
 
-                    {/* Bank Transfer */}
+                    {}
                     <div
                       onClick={() => setPaymentMethod('Bank')}
                       className={`rounded-xl border p-4 flex items-center justify-between cursor-pointer select-none transition-all ${
@@ -475,7 +475,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                       <span className="text-[9px] font-mono font-bold text-zinc-400">₱0.00 FEE</span>
                     </div>
 
-                    {/* Credit Card */}
+                    {}
                     <div
                       onClick={() => setPaymentMethod('Card')}
                       className={`rounded-xl border p-4 flex items-center justify-between cursor-pointer select-none transition-all ${
@@ -492,7 +492,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                     </div>
                   </div>
 
-                  {/* Specific payment details based on method */}
+                  {}
                   <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 space-y-4 mt-6">
                     {paymentMethod === 'GCash' && (
                       <div className="space-y-3 font-mono text-xs text-zinc-600 leading-relaxed uppercase">
@@ -544,7 +544,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                       </div>
                     )}
 
-                    {/* Reference input for manual verification (non-card) */}
+                    {}
                     {paymentMethod !== 'Card' && (
                       <div className="mt-4 pt-2">
                         <label className="block text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">Reference Number</label>
@@ -561,7 +561,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   </div>
                 </div>
 
-                {/* Navigation CTAs */}
+                {}
                 <div className="flex gap-4 pt-4">
                   <button
                     type="button"
@@ -573,7 +573,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      // Final confirmation
+                      
                       const randomBib = Math.floor(100 + Math.random() * 900).toString();
                       setRegisteredName(`${formData.firstName} ${formData.lastName}`);
                       setRegisteredBib(randomBib);
@@ -588,9 +588,9 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
               </div>
             )}
 
-            {/* Right Column: Order Details */}
+            {}
             <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-6 lg:sticky lg:top-24">
-              <h3 className="font-display text-base font-black text-zinc-900 tracking-tight uppercase border-b border-zinc-200 pb-4">
+              <h3 className="font-sans text-base font-bold text-zinc-900 tracking-tight uppercase border-b border-zinc-200 pb-4">
                 Registration Summary
               </h3>
 

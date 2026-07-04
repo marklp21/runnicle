@@ -16,7 +16,7 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Back Button */}
+      {}
       <button
         onClick={onBack}
         className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-orange-500 uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
@@ -25,13 +25,13 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
         Back to Events
       </button>
 
-      {/* Main Grid */}
+      {}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
         
-        {/* Left Column: Details (Main Content) */}
+        {}
         <div className="lg:col-span-2 space-y-8">
           
-          {/* Header Banner Visual */}
+          {}
           <div 
             style={{ backgroundImage: `url(${event.image})` }}
             className="relative rounded-2xl overflow-hidden bg-cover bg-center border border-zinc-200 p-8 md:p-12 flex flex-col justify-end min-h-[300px] shadow-sm"
@@ -39,7 +39,7 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
             
             <div className="relative z-20">
-              {/* Distance badges */}
+              {}
               <div className="flex gap-2.5 mb-4">
                 {event.distances.map((dist) => (
                   <span
@@ -55,7 +55,7 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
                 {event.title}
               </h1>
 
-              {/* Specs Row */}
+              {}
               <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs text-zinc-300 font-semibold mt-6">
                 <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-orange-500" /> {event.date}</span>
                 <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4 text-orange-500" /> {event.location}</span>
@@ -64,10 +64,10 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
             </div>
           </div>
 
-          {/* Race Overview */}
+          {}
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 md:p-8 space-y-4">
-            <h3 className="font-display text-lg font-black text-zinc-900 tracking-tight">Race Description</h3>
-            <p className="text-zinc-705 text-sm leading-relaxed font-medium">
+            <h3 className="font-sans text-lg font-bold text-zinc-900 tracking-tight">Race Description</h3>
+            <p className="text-zinc-700 text-sm leading-relaxed font-medium">
               {event.description}
             </p>
             <p className="text-zinc-500 text-xs leading-relaxed font-medium">
@@ -75,15 +75,15 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
             </p>
           </div>
 
-          {/* Timeline & Inclusions Grid */}
+          {}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            {/* Schedule */}
+            {}
             <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h3 className="font-display text-base font-black text-zinc-900 mb-4 tracking-tight uppercase">Event Schedule</h3>
+              <h3 className="font-sans text-base font-bold text-zinc-900 mb-4 tracking-tight uppercase">Event Schedule</h3>
               <ul className="space-y-3.5">
                 {event.details.schedule.map((item, idx) => (
-                  <li key={idx} className="flex gap-3 text-xs text-zinc-650 font-semibold">
+                  <li key={idx} className="flex gap-3 text-xs text-zinc-600 font-semibold">
                     <Clock className="h-4.5 w-4.5 text-orange-500 flex-shrink-0 mt-0.5" />
                     <span>{item}</span>
                   </li>
@@ -91,12 +91,12 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
               </ul>
             </div>
 
-            {/* Perks */}
+            {}
             <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h3 className="font-display text-base font-black text-zinc-900 mb-4 tracking-tight uppercase">Runner Inclusions</h3>
+              <h3 className="font-sans text-base font-bold text-zinc-900 mb-4 tracking-tight uppercase">Runner Inclusions</h3>
               <ul className="space-y-3.5">
                 {event.details.perks.map((perk, idx) => (
-                  <li key={idx} className="flex gap-3 text-xs text-zinc-655 font-semibold">
+                  <li key={idx} className="flex gap-3 text-xs text-zinc-600 font-semibold">
                     <Award className="h-4.5 w-4.5 text-orange-500 flex-shrink-0 mt-0.5" />
                     <span>{perk}</span>
                   </li>
@@ -106,7 +106,7 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
 
           </div>
 
-          {/* Safety & Guidelines */}
+          {}
           <div className="rounded-xl border border-red-200 bg-red-50/50 p-6 flex gap-4">
             <ShieldAlert className="h-6 w-6 text-red-500 flex-shrink-0 mt-0.5" />
             <div>
@@ -117,14 +117,14 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
             </div>
           </div>
 
-          {/* Visual Showcase: Race Kit & Venue Map */}
+          {}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            {/* Race Kit Card */}
+            {}
             <div className="rounded-xl border border-zinc-200 bg-white p-6 space-y-4 shadow-sm">
               <div className="flex justify-between items-center border-b border-zinc-200 pb-3">
-                <h3 className="font-display text-xs font-black text-zinc-900 uppercase tracking-wider">Official Race Kit</h3>
-                <span className="text-[10px] text-zinc-450 font-extrabold uppercase tracking-widest">Singlet & Perks</span>
+                <h3 className="font-sans text-xs font-bold text-zinc-900 uppercase tracking-wider">Official Race Kit</h3>
+                <span className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-widest">Singlet & Perks</span>
               </div>
               <div className="relative aspect-video rounded-lg overflow-hidden border border-zinc-200 bg-zinc-50">
                 <img 
@@ -141,10 +141,10 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
               </p>
             </div>
 
-            {/* Venue & Route Card */}
+            {}
             <div className="rounded-xl border border-zinc-200 bg-white p-6 space-y-4 shadow-sm">
               <div className="flex justify-between items-center border-b border-zinc-200 pb-3">
-                <h3 className="font-display text-sm font-black text-zinc-900 uppercase tracking-wider">Route & Venue Map</h3>
+                <h3 className="font-sans text-sm font-bold text-zinc-900 uppercase tracking-wider">Route & Venue Map</h3>
                 <span className="text-[10px] text-zinc-450 font-extrabold uppercase tracking-widest">{event.location}</span>
               </div>
               <div className="relative aspect-video rounded-lg overflow-hidden border border-zinc-200 bg-zinc-50">
@@ -166,13 +166,13 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
 
         </div>
 
-        {/* Right Column: Checkout Card */}
+        {}
         <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-6 lg:sticky lg:top-24">
           <div>
             <span className="text-[10px] font-black text-zinc-450 uppercase tracking-widest">Registration Status</span>
             <div className="flex items-center justify-between mt-2.5">
               <span className={`rounded-sm px-2 py-0.5 text-[9px] font-black tracking-widest uppercase ${
-                event.badge === 'SOLD OUT' ? 'bg-red-50 text-red-650 border border-red-250' : 'bg-orange-500 text-white font-extrabold'
+                event.badge === 'SOLD OUT' ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-orange-500 text-white font-extrabold'
               }`}>
                 {event.badge}
               </span>
@@ -184,28 +184,28 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
           </div>
 
           <div className="border-t border-zinc-200 pt-6">
-            <span className="text-[10px] font-black text-zinc-450 uppercase tracking-widest block">Entry Price</span>
-            <span className="text-3xl font-display font-black text-zinc-900 mt-1.5 block">
+            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">Entry Price</span>
+            <span className="text-3xl font-mono font-bold text-zinc-900 mt-1.5 block">
               {event.details.fee}
             </span>
           </div>
 
           <div className="border-t border-zinc-200 pt-6 space-y-3.5 text-xs text-zinc-500 font-semibold">
             <div className="flex justify-between">
-              <span className="text-zinc-450">Route Map</span>
+              <span className="text-zinc-400">Route Map</span>
               <span className="text-zinc-800 text-right">{event.details.route}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-455">Timer Method</span>
+              <span className="text-zinc-400">Timer Method</span>
               <span className="text-zinc-800">RFID Timing Chip</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-455">Location Area</span>
+              <span className="text-zinc-400">Location Area</span>
               <span className="text-zinc-800">{event.location}</span>
             </div>
           </div>
 
-          {/* Registration Trigger CTA */}
+          {}
           <button
             disabled={event.badge === 'SOLD OUT'}
             onClick={() => onRegisterClick(event)}

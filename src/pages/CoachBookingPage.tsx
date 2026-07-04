@@ -36,7 +36,7 @@ export const CoachBookingPage: React.FC<CoachBookingPageProps> = ({
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Dynamic Content */}
+      {}
       {bookingSuccess ? (
         <div className="max-w-2xl mx-auto text-center py-16 space-y-8 animate-fade-in">
           
@@ -53,7 +53,7 @@ export const CoachBookingPage: React.FC<CoachBookingPageProps> = ({
             </p>
           </div>
 
-          {/* Details Dashboard Card */}
+          {}
           <div className="rounded-xl border border-zinc-200 bg-white p-6 text-left max-w-md mx-auto space-y-4 shadow-sm">
             <div className="flex justify-between items-center border-b border-zinc-200 pb-3 text-xs font-semibold">
               <span className="text-zinc-450">Coach Partner</span>
@@ -77,7 +77,7 @@ export const CoachBookingPage: React.FC<CoachBookingPageProps> = ({
 
           <button
             onClick={onBack}
-            className="rounded-md bg-orange-500 px-8 py-3 text-xs font-bold text-white hover:bg-orange-605 transition-colors uppercase tracking-wider cursor-pointer shadow-md shadow-orange-500/10"
+            className="rounded-md bg-orange-500 px-8 py-3 text-xs font-bold text-white hover:bg-orange-600 transition-colors uppercase tracking-wider cursor-pointer shadow-md shadow-orange-500/10"
           >
             Return to Portal
           </button>
@@ -86,16 +86,16 @@ export const CoachBookingPage: React.FC<CoachBookingPageProps> = ({
       ) : (
         <div className="space-y-8">
           
-          {/* Back Button */}
+          {}
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-xs font-bold text-zinc-505 hover:text-orange-505 uppercase tracking-wider cursor-pointer group"
+            className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-orange-500 uppercase tracking-wider cursor-pointer group"
           >
             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Cancel Session
           </button>
 
-          {/* Heading */}
+          {}
           <div className="border-b border-zinc-200 pb-5">
             <h1 className="font-display text-4xl font-black text-zinc-900 tracking-tight">
               Book Consultation
@@ -105,35 +105,35 @@ export const CoachBookingPage: React.FC<CoachBookingPageProps> = ({
             </p>
           </div>
 
-          {/* Layout Grid */}
+          {}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
             
-            {/* Form Fields */}
+            {}
             <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6">
               
-              {/* Step 1: Calendar slots */}
+              {}
               <div className="space-y-4">
-                <h3 className="font-display text-base font-black text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">1. Select Date & Time</h3>
+                <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">1. Select Date & Time</h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-extrabold text-zinc-705 uppercase tracking-wider mb-2">Consultation Date</label>
+                    <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Consultation Date</label>
                     <input
                       type="date"
                       required
                       value={bookingDate}
                       onChange={(e) => setBookingDate(e.target.value)}
-                      className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-905 focus:border-orange-500 focus:outline-none"
+                      className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-900 focus:border-orange-500 focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold text-zinc-750 uppercase tracking-wider mb-2">Available Time slots</label>
+                    <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Available Time slots</label>
                     <select
                       required
                       value={bookingTime}
                       onChange={(e) => setBookingTime(e.target.value)}
-                      className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-750 focus:border-orange-500 focus:outline-none"
+                      className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-700 focus:border-orange-500 focus:outline-none"
                     >
                       <option value="">Select a time slot</option>
                       {timeSlots.map((slot) => (
@@ -144,17 +144,17 @@ export const CoachBookingPage: React.FC<CoachBookingPageProps> = ({
                 </div>
               </div>
 
-              {/* Step 2: Background questionnaire */}
+              {}
               <div className="space-y-4 pt-4">
-                <h3 className="font-display text-base font-black text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">2. Running Background</h3>
+                <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">2. Running Background</h3>
                 
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-[10px] font-extrabold text-zinc-750 uppercase tracking-wider mb-2">Current Weekly Mileage</label>
+                    <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Current Weekly Mileage</label>
                     <select
                       value={mileage}
                       onChange={(e) => setMileage(e.target.value)}
-                      className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-750 focus:border-orange-500 focus:outline-none"
+                      className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-700 focus:border-orange-500 focus:outline-none"
                     >
                       <option>0-15 km/week</option>
                       <option>15-40 km/week</option>
@@ -164,7 +164,7 @@ export const CoachBookingPage: React.FC<CoachBookingPageProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold text-zinc-750 uppercase tracking-wider mb-2">Running Goals & Concerns</label>
+                    <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Running Goals & Concerns</label>
                     <textarea
                       required
                       rows={4}
@@ -177,19 +177,19 @@ export const CoachBookingPage: React.FC<CoachBookingPageProps> = ({
                 </div>
               </div>
 
-              {/* Booking CTA */}
+              {}
               <button
                 type="submit"
-                className="w-full rounded-md bg-orange-500 py-4 text-sm font-black text-white hover:bg-orange-606 active:scale-98 transition-all duration-200 uppercase tracking-wider cursor-pointer mt-4 shadow-md shadow-orange-500/10"
+                className="w-full rounded-md bg-orange-500 py-4 text-sm font-black text-white hover:bg-orange-600 active:scale-98 transition-all duration-200 uppercase tracking-wider cursor-pointer mt-4 shadow-md shadow-orange-500/10"
               >
                 Schedule session
               </button>
 
             </form>
 
-            {/* Right Column: Coach info summary */}
+            {}
             <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-6">
-              <h3 className="font-display text-base font-black text-zinc-900 tracking-tight uppercase border-b border-zinc-200 pb-4">
+              <h3 className="font-sans text-base font-bold text-zinc-900 tracking-tight uppercase border-b border-zinc-200 pb-4">
                 Session Outline
               </h3>
 
@@ -200,11 +200,11 @@ export const CoachBookingPage: React.FC<CoachBookingPageProps> = ({
                   </div>
                   <div>
                     <span className="text-xs font-bold text-zinc-900 block">30-Min Strategic Video Call</span>
-                    <span className="text-[10px] text-zinc-505 font-medium block">Personalized, 1-on-1 advice</span>
+                    <span className="text-[10px] text-zinc-500 font-medium block">Personalized, 1-on-1 advice</span>
                   </div>
                 </div>
 
-                <div className="text-xs font-semibold text-zinc-550 space-y-2 pt-2 leading-relaxed">
+                <div className="text-xs font-semibold text-zinc-500 space-y-2 pt-2 leading-relaxed">
                   <p>✅ Analysis of your current pacing, strides, and form logs.</p>
                   <p>✅ Advice on target heart rate zones and dynamic warmups.</p>
                   <p>✅ Direct alignment on customized week-by-week calendar mileage.</p>

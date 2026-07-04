@@ -35,7 +35,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Title */}
+      {}
       <div className="border-b border-zinc-200 pb-6 mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
         <div>
           <span className="rounded-full bg-orange-50 px-4 py-1 text-xs font-extrabold tracking-widest text-orange-600 border border-orange-200 uppercase">
@@ -49,7 +49,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({
           </p>
         </div>
 
-        {/* Search */}
+        {}
         <div className="relative w-full md:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
           <input
@@ -62,7 +62,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({
         </div>
       </div>
 
-      {/* Category filters */}
+      {}
       <div className="flex gap-2 flex-wrap border-b border-zinc-200 pb-5 mb-8">
         {categories.map((cat) => (
           <button
@@ -71,7 +71,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({
             className={`rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border ${
               activeCategory === cat
                 ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/10'
-                : 'border-zinc-200 text-zinc-655 hover:border-zinc-350 hover:text-orange-500 bg-white'
+                : 'border-zinc-200 text-zinc-600 hover:border-zinc-350 hover:text-orange-500 bg-white'
             }`}
           >
             {cat === 'all' ? 'All Updates' : cat}
@@ -79,7 +79,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({
         ))}
       </div>
 
-      {/* Articles loop */}
+      {}
       {filteredArticles.length === 0 ? (
         <div className="text-center py-20 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-500">
           <Info className="h-10 w-10 text-zinc-400 mx-auto mb-4" />
@@ -95,7 +95,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({
               onClick={() => onArticleClick(article)}
             >
               <div>
-                {/* Visual */}
+                {}
                 <div className="relative aspect-video overflow-hidden bg-zinc-50 border-b border-zinc-100">
                   <img
                     src={article.image}
@@ -108,24 +108,24 @@ export const NewsPage: React.FC<NewsPageProps> = ({
                   </span>
                 </div>
 
-                {/* Content */}
+                {}
                 <div className="p-6 space-y-3.5">
                   <span className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5 text-orange-500" />
                     {article.date} • {article.readTime}
                   </span>
 
-                  <h3 className="font-display text-lg font-black text-zinc-900 group-hover:text-orange-655 transition-colors tracking-tight leading-snug">
+                  <h3 className="font-sans text-lg font-bold text-zinc-900 group-hover:text-orange-600 transition-colors tracking-tight leading-snug">
                     {article.title}
                   </h3>
 
-                  <p className="text-xs text-zinc-650 font-semibold leading-relaxed line-clamp-3">
+                  <p className="text-xs text-zinc-600 font-semibold leading-relaxed line-clamp-3">
                     {article.summary}
                   </p>
                 </div>
               </div>
 
-              {/* Author & Read More */}
+              {}
               <div className="p-6 border-t border-zinc-100 bg-zinc-50 flex justify-between items-center text-xs font-semibold">
                 <div className="flex items-center gap-2">
                   <img src={article.authorAvatar} alt={article.author} className="h-6 w-6 rounded-full border border-zinc-200 object-cover" />

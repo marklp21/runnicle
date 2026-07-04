@@ -25,25 +25,25 @@ export const CartPage: React.FC<CartPageProps> = ({
   onCheckout,
 }) => {
   
-  // Calculate pricing summary
+  
   const subtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
   const shipping = subtotal > 3000 ? 0 : subtotal === 0 ? 0 : 250;
-  const tax = subtotal * 0.12; // 12% VAT in the Philippines
+  const tax = subtotal * 0.12; 
   const total = subtotal + shipping + tax;
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Back button */}
+      {}
       <button
         onClick={onBackToStore}
-        className="inline-flex items-center gap-2 text-xs font-bold text-zinc-505 hover:text-orange-505 uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
+        className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-orange-500 uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
         Back to Store
       </button>
 
-      {/* Main layout */}
+      {}
       <div className="border-b border-zinc-200 pb-5 mb-8">
         <h1 className="font-display text-4xl font-black text-zinc-900 tracking-tight">
           Your Shopping Cart
@@ -139,7 +139,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                   </div>
 
                   {/* Total price */}
-                  <span className="text-sm font-bold text-zinc-900 w-20 text-right font-display">
+                  <span className="text-sm font-bold text-zinc-900 w-20 text-right font-mono">
                     ₱{(item.product.price * item.quantity).toLocaleString()}
                   </span>
 
@@ -159,7 +159,7 @@ export const CartPage: React.FC<CartPageProps> = ({
 
           {/* Checkout Card Summary */}
           <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-6">
-            <h3 className="font-display text-base font-black text-zinc-900 tracking-tight uppercase border-b border-zinc-200 pb-4">
+            <h3 className="font-sans text-base font-bold text-zinc-900 tracking-tight uppercase border-b border-zinc-200 pb-4">
               Order Summary
             </h3>
 
@@ -181,13 +181,13 @@ export const CartPage: React.FC<CartPageProps> = ({
               
               <div className="border-t border-zinc-200 pt-4 flex justify-between text-sm font-bold">
                 <span className="text-zinc-900">Total Est.</span>
-                <span className="text-orange-600 font-display font-bold">₱{total.toLocaleString()}</span>
+                <span className="text-orange-600 font-mono font-bold">₱{total.toLocaleString()}</span>
               </div>
             </div>
 
             <button
               onClick={onCheckout}
-              className="w-full rounded-md bg-orange-500 py-4 mt-6 text-sm font-black text-white hover:bg-orange-605 active:scale-98 transition-all duration-200 uppercase tracking-wider cursor-pointer inline-flex items-center justify-center gap-2 shadow-md shadow-orange-500/10"
+              className="w-full rounded-md bg-orange-500 py-4 mt-6 text-sm font-black text-white hover:bg-orange-600 active:scale-98 transition-all duration-200 uppercase tracking-wider cursor-pointer inline-flex items-center justify-center gap-2 shadow-md shadow-orange-500/10"
             >
               <CreditCard className="h-4 w-4" />
               Proceed to Checkout

@@ -23,7 +23,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Title */}
+      {}
       <div className="border-b border-zinc-200 pb-6 mb-8 text-center max-w-3xl mx-auto">
         <span className="rounded-full bg-orange-50 px-4 py-1 text-xs font-extrabold tracking-widest text-orange-600 border border-orange-200 uppercase">
           RUNNICLE EVENTS
@@ -36,7 +36,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
         </p>
       </div>
 
-      {/* Tab selectors */}
+      {}
       <div className="flex justify-center border-b border-zinc-200 pb-5 mb-8 gap-2">
         <button
           onClick={() => setActiveTab('upcoming')}
@@ -60,7 +60,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
         </button>
       </div>
 
-      {/* Events loop */}
+      {}
       <div className="space-y-6 max-w-4xl mx-auto">
         {activeTab === 'upcoming' ? (
           upcomingEvents.map((event) => (
@@ -68,7 +68,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
               key={event.id}
               className="rounded-3xl border border-zinc-200 bg-white overflow-hidden shadow-sm flex flex-col md:flex-row hover:border-brand transition-all duration-300 group"
             >
-              {/* Event image */}
+              {}
               <div className="md:w-1/3 aspect-video md:aspect-auto min-h-[160px] md:min-h-full relative bg-zinc-150">
                 <img
                   src={event.image}
@@ -81,7 +81,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                 </span>
               </div>
 
-              {/* Event Info content */}
+              {}
               <div className="md:w-2/3 p-5 md:p-6 flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
                   <div className="flex flex-wrap gap-1.5">
@@ -95,7 +95,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                     ))}
                   </div>
 
-                  <h3 className="font-display text-xl font-black text-zinc-900 tracking-tight leading-none uppercase group-hover:text-brand transition-colors">
+                  <h3 className="font-sans text-xl font-bold text-zinc-900 tracking-tight leading-snug group-hover:text-brand transition-colors">
                     {event.title}
                   </h3>
 
@@ -119,7 +119,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                   </p>
                 </div>
 
-                {/* Actions row */}
+                {}
                 <div className="flex flex-col sm:flex-row gap-2.5 pt-3.5 border-t border-zinc-150">
                   <button
                     disabled={event.badge === 'SOLD OUT'}
@@ -144,7 +144,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
               key={event.id}
               className="rounded-3xl border border-zinc-200 bg-zinc-50/50 overflow-hidden flex flex-col md:flex-row hover:border-brand/40 transition-all duration-300 group"
             >
-              {/* Event image */}
+              {}
               <div className="md:w-1/3 aspect-video md:aspect-auto min-h-[160px] md:min-h-full relative bg-zinc-150">
                 <img
                   src={event.image}
@@ -157,7 +157,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                 </span>
               </div>
 
-              {/* Event Info content */}
+              {}
               <div className="md:w-2/3 p-5 md:p-6 flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
                   <div className="flex gap-1.5">
@@ -171,7 +171,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                     ))}
                   </div>
 
-                  <h3 className="font-display text-lg font-black text-zinc-800 tracking-tight leading-none uppercase group-hover:text-brand transition-colors">
+                  <h3 className="font-sans text-lg font-bold text-zinc-800 leading-snug group-hover:text-brand transition-colors">
                     {event.title}
                   </h3>
 
@@ -185,7 +185,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                   </div>
                 </div>
 
-                {/* Results triggers */}
+                {}
                 <div className="flex flex-col sm:flex-row gap-2.5 pt-3.5 border-t border-zinc-150">
                   {event.results && event.results.length > 0 ? (
                     <button

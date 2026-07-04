@@ -49,7 +49,7 @@ export const Hero: React.FC<HeroProps> = ({
       });
     };
 
-    tick(); // Run immediately
+    tick(); 
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, [targetEventTimestamp]);
@@ -59,10 +59,10 @@ export const Hero: React.FC<HeroProps> = ({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center relative">
           
-          {/* Left Column: Typographic Header & CTAs */}
+          {}
           <div className="md:col-span-7 flex flex-col items-center md:items-start text-center md:text-left">
             
-            {/* Early-Bird Tag showing target event details */}
+            {}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -70,7 +70,7 @@ export const Hero: React.FC<HeroProps> = ({
               className="inline-flex flex-col items-center lg:items-start gap-2"
             >
               <span className="font-mono text-[9px] font-black tracking-widest text-brand uppercase">
-                [ TARGET PROTOCOL // DEPLOYMENT IN PROTOCOL ]
+                [ TARGET PROTOCOL 
               </span>
               <span className="text-zinc-500 font-mono text-[10px] font-bold mt-1 flex items-center gap-1.5 uppercase">
                 <Calendar className="h-3.5 w-3.5 text-zinc-400" />
@@ -78,7 +78,7 @@ export const Hero: React.FC<HeroProps> = ({
               </span>
             </motion.div>
 
-            {/* Big Bold Headline */}
+            {}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -89,24 +89,24 @@ export const Hero: React.FC<HeroProps> = ({
               System.
             </motion.h1>
 
-            {/* Subtitle */}
+            {}
             <motion.p
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.15 }}
               className="mt-5 max-w-md font-mono text-[10px] tracking-wide text-zinc-500 leading-relaxed uppercase"
             >
-              // ACTIVE DEPLOYMENT PORTAL. TRACK SCHEDULED TIMING RACES, GENERATE SAMPLE TRAINING CYCLES, AND SECURE ACCREDITED APPAREL.
+              
             </motion.p>
 
-            {/* Sleek Typographic Countdown */}
+            {}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="flex justify-center md:justify-start items-center gap-4 sm:gap-6 mt-8 w-full font-mono"
             >
-              {/* Days */}
+              {}
               <div className="w-14 sm:w-16">
                 <span className="font-display text-4xl sm:text-5xl font-black tracking-tight text-zinc-900 block">
                   {timeLeft.days}
@@ -118,7 +118,7 @@ export const Hero: React.FC<HeroProps> = ({
 
               <div className="text-xl text-zinc-300 font-light select-none pb-3.5">:</div>
 
-              {/* Hours */}
+              {}
               <div className="w-14 sm:w-16">
                 <span className="font-display text-4xl sm:text-5xl font-black tracking-tight text-zinc-900 block">
                   {timeLeft.hours}
@@ -130,7 +130,7 @@ export const Hero: React.FC<HeroProps> = ({
 
               <div className="text-xl text-zinc-300 font-light select-none pb-3.5">:</div>
 
-              {/* Minutes */}
+              {}
               <div className="w-14 sm:w-16">
                 <span className="font-display text-4xl sm:text-5xl font-black tracking-tight text-zinc-900 block">
                   {timeLeft.minutes}
@@ -142,7 +142,7 @@ export const Hero: React.FC<HeroProps> = ({
 
               <div className="text-xl text-zinc-300 font-light select-none pb-3.5">:</div>
 
-              {/* Seconds */}
+              {}
               <div className="w-14 sm:w-16">
                 <span className="font-display text-4xl sm:text-5xl font-black tracking-tight text-brand block animate-pulse">
                   {timeLeft.seconds}
@@ -153,7 +153,7 @@ export const Hero: React.FC<HeroProps> = ({
               </div>
             </motion.div>
 
-            {/* Deadline Notice */}
+            {}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -162,7 +162,7 @@ export const Hero: React.FC<HeroProps> = ({
             >
               <AlertCircle className="h-3.5 w-3.5 text-zinc-400" />
               REGISTRATION TERMINAL DEACTIVATION ON {targetEventDeadline}
-            </motion.p>            {/* CTA Buttons */}
+            </motion.p>            {}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -187,10 +187,10 @@ export const Hero: React.FC<HeroProps> = ({
             </motion.div>
           </div>
 
-          {/* Right Column: Premium Hero Image with Live Overlays */}
+          {}
           <div className="hidden md:block md:col-span-5 relative w-full aspect-[4/5] bg-zinc-50 border border-zinc-200/80 p-2">
             
-            {/* Tech plus markers on corners */}
+            {}
             <span className="absolute top-1.5 left-1.5 text-[9px] font-light text-zinc-400/60 select-none">+</span>
             <span className="absolute top-1.5 right-1.5 text-[9px] font-light text-zinc-400/60 select-none">+</span>
             <span className="absolute bottom-1.5 left-1.5 text-[9px] font-light text-zinc-400/60 select-none">+</span>
@@ -202,10 +202,10 @@ export const Hero: React.FC<HeroProps> = ({
                 alt="Elite athlete training"
                 className="h-full w-full object-cover opacity-90 filter grayscale contrast-110"
               />
-              {/* Dark gradient overlay */}
+              {}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
               
-              {/* Live Status Badge */}
+              {}
               <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3.5 py-2.5 border border-zinc-200 shadow-md flex items-center gap-2.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
                 <div className="font-mono">
@@ -214,7 +214,7 @@ export const Hero: React.FC<HeroProps> = ({
                 </div>
               </div>
 
-              {/* Weekly Target Badge */}
+              {}
               <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3.5 border border-zinc-200 shadow-lg flex items-center justify-between font-mono">
                 <div>
                   <div className="text-[7px] font-black text-brand uppercase tracking-widest">WEEKLY TARGET PROTOCOL</div>
@@ -228,7 +228,7 @@ export const Hero: React.FC<HeroProps> = ({
             </div>
           </div>
 
-          {/* Giant Sideways Outline Wordmark RUNNICLE on right */}
+          {}
           <div className="absolute right-[-135px] top-1/2 -translate-y-1/2 rotate-90 select-none pointer-events-none hidden 2xl:block">
             <span className="font-display text-[95px] font-black tracking-[0.18em] uppercase whitespace-nowrap block" style={{ WebkitTextStroke: '1px var(--color-brand-glow)', color: 'transparent' }}>
               RUNNICLE

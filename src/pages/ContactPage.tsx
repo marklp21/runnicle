@@ -16,11 +16,11 @@ export const ContactPage: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name === 'phone') {
-      // Allow + as first char, then digits only
+      
       const cleaned = value.replace(/(?!^\+)\D/g, '');
       const hasPlus = cleaned.startsWith('+');
       const digits = cleaned.replace(/\D/g, '');
-      // Cap: 12 digits if starts with 63, 11 digits if starts with 09
+      
       const maxDigits = digits.startsWith('63') ? 12 : digits.startsWith('09') ? 11 : 12;
       const capped = digits.slice(0, maxDigits);
       setFormData({ ...formData, [name]: hasPlus ? '+' + capped : capped });
@@ -49,7 +49,7 @@ export const ContactPage: React.FC = () => {
 
     setStatus('loading');
 
-    // Simulate API submission
+    
     setTimeout(() => {
       setStatus('success');
       setFormData({
@@ -66,7 +66,7 @@ export const ContactPage: React.FC = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Title */}
+      {}
       <div className="border-b border-zinc-200 pb-6 mb-8 text-center max-w-3xl mx-auto">
         <span className="rounded-full bg-orange-50 px-4 py-1 text-xs font-extrabold tracking-widest text-orange-600 border border-orange-200 uppercase">
           CONTACT US
@@ -74,21 +74,21 @@ export const ContactPage: React.FC = () => {
         <h1 className="mt-6 font-display text-4xl font-black leading-tight text-zinc-900 sm:text-5xl">
           Get in Touch.
         </h1>
-        <p className="mt-4 text-zinc-505 text-sm leading-relaxed">
+        <p className="mt-4 text-zinc-500 text-sm leading-relaxed">
           Have queries about race BIB pickup times, sponsor collaborations, coaching webinar plans, or e-commerce orders? Drop us a line.
         </p>
       </div>
 
-      {/* Grid structure */}
+      {}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         
-        {/* Left Column: Contact details and Map placeholder */}
+        {}
         <div className="space-y-8">
           
-          {/* Details list */}
+          {}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             
-            {/* Box 1 */}
+            {}
             <div className="rounded-xl border border-zinc-200 bg-white p-5 space-y-3 shadow-sm">
               <Mail className="h-5 w-5 text-orange-500" />
               <div>
@@ -99,7 +99,7 @@ export const ContactPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Box 2 */}
+            {}
             <div className="rounded-xl border border-zinc-200 bg-white p-5 space-y-3 shadow-sm">
               <Phone className="h-5 w-5 text-brand" />
               <div>
@@ -112,8 +112,7 @@ export const ContactPage: React.FC = () => {
 
           </div>
 
-
-          {/* Social connections */}
+          {}
           <div className="space-y-4">
             <h4 className="text-xs font-bold text-zinc-900 uppercase tracking-wider">Social Channels</h4>
             <div className="flex gap-4">
@@ -156,10 +155,10 @@ export const ContactPage: React.FC = () => {
 
         </div>
 
-        {/* Right Column: Inquiry Form */}
+        {}
         <div className="rounded-xl border border-zinc-200 bg-white p-6 md:p-8 shadow-sm">
           
-          <h3 className="font-display text-base font-black text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-3 mb-6">
+          <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-3 mb-6">
             Send Inquiry
           </h3>
 
@@ -174,7 +173,7 @@ export const ContactPage: React.FC = () => {
               </p>
               <button
                 onClick={() => setStatus('idle')}
-                className="rounded-md bg-orange-500 px-6 py-2.5 text-xs font-bold text-white hover:bg-orange-605 transition-colors uppercase tracking-wider cursor-pointer"
+                className="rounded-md bg-orange-500 px-6 py-2.5 text-xs font-bold text-white hover:bg-orange-600 transition-colors uppercase tracking-wider cursor-pointer"
               >
                 Send Another Message
               </button>

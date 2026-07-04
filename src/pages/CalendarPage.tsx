@@ -25,16 +25,16 @@ export const CalendarPage: React.FC<CalendarPageProps> = ({
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Back Button */}
+      {}
       <button
         onClick={onBack}
-        className="inline-flex items-center gap-2 text-xs font-bold text-zinc-505 hover:text-orange-505 uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
+        className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-orange-500 uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
         Back to Home
       </button>
 
-      {/* Title */}
+      {}
       <div className="border-b border-zinc-200 pb-6 mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
           <h1 className="font-display text-4xl font-black text-zinc-900 tracking-tight">
@@ -45,7 +45,7 @@ export const CalendarPage: React.FC<CalendarPageProps> = ({
           </p>
         </div>
 
-        {/* Search bar */}
+        {}
         <div className="relative w-full md:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
           <input
@@ -58,7 +58,7 @@ export const CalendarPage: React.FC<CalendarPageProps> = ({
         </div>
       </div>
 
-      {/* Filter tabs */}
+      {}
       <div className="flex gap-2 flex-wrap border-b border-zinc-200 pb-5 mb-8">
         {['all', 'race', 'training', 'coaching', 'equipment'].map((tab) => (
           <button
@@ -67,7 +67,7 @@ export const CalendarPage: React.FC<CalendarPageProps> = ({
             className={`rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border ${
               filter === tab
                 ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/10'
-                : 'border-zinc-200 text-zinc-655 hover:border-zinc-350 hover:text-orange-500 bg-white'
+                : 'border-zinc-200 text-zinc-600 hover:border-zinc-350 hover:text-orange-500 bg-white'
             }`}
           >
             {tab}
@@ -75,7 +75,7 @@ export const CalendarPage: React.FC<CalendarPageProps> = ({
         ))}
       </div>
 
-      {/* Main timeline listing */}
+      {}
       {filteredEvents.length === 0 ? (
         <div className="text-center py-20 rounded-xl border border-zinc-200 bg-zinc-50">
           <CalendarClock className="h-10 w-10 text-zinc-400 mx-auto mb-4" />
@@ -90,7 +90,7 @@ export const CalendarPage: React.FC<CalendarPageProps> = ({
               className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-xl border border-zinc-200 bg-white hover:border-orange-200 hover:shadow-sm transition-all gap-4 shadow-sm"
             >
               <div className="flex items-start gap-4">
-                {/* Event type icon indicator */}
+                {}
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50 border border-orange-100 flex-shrink-0 text-orange-600 shadow-sm">
                   {ev.type === 'race' ? <Activity className="h-5 w-5" /> : <CalendarIcon className="h-5 w-5" />}
                 </div>
@@ -105,9 +105,9 @@ export const CalendarPage: React.FC<CalendarPageProps> = ({
                 </div>
               </div>
 
-              {/* Actions row */}
+              {}
               <div className="flex items-center gap-3 w-full sm:w-auto border-t border-zinc-200 pt-3 sm:pt-0 sm:border-0 justify-between sm:justify-end">
-                <span className="text-[9px] font-black text-orange-605 bg-orange-50 rounded px-2.5 py-1 tracking-widest uppercase border border-orange-100">
+                <span className="text-[9px] font-black text-orange-600 bg-orange-50 rounded px-2.5 py-1 tracking-widest uppercase border border-orange-100">
                   {ev.type}
                 </span>
 

@@ -10,7 +10,7 @@ export const Newsletter: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple validation
+    
     if (!email) {
       setStatus('error');
       setMessage('Please enter your email address.');
@@ -26,7 +26,7 @@ export const Newsletter: React.FC = () => {
 
     setStatus('loading');
 
-    // Simulate API request
+    
     setTimeout(() => {
       setStatus('success');
       setMessage(`Welcome to the tribe! We've sent a starter kit to ${email}.`);
@@ -39,7 +39,7 @@ export const Newsletter: React.FC = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
           
-          {/* Left side text */}
+          {}
           <div className="max-w-xl">
             <h2 className="font-display text-3xl font-black tracking-tight text-zinc-900 sm:text-4xl">
               Never Miss a Start Gun
@@ -49,7 +49,7 @@ export const Newsletter: React.FC = () => {
             </p>
           </div>
 
-          {/* Right side form */}
+          {}
           <div className="w-full lg:max-w-md">
             <AnimatePresence mode="wait">
               {status === 'success' ? (
