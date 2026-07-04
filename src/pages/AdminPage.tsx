@@ -45,10 +45,11 @@ const coverPresets = [
 ];
 
 interface AdminPageProps {
-  view: 'login' | 'dashboard' | 'registrations' | 'create-event' | 'registration-details';
+  view: 'login' | 'dashboard' | 'registrations' | 'events' | 'create-event' | 'registration-details';
   selectedRegId?: string | null;
   events: EventItem[];
   onAddEvent: (event: EventItem) => void;
+  onUpdateEvents?: (newEvents: EventItem[]) => void;
   registrations: any[];
   onUpdateRegistrations: (newRegs: any[]) => void;
   onBackToHome: () => void;
@@ -69,6 +70,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   selectedRegId,
   events,
   onAddEvent,
+  onUpdateEvents,
   registrations,
   onUpdateRegistrations,
   onBackToHome,
@@ -92,10 +94,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   // Custom Event Gallery Photos State
   const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
 
+  // Event editing state
+  const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
+
+  // Uploader error message state
+  const [uploaderError, setUploaderError] = useState<string | null>(null);
+
   // Create Event Form state
   const [newEvent, setNewEvent] = useState({
     title: '',
-    badge: 'OPEN' as 'OPEN' | 'CLOSING SOON' | 'SOLD OUT',
+    badge: 'OPEN' as 'OPEN' | 'CLOSING SOON' | 'SOLD OUT' | 'PAST EVENT',
     date: '',
     time: '05:00 AM',
     deadline: '',
@@ -192,7 +200,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     });
   };
 
-  // Create Event Submit
+  // Create & Edit Event Submit
   const handleCreateEventSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEvent.title || !newEvent.date || !newEvent.location || newEvent.distances.length === 0) {
@@ -205,38 +213,76 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       return;
     }
 
-    const eventId = `event-generated-${Date.now()}`;
     const cleanFee = newEvent.fee.startsWith('₱') ? newEvent.fee : `₱${newEvent.fee}`;
-    
-    const formattedEvent: EventItem = {
-      id: eventId,
-      title: newEvent.title,
-      badge: newEvent.badge,
-      distances: newEvent.distances,
-      date: newEvent.date,
-      deadline: newEvent.deadline || newEvent.date,
-      location: newEvent.location,
-      description: newEvent.description || `Experience the ultimate running event: ${newEvent.title} in ${newEvent.location}.`,
-      highlights: newEvent.highlights ? newEvent.highlights.split(',').map(h => h.trim()) : [],
-      details: {
-        time: newEvent.time,
-        fee: cleanFee,
-        route: newEvent.route || 'Official Course Route Loop',
-        slotsLeft: newEvent.slotsLimit,
-        schedule: [
-          '04:30 AM - Assembly & Timing Tag Inspection',
-          '05:00 AM - Race Gunstart',
-          '08:00 AM - Awarding & Post-race Program'
-        ],
-        perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Timing Chip', 'Finisher Medal']
-      },
-      iconType: newEvent.iconType,
-      image: galleryPhotos[0],
-      galleryImages: galleryPhotos
-    };
 
-    onAddEvent(formattedEvent);
-    showToast(`Successfully created event: "${newEvent.title}"`);
+    if (editingEvent) {
+      // EDIT MODE
+      const updatedEvents = events.map(evt => {
+        if (evt.id === editingEvent.id) {
+          return {
+            ...evt,
+            title: newEvent.title,
+            badge: newEvent.badge,
+            distances: newEvent.distances,
+            date: newEvent.date,
+            deadline: newEvent.deadline || newEvent.date,
+            location: newEvent.location,
+            description: newEvent.description || `Experience the ultimate running event: ${newEvent.title} in ${newEvent.location}.`,
+            highlights: newEvent.highlights ? newEvent.highlights.split(',').map(h => h.trim()) : [],
+            details: {
+              ...evt.details,
+              time: newEvent.time,
+              fee: cleanFee,
+              route: newEvent.route || 'Official Course Route Loop',
+              slotsLeft: newEvent.slotsLimit,
+              perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Timing Chip', 'Finisher Medal']
+            },
+            iconType: newEvent.iconType,
+            image: galleryPhotos[0],
+            galleryImages: galleryPhotos
+          };
+        }
+        return evt;
+      });
+
+      if (onUpdateEvents) {
+        onUpdateEvents(updatedEvents);
+      }
+      showToast(`Successfully updated event: "${newEvent.title}"`);
+      setEditingEvent(null);
+    } else {
+      // CREATE MODE
+      const eventId = `event-generated-${Date.now()}`;
+      const formattedEvent: EventItem = {
+        id: eventId,
+        title: newEvent.title,
+        badge: newEvent.badge,
+        distances: newEvent.distances,
+        date: newEvent.date,
+        deadline: newEvent.deadline || newEvent.date,
+        location: newEvent.location,
+        description: newEvent.description || `Experience the ultimate running event: ${newEvent.title} in ${newEvent.location}.`,
+        highlights: newEvent.highlights ? newEvent.highlights.split(',').map(h => h.trim()) : [],
+        details: {
+          time: newEvent.time,
+          fee: cleanFee,
+          route: newEvent.route || 'Official Course Route Loop',
+          slotsLeft: newEvent.slotsLimit,
+          schedule: [
+            '04:30 AM - Assembly & Timing Tag Inspection',
+            '05:00 AM - Race Gunstart',
+            '08:00 AM - Awarding & Post-race Program'
+          ],
+          perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Timing Chip', 'Finisher Medal']
+        },
+        iconType: newEvent.iconType,
+        image: galleryPhotos[0],
+        galleryImages: galleryPhotos
+      };
+
+      onAddEvent(formattedEvent);
+      showToast(`Successfully created event: "${newEvent.title}"`);
+    }
     
     // Reset Form
     setNewEvent({
@@ -258,8 +304,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     });
     setGalleryPhotos([]);
 
-    // Navigate to registrations
-    onNavigate('admin-registrations');
+    // Navigate to respective lists
+    if (editingEvent) {
+      onNavigate('admin-events');
+    } else {
+      onNavigate('admin-registrations');
+    }
   };
 
   // Filter registrations list
@@ -935,16 +985,164 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           </div>
         )}
 
-        {view === 'create-event' && (
+        {view === 'events' && !editingEvent && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="flex justify-between items-center bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
+              <div>
+                <h2 className="font-display text-2xl font-black text-zinc-900 uppercase tracking-tight">
+                  Active Race Events
+                </h2>
+                <p className="mt-1 text-xs text-zinc-500 font-medium">
+                  Review, edit details, or delete active race categories currently displayed on the registration portal.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setEditingEvent(null);
+                  setNewEvent({
+                    title: '',
+                    badge: 'OPEN',
+                    date: '',
+                    time: '05:00 AM',
+                    deadline: '',
+                    location: '',
+                    fee: '₱1,200.00',
+                    slotsLimit: 500,
+                    description: '',
+                    route: '',
+                    distances: [],
+                    perks: 'Timing Chip, Finisher Medal, Event Singlet',
+                    highlights: 'Certified race course, Fully loaded hydrations, Post-race concert',
+                    image: '',
+                    iconType: 'compass'
+                  });
+                  setGalleryPhotos([]);
+                  onNavigate('admin-create-event');
+                }}
+                className="rounded-full bg-brand hover:bg-brand-hover text-white text-xs font-mono font-black uppercase tracking-widest py-3 px-6 cursor-pointer transition-colors shadow-sm"
+              >
+                + Create Event
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((evt) => {
+                const verifiedRunners = registrations.filter(r => r.eventTitle === evt.title && r.status === 'Verified').length;
+                
+                return (
+                  <div key={evt.id} className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+                    <div>
+                      {/* Image header */}
+                      <div className="h-44 bg-zinc-105 overflow-hidden relative">
+                        <img src={evt.image} alt={evt.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <span className={`absolute top-4 right-4 rounded-sm border px-2 py-0.5 text-[9px] font-black uppercase ${
+                          evt.badge === 'OPEN'
+                            ? 'bg-emerald-500 text-white border-emerald-400'
+                            : 'bg-red-500 text-white border-red-400'
+                        }`}>
+                          {evt.badge || 'OPEN'}
+                        </span>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-6 space-y-4">
+                        <div>
+                          <h3 className="font-sans font-extrabold text-zinc-900 text-base leading-snug uppercase tracking-tight line-clamp-2">
+                            {evt.title}
+                          </h3>
+                          <span className="text-[9px] font-bold text-zinc-450 uppercase tracking-wider block mt-1.5 font-mono">
+                            {evt.date} | {evt.location}
+                          </span>
+                        </div>
+
+                        {/* Details Grid */}
+                        <div className="grid grid-cols-2 gap-3 text-[10px] font-mono border-t border-b border-zinc-100 py-3 text-zinc-650">
+                          <div>
+                            <span className="text-zinc-400 font-bold uppercase block text-[8px]">Fee</span>
+                            <span className="text-zinc-800 font-bold">{evt.details.fee}</span>
+                          </div>
+                          <div>
+                            <span className="text-zinc-400 font-bold uppercase block text-[8px]">Slots Left</span>
+                            <span className="text-zinc-850 font-bold">{evt.details.slotsLeft || 500}</span>
+                          </div>
+                          <div>
+                            <span className="text-zinc-400 font-bold uppercase block text-[8px]">Distances</span>
+                            <div className="flex flex-wrap gap-1 mt-0.5">
+                              {evt.distances.map(d => (
+                                <span key={d} className="bg-zinc-50 border border-zinc-200 px-1.5 py-0.2 rounded font-black text-brand text-[8px]">{d}</span>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-zinc-400 font-bold uppercase block text-[8px]">Subscribers</span>
+                            <span className="text-zinc-850 font-bold">{verifiedRunners} Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions bar */}
+                    <div className="px-6 pb-6 pt-2 flex gap-3 font-mono text-xs">
+                      <button
+                        onClick={() => {
+                          setEditingEvent(evt);
+                          setNewEvent({
+                            title: evt.title,
+                            badge: evt.badge || 'OPEN',
+                            date: evt.date,
+                            time: evt.details.time,
+                            deadline: evt.deadline || evt.date,
+                            location: evt.location,
+                            fee: evt.details.fee,
+                            slotsLimit: evt.details.slotsLeft || 500,
+                            description: evt.description || '',
+                            route: evt.details.route || '',
+                            distances: evt.distances,
+                            perks: evt.details.perks ? evt.details.perks.join(', ') : 'Timing Chip, Finisher Medal',
+                            highlights: evt.highlights ? evt.highlights.join(', ') : 'Certified race course, Fully loaded hydrations',
+                            image: evt.image,
+                            iconType: evt.iconType || 'compass'
+                          });
+                          setGalleryPhotos(evt.galleryImages || [evt.image]);
+                        }}
+                        className="flex-1 rounded-full border border-zinc-200 hover:border-zinc-950 bg-white py-2.5 text-center text-[10px] font-black text-zinc-750 hover:text-zinc-900 transition-colors uppercase tracking-widest cursor-pointer shadow-sm"
+                      >
+                        Edit Info
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to permanently delete event "${evt.title}"?`)) {
+                            const updatedList = events.filter(e => e.id !== evt.id);
+                            if (onUpdateEvents) onUpdateEvents(updatedList);
+                            showToast(`Successfully deleted event: "${evt.title}"`);
+                          }
+                        }}
+                        className="rounded-full border border-red-200 hover:border-red-650 hover:bg-red-50 px-3 py-2.5 text-red-650 transition-colors cursor-pointer"
+                        title="Delete Event"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {(view === 'create-event' || (view === 'events' && editingEvent)) && (
           <div className="bg-white rounded-3xl border border-zinc-200 p-6 md:p-8 shadow-sm max-w-4xl mx-auto relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-brand animate-pulse" />
             
             <div className="mb-8 border-b border-zinc-150 pb-5">
               <h2 className="font-display text-2xl font-black text-zinc-900 uppercase tracking-tight">
-                Race Event Upload Form
+                {editingEvent ? "Edit Race Event Details" : "Race Event Upload Form"}
               </h2>
               <p className="mt-1 text-xs text-zinc-500 font-medium">
-                Fill in the details below to launch a new competitive race category and activate it in the client system.
+                {editingEvent 
+                  ? `Modify the fields below to update specifications for "${editingEvent.title}".`
+                  : "Fill in the details below to launch a new competitive race category and activate it in the client system."
+                }
               </p>
             </div>
 
@@ -977,6 +1175,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     <option value="OPEN">OPEN (REGISTERING)</option>
                     <option value="CLOSING SOON">CLOSING SOON</option>
                     <option value="SOLD OUT">SOLD OUT</option>
+                    <option value="PAST EVENT">PAST EVENT</option>
                   </select>
                 </div>
               </div>
@@ -1109,6 +1308,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   <ImageIcon className="h-3.5 w-3.5 text-zinc-400" />
                   <span>Upload Race Event Photos (Max 5 images from folders) <span className="text-brand">*</span></span>
                 </label>
+
+                {uploaderError && (
+                  <div className="text-[10px] font-bold text-red-650 font-mono uppercase bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-2 animate-fade-in">
+                    <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                    <span>{uploaderError}</span>
+                  </div>
+                )}
                 
                 {/* Upload Zone */}
                 <div className="border-2 border-dashed border-zinc-200 hover:border-brand rounded-2xl p-6 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group">
@@ -1119,9 +1325,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     onChange={(e) => {
                       const files = Array.from(e.target.files || []);
                       if (galleryPhotos.length + files.length > 5) {
-                        alert("You can upload a maximum of 5 gallery photos.");
+                        setUploaderError("You can upload a maximum of 5 gallery photos.");
+                        setTimeout(() => {
+                          setUploaderError(null);
+                        }, 4000);
                         return;
                       }
+                      setUploaderError(null);
                       
                       files.forEach((file) => {
                         const reader = new FileReader();
