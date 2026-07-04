@@ -527,7 +527,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   return (
     <div className="min-h-screen bg-zinc-50 select-none">
       {/* Original Style Admin Navbar */}
-      <nav className="sticky top-0 z-50 w-full h-16 bg-white border-b border-zinc-200 select-none">
+      <nav className="fixed top-0 z-50 w-full h-16 bg-white border-b border-zinc-200 select-none">
         <div className="w-full h-full flex items-center justify-between pl-0 pr-0">
           {/* Logo / brand */}
           <div className="flex items-center h-full">
@@ -727,7 +727,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       </AnimatePresence>
 
       {/* Main Admin Workspace Area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pt-26 space-y-8">
         {/* Success Alert Toast */}
         {successToast && (
           <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-zinc-900 border border-zinc-800 text-white px-5 py-4 flex items-center gap-3.5 shadow-2xl font-mono text-xs uppercase tracking-wider animate-fade-in border-l-4 border-l-brand">
