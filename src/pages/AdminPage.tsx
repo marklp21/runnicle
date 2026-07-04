@@ -103,6 +103,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   // Distance specific routes state
   const [distanceRoutes, setDistanceRoutes] = useState<Record<string, string>>({});
 
+  // Form wizard step tracker state
+  const [formStep, setFormStep] = useState<1 | 2>(1);
+
+  // Custom single file upload states
+  const [routeMapPhoto, setRouteMapPhoto] = useState<string>('');
+  const [kitPhoto, setKitPhoto] = useState<string>('');
+
   // Create Event Form state
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -249,7 +256,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             },
             iconType: newEvent.iconType,
             image: galleryPhotos[0],
-            galleryImages: galleryPhotos
+            galleryImages: galleryPhotos,
+            routeMapImage: routeMapPhoto || undefined,
+            kitImage: kitPhoto || undefined
           };
         }
         return evt;
@@ -288,7 +297,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         },
         iconType: newEvent.iconType,
         image: galleryPhotos[0],
-        galleryImages: galleryPhotos
+        galleryImages: galleryPhotos,
+        routeMapImage: routeMapPhoto || undefined,
+        kitImage: kitPhoto || undefined
       };
 
       onAddEvent(formattedEvent);
@@ -315,6 +326,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     });
     setGalleryPhotos([]);
     setDistanceRoutes({});
+    setRouteMapPhoto('');
+    setKitPhoto('');
+    setFormStep(1);
 
     // Navigate to respective lists
     if (editingEvent) {
@@ -1030,6 +1044,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   });
                   setGalleryPhotos([]);
                   setDistanceRoutes({});
+                  setRouteMapPhoto('');
+                  setKitPhoto('');
+                  setFormStep(1);
                   onNavigate('admin-create-event');
                 }}
                 className="rounded-full bg-brand hover:bg-brand-hover text-white text-xs font-mono font-black uppercase tracking-widest py-3 px-6 cursor-pointer transition-colors shadow-sm"
@@ -1122,6 +1139,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                             initialRoutes[d] = evt.details.routes?.[d] || evt.details.route || '';
                           });
                           setDistanceRoutes(initialRoutes);
+                          setRouteMapPhoto(evt.routeMapImage || '');
+                          setKitPhoto(evt.kitImage || '');
+                          setFormStep(1);
                         }}
                         className="flex-1 rounded-full border border-zinc-200 hover:border-zinc-950 bg-white py-2.5 text-center text-[10px] font-black text-zinc-750 hover:text-zinc-900 transition-colors uppercase tracking-widest cursor-pointer shadow-sm"
                       >
@@ -1164,320 +1184,471 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               </p>
             </div>
 
-            <form onSubmit={handleCreateEventSubmit} className="space-y-6">
-              
-              {/* Event Name & Status */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <div className="sm:col-span-2">
-                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                    Race Event Title <span className="text-brand">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newEvent.title}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="e.g. Bacolod Sunset Coast Half Marathon"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                    Badge / Registration Status
-                  </label>
-                  <select
-                    value={newEvent.badge}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, badge: e.target.value as any }))}
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-3 text-xs text-zinc-705 focus:border-brand focus:outline-none cursor-pointer font-bold"
-                  >
-                    <option value="OPEN">OPEN (REGISTERING)</option>
-                    <option value="CLOSING SOON">CLOSING SOON</option>
-                    <option value="SOLD OUT">SOLD OUT</option>
-                    <option value="PAST EVENT">PAST EVENT</option>
-                  </select>
-                </div>
+            {/* Form Progress Bar */}
+            <div className="mb-6 select-none bg-zinc-50 rounded-2xl border border-zinc-200/80 p-4">
+              <div className="flex items-center justify-between font-mono text-[9px] font-black uppercase tracking-wider text-zinc-400 mb-2">
+                <span className={formStep === 1 ? "text-brand" : ""}>Step 1: Specifications</span>
+                <span className={formStep === 2 ? "text-brand" : ""}>Step 2: Media & Gallery</span>
               </div>
-
-              {/* Date, Time, Deadline, Location */}
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
-                <div>
-                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                    Race Date <span className="text-brand">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newEvent.date}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, date: e.target.value }))}
-                    placeholder="Oct 24, 2026"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                    Gunstart Time
-                  </label>
-                  <input
-                    type="text"
-                    value={newEvent.time}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, time: e.target.value }))}
-                    placeholder="05:00 AM"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono text-center"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                    Deadline Date
-                  </label>
-                  <input
-                    type="text"
-                    value={newEvent.deadline}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, deadline: e.target.value }))}
-                    placeholder="Oct 15, 2026"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                    Location <span className="text-brand">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newEvent.location}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, location: e.target.value }))}
-                    placeholder="Bacolod City"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Fee & Limit */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                    Entry Fee (PHP)
-                  </label>
-                  <input
-                    type="text"
-                    value={newEvent.fee}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, fee: e.target.value }))}
-                    placeholder="₱1,200.00"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                    Runner Limit
-                  </label>
-                  <input
-                    type="number"
-                    value={newEvent.slotsLimit}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, slotsLimit: parseInt(e.target.value) || 0 }))}
-                    placeholder="500"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono text-center"
-                  />
-                </div>
-              </div>
-
-              {/* Route Maps / Path descriptions per category */}
-              <div>
-                <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2.5 font-mono">
-                  Route Maps / Path descriptions per category <span className="text-brand">*</span>
-                </label>
-                {newEvent.distances.length === 0 ? (
-                  <div className="text-[10px] font-mono bg-zinc-55 text-zinc-450 border border-zinc-200 rounded-xl p-4 text-center">
-                    Please select at least one distance category above to specify routes.
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-50 rounded-xl border border-zinc-200 p-4">
-                    {newEvent.distances.map((dist) => (
-                      <div key={dist} className="space-y-1.5 animate-fade-in">
-                        <div className="flex justify-between items-center">
-                          <span className="bg-brand text-white font-mono font-black text-[9px] px-2 py-0.5 rounded uppercase tracking-wider">{dist} category</span>
-                        </div>
-                        <input
-                          type="text"
-                          required
-                          value={distanceRoutes[dist] || ''}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setDistanceRoutes(prev => ({ ...prev, [dist]: val }));
-                          }}
-                          placeholder={`e.g. ${dist} race course loop description`}
-                          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Distances Category checklist */}
-              <div>
-                <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2 font-mono">
-                  Distance Categories <span className="text-brand">*</span>
-                </label>
-                <div className="flex flex-wrap gap-4 bg-zinc-50 rounded-xl border border-zinc-200 p-4">
-                  {['3K', '5K', '10K', '16K', '21K', '32K', '42K'].map(dist => {
-                    const isChecked = newEvent.distances.includes(dist);
-                    return (
-                      <label 
-                        key={dist} 
-                        className={`flex items-center gap-2 cursor-pointer border px-4 py-2 rounded-lg bg-white select-none transition-all ${
-                          isChecked ? 'border-brand text-brand font-extrabold shadow-sm bg-brand/5' : 'border-zinc-200 hover:border-zinc-300 text-zinc-650'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => handleDistanceCheckboxChange(dist)}
-                          className="sr-only"
-                        />
-                        <span className="text-xs font-mono">{dist}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Event Gallery Image Upload (Max 5 photos) */}
-              <div className="space-y-3">
-                <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest font-mono flex items-center gap-1.5">
-                  <ImageIcon className="h-3.5 w-3.5 text-zinc-400" />
-                  <span>Upload Race Event Photos (Max 5 images from folders) <span className="text-brand">*</span></span>
-                </label>
-
-                {uploaderError && (
-                  <div className="text-[10px] font-bold text-red-650 font-mono uppercase bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-2 animate-fade-in">
-                    <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-                    <span>{uploaderError}</span>
-                  </div>
-                )}
-                
-                {/* Upload Zone */}
-                <div className="border-2 border-dashed border-zinc-200 hover:border-brand rounded-2xl p-6 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => {
-                      const files = Array.from(e.target.files || []);
-                      if (galleryPhotos.length + files.length > 5) {
-                        setUploaderError("You can upload a maximum of 5 gallery photos.");
-                        setTimeout(() => {
-                          setUploaderError(null);
-                        }, 4000);
-                        return;
-                      }
-                      setUploaderError(null);
-                      
-                      files.forEach((file) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          if (typeof reader.result === 'string') {
-                            setGalleryPhotos(prev => [...prev, reader.result as string]);
-                          }
-                        };
-                        reader.readAsDataURL(file);
-                      });
-                    }}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <ImageIcon className="h-8 w-8 text-zinc-400 group-hover:text-brand mx-auto mb-2 transition-colors" />
-                  <span className="text-xs font-semibold text-zinc-650 block">
-                    Drag & drop or browse from your folders
-                  </span>
-                  <span className="text-[10px] text-zinc-400 block mt-1">
-                    PNG, JPG, or WEBP (Max 5 photos)
-                  </span>
-                </div>
-
-                {/* Thumbnails list */}
-                {galleryPhotos.length > 0 && (
-                  <div className="flex flex-wrap gap-3 mt-3">
-                    {galleryPhotos.map((photo, idx) => (
-                      <div key={idx} className="relative h-16 w-16 rounded-xl border border-zinc-200 overflow-hidden group shadow-sm bg-zinc-50">
-                        <img src={photo} alt={`Uploaded gallery ${idx + 1}`} className="h-full w-full object-cover" />
-                        <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                          <button
-                            type="button"
-                            onClick={() => setGalleryPhotos(prev => prev.filter((_, i) => i !== idx))}
-                            className="p-1 hover:text-red-500 transition-colors cursor-pointer"
-                            title="Remove photo"
-                          >
-                            <Trash2 className="h-4.5 w-4.5" />
-                          </button>
-                        </div>
-                        {idx === 0 && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-brand text-white text-[8px] font-black tracking-widest text-center py-0.5 uppercase">
-                            Cover
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                  Race Description
-                </label>
-                <textarea
-                  rows={3}
-                  value={newEvent.description}
-                  onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Provide registration notes, details about the hydration hubs, medical stands, and finishing criteria..."
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-450 focus:border-brand focus:outline-none"
+              <div className="h-1 w-full bg-zinc-200 rounded-full overflow-hidden relative">
+                <div 
+                  className="h-full bg-brand transition-all duration-500 rounded-full" 
+                  style={{ width: formStep === 1 ? '50%' : '100%' }}
                 />
               </div>
+            </div>
 
-              {/* Perks & Highlights */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                    Athlete Perks (Comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={newEvent.perks}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, perks: e.target.value }))}
-                    placeholder="e.g. RFID Timing Chip, Finisher Medal, Sub-assembly Singlet"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-450 focus:border-brand focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                    Race Highlights (Comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={newEvent.highlights}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, highlights: e.target.value }))}
-                    placeholder="e.g. AIMS Certified course, Sub-15 Timing Hubs, Post-race hydration booths"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-450 focus:border-brand focus:outline-none"
-                  />
-                </div>
-              </div>
+            <form onSubmit={handleCreateEventSubmit} className="space-y-6">
+              {formStep === 1 && (
+                <div className="space-y-6 animate-fade-in">
+                  {/* Event Name & Status */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div className="sm:col-span-2">
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
+                        Race Event Title <span className="text-brand">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newEvent.title}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="e.g. Bacolod Sunset Coast Half Marathon"
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
+                        Badge / Registration Status
+                      </label>
+                      <select
+                        value={newEvent.badge}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, badge: e.target.value as any }))}
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-3 text-xs text-zinc-700 focus:border-brand focus:outline-none cursor-pointer font-bold"
+                      >
+                        <option value="OPEN">OPEN (REGISTERING)</option>
+                        <option value="CLOSING SOON">CLOSING SOON</option>
+                        <option value="SOLD OUT">SOLD OUT</option>
+                        <option value="PAST EVENT">PAST EVENT</option>
+                      </select>
+                    </div>
+                  </div>
 
-              {/* Form Actions */}
-              <div className="flex gap-4 pt-4 border-t border-zinc-150 font-mono">
-                <button
-                  type="button"
-                  onClick={() => onNavigate('admin-registrations')}
-                  className="flex-1 rounded-full border border-zinc-300 bg-white py-3.5 text-center text-xs font-mono font-black text-zinc-800 hover:bg-zinc-50 transition-colors uppercase tracking-widest cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-full bg-brand hover:bg-brand-hover py-3.5 text-center text-xs font-mono font-black text-white transition-colors uppercase tracking-widest cursor-pointer shadow-md shadow-brand/10"
-                >
-                  Create & Launch Race
-                </button>
-              </div>
+                  {/* Date, Time, Deadline, Location */}
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
+                        Race Date <span className="text-brand">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newEvent.date}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, date: e.target.value }))}
+                        placeholder="Oct 24, 2026"
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
+                        Gunstart Time
+                      </label>
+                      <input
+                        type="text"
+                        value={newEvent.time}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, time: e.target.value }))}
+                        placeholder="05:00 AM"
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono text-center"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
+                        Deadline Date
+                      </label>
+                      <input
+                        type="text"
+                        value={newEvent.deadline}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, deadline: e.target.value }))}
+                        placeholder="Oct 15, 2026"
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
+                        Location <span className="text-brand">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newEvent.location}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, location: e.target.value }))}
+                        placeholder="Bacolod City"
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Fee & Limit */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
+                        Entry Fee (PHP)
+                      </label>
+                      <input
+                        type="text"
+                        value={newEvent.fee}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, fee: e.target.value }))}
+                        placeholder="₱1,200.00"
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
+                        Runner Limit
+                      </label>
+                      <input
+                        type="number"
+                        value={newEvent.slotsLimit}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, slotsLimit: parseInt(e.target.value) || 0 }))}
+                        placeholder="500"
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono text-center"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Distances Category checklist */}
+                  <div>
+                    <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2 font-mono">
+                      Distance Categories <span className="text-brand">*</span>
+                    </label>
+                    <div className="flex flex-wrap gap-4 bg-zinc-50 rounded-xl border border-zinc-200 p-4">
+                      {['3K', '5K', '10K', '16K', '21K', '32K', '42K'].map(dist => {
+                        const isChecked = newEvent.distances.includes(dist);
+                        return (
+                          <label 
+                            key={dist} 
+                            className={`flex items-center gap-2 cursor-pointer border px-4 py-2 rounded-lg bg-white select-none transition-all ${
+                              isChecked ? 'border-brand text-brand font-extrabold shadow-sm bg-brand/5' : 'border-zinc-200 hover:border-zinc-300 text-zinc-650'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => handleDistanceCheckboxChange(dist)}
+                              className="sr-only"
+                            />
+                            <span className="text-xs font-mono">{dist}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Route Maps / Path descriptions per category */}
+                  <div>
+                    <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2.5 font-mono">
+                      Route Maps / Path descriptions per category <span className="text-brand">*</span>
+                    </label>
+                    {newEvent.distances.length === 0 ? (
+                      <div className="text-[10px] font-mono bg-zinc-55 text-zinc-455 border border-zinc-200 rounded-xl p-4 text-center">
+                        Please select at least one distance category above to specify routes.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-50 rounded-xl border border-zinc-200 p-4">
+                        {newEvent.distances.map((dist) => (
+                          <div key={dist} className="space-y-1.5 animate-fade-in">
+                            <div className="flex justify-between items-center">
+                              <span className="bg-brand text-white font-mono font-black text-[9px] px-2 py-0.5 rounded uppercase tracking-wider">{dist} category</span>
+                            </div>
+                            <input
+                              type="text"
+                              required
+                              value={distanceRoutes[dist] || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setDistanceRoutes(prev => ({ ...prev, [dist]: val }));
+                              }}
+                              placeholder={`e.g. ${dist} race course loop description`}
+                              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Perks & Highlights */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
+                        Athlete Perks (Comma-separated)
+                      </label>
+                      <input
+                        type="text"
+                        value={newEvent.perks}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, perks: e.target.value }))}
+                        placeholder="e.g. RFID Timing Chip, Finisher Medal, Sub-assembly Singlet"
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-450 focus:border-brand focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
+                        Race Highlights (Comma-separated)
+                      </label>
+                      <input
+                        type="text"
+                        value={newEvent.highlights}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, highlights: e.target.value }))}
+                        placeholder="e.g. AIMS Certified course, Sub-15 Timing Hubs, Post-race hydration booths"
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-450 focus:border-brand focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
+                      Race Description
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={newEvent.description}
+                      onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Provide registration notes, details about the hydration hubs, medical stands, and finishing criteria..."
+                      className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-455 focus:border-brand focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Step 1 Actions */}
+                  <div className="flex gap-4 pt-4 border-t border-zinc-150 font-mono">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDistanceRoutes({});
+                        setRouteMapPhoto('');
+                        setKitPhoto('');
+                        setFormStep(1);
+                        if (editingEvent) {
+                          setEditingEvent(null);
+                          onNavigate('admin-events');
+                        } else {
+                          onNavigate('admin-registrations');
+                        }
+                      }}
+                      className="flex-1 rounded-full border border-zinc-300 bg-white py-3.5 text-center text-xs font-mono font-black text-zinc-800 hover:bg-zinc-50 transition-colors uppercase tracking-widest cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newEvent.title || !newEvent.date || !newEvent.location || newEvent.distances.length === 0) {
+                          alert('Please fill out all required fields and check at least one distance.');
+                          return;
+                        }
+                        setFormStep(2);
+                      }}
+                      className="flex-1 rounded-full bg-brand hover:bg-brand-hover py-3.5 text-center text-xs font-mono font-black text-white transition-colors uppercase tracking-widest cursor-pointer shadow-md shadow-brand/10"
+                    >
+                      Next Step: Uploads
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {formStep === 2 && (
+                <div className="space-y-6 animate-fade-in">
+                  {/* Event Gallery Image Upload (Max 5 photos) */}
+                  <div className="space-y-3">
+                    <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                      <ImageIcon className="h-3.5 w-3.5 text-zinc-400" />
+                      <span>Upload Race Event Gallery Photos (Max 5 images from folders) <span className="text-brand">*</span></span>
+                    </label>
+
+                    {uploaderError && (
+                      <div className="text-[10px] font-bold text-red-655 font-mono uppercase bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-2 animate-fade-in">
+                        <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                        <span>{uploaderError}</span>
+                      </div>
+                    )}
+                    
+                    {/* Upload Zone */}
+                    <div className="border-2 border-dashed border-zinc-200 hover:border-brand rounded-2xl p-6 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          if (galleryPhotos.length + files.length > 5) {
+                            setUploaderError("You can upload a maximum of 5 gallery photos.");
+                            setTimeout(() => {
+                              setUploaderError(null);
+                            }, 4000);
+                            return;
+                          }
+                          setUploaderError(null);
+                          
+                          files.forEach((file) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              if (typeof reader.result === 'string') {
+                                setGalleryPhotos(prev => [...prev, reader.result as string]);
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          });
+                        }}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                      <ImageIcon className="h-8 w-8 text-zinc-400 group-hover:text-brand mx-auto mb-2 transition-colors" />
+                      <span className="text-xs font-semibold text-zinc-650 block">
+                        Drag & drop or browse from your folders
+                      </span>
+                      <span className="text-[10px] text-zinc-400 block mt-1">
+                        PNG, JPG, or WEBP (Max 5 photos)
+                      </span>
+                    </div>
+
+                    {/* Thumbnails list */}
+                    {galleryPhotos.length > 0 && (
+                      <div className="flex flex-wrap gap-3 mt-3">
+                        {galleryPhotos.map((photo, idx) => (
+                          <div key={idx} className="relative h-16 w-16 rounded-xl border border-zinc-200 overflow-hidden group shadow-sm bg-zinc-50">
+                            <img src={photo} alt={`Uploaded gallery ${idx + 1}`} className="h-full w-full object-cover" />
+                            <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                              <button
+                                type="button"
+                                onClick={() => setGalleryPhotos(prev => prev.filter((_, i) => i !== idx))}
+                                className="p-1 hover:text-red-500 transition-colors cursor-pointer"
+                                title="Remove photo"
+                              >
+                                <Trash2 className="h-4.5 w-4.5" />
+                              </button>
+                            </div>
+                            {idx === 0 && (
+                              <div className="absolute bottom-0 left-0 right-0 bg-brand text-white text-[8px] font-black tracking-widest text-center py-0.5 uppercase">
+                                Cover
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Route Map & Race Kit uploads */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                    {/* Route Map Photo */}
+                    <div className="space-y-3">
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                        <ImageIcon className="h-3.5 w-3.5 text-zinc-400" />
+                        <span>Upload Route Map Image <span className="text-zinc-400">(Optional)</span></span>
+                      </label>
+                      
+                      {routeMapPhoto ? (
+                        <div className="relative h-44 rounded-2xl border border-zinc-200 overflow-hidden group shadow-sm bg-zinc-50">
+                          <img src={routeMapPhoto} alt="Route Map Preview" className="h-full w-full object-cover" />
+                          <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                            <button
+                              type="button"
+                              onClick={() => setRouteMapPhoto('')}
+                              className="rounded-full bg-red-600 hover:bg-red-700 text-white font-mono text-[9px] font-black uppercase tracking-wider px-3.5 py-2 cursor-pointer transition-colors shadow"
+                            >
+                              Remove Photo
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-zinc-200 hover:border-brand rounded-2xl p-6 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group h-44 flex flex-col justify-center items-center">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  if (typeof reader.result === 'string') {
+                                    setRouteMapPhoto(reader.result);
+                                  }
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          />
+                          <ImageIcon className="h-6 w-6 text-zinc-400 group-hover:text-brand mb-1.5 transition-colors" />
+                          <span className="text-[10px] font-bold text-zinc-650 block">Browse Route Map Photo</span>
+                          <span className="text-[8px] text-zinc-400 block mt-0.5">PNG, JPG, or WEBP (Max 1)</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Race Kit / Singlet Preview */}
+                    <div className="space-y-3">
+                      <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                        <ImageIcon className="h-3.5 w-3.5 text-zinc-400" />
+                        <span>Upload Race Kit / Singlet Preview <span className="text-zinc-400">(Optional)</span></span>
+                      </label>
+                      
+                      {kitPhoto ? (
+                        <div className="relative h-44 rounded-2xl border border-zinc-200 overflow-hidden group shadow-sm bg-zinc-50">
+                          <img src={kitPhoto} alt="Race Kit Preview" className="h-full w-full object-cover" />
+                          <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                            <button
+                              type="button"
+                              onClick={() => setKitPhoto('')}
+                              className="rounded-full bg-red-650 hover:bg-red-700 text-white font-mono text-[9px] font-black uppercase tracking-wider px-3.5 py-2 cursor-pointer transition-colors shadow"
+                            >
+                              Remove Photo
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-zinc-200 hover:border-brand rounded-2xl p-6 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group h-44 flex flex-col justify-center items-center">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  if (typeof reader.result === 'string') {
+                                    setKitPhoto(reader.result);
+                                  }
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          />
+                          <ImageIcon className="h-6 w-6 text-zinc-400 group-hover:text-brand mb-1.5 transition-colors" />
+                          <span className="text-[10px] font-bold text-zinc-650 block">Browse Race Kit Photo</span>
+                          <span className="text-[8px] text-zinc-400 block mt-0.5">PNG, JPG, or WEBP (Max 1)</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Step 2 Actions */}
+                  <div className="flex gap-4 pt-4 border-t border-zinc-150 font-mono">
+                    <button
+                      type="button"
+                      onClick={() => setFormStep(1)}
+                      className="flex-1 rounded-full border border-zinc-300 bg-white py-3.5 text-center text-xs font-mono font-black text-zinc-800 hover:bg-zinc-50 transition-colors uppercase tracking-widest cursor-pointer"
+                    >
+                      Back to Specs
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 rounded-full bg-brand hover:bg-brand-hover py-3.5 text-center text-xs font-mono font-black text-white transition-colors uppercase tracking-widest cursor-pointer shadow-md shadow-brand/10"
+                    >
+                      {editingEvent ? "Save Event Changes" : "Create & Launch Race"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </form>
           </div>
         )}
