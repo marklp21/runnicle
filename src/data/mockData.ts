@@ -32,6 +32,7 @@ export interface EventItem {
   image: string;
   kitImage?: string;
   routeMapImage?: string;
+  galleryImages?: string[];
 }
 
 export interface CommunityPost {

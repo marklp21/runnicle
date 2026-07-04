@@ -89,6 +89,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [selectedPaymentFilter, setSelectedPaymentFilter] = useState('');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('');
 
+  // Custom Event Gallery Photos State
+  const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
+
   // Create Event Form state
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -223,7 +226,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Timing Chip', 'Finisher Medal']
       },
       iconType: newEvent.iconType,
-      image: newEvent.image
+      image: newEvent.image,
+      galleryImages: galleryPhotos
     };
 
     onAddEvent(formattedEvent);
@@ -247,6 +251,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       image: coverPresets[0].url,
       iconType: 'compass'
     });
+    setGalleryPhotos([]);
 
     // Navigate to registrations
     onNavigate('admin-registrations');
@@ -1128,7 +1133,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 </div>
                 
                 {/* Custom URL */}
-                <div>
+                <div className="mb-4">
                   <label className="block text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1 font-mono">Or input Custom Cover URL</label>
                   <input
                     type="url"
@@ -1137,6 +1142,67 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     placeholder="https://images.unsplash.com/photo-..."
                     className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-xs text-zinc-650 focus:border-brand focus:outline-none font-mono"
                   />
+                </div>
+
+                {/* Event Gallery Image Upload (Max 5 photos) */}
+                <div className="space-y-3">
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                    <ImageIcon className="h-3.5 w-3.5 text-zinc-400" />
+                    <span>Upload Event Gallery Photos (Max 5 images)</span>
+                  </label>
+                  
+                  {/* Upload Zone */}
+                  <div className="border-2 border-dashed border-zinc-200 hover:border-brand rounded-2xl p-6 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        if (galleryPhotos.length + files.length > 5) {
+                          alert("You can upload a maximum of 5 gallery photos.");
+                          return;
+                        }
+                        
+                        files.forEach((file) => {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            if (typeof reader.result === 'string') {
+                              setGalleryPhotos(prev => [...prev, reader.result as string]);
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        });
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <ImageIcon className="h-8 w-8 text-zinc-400 group-hover:text-brand mx-auto mb-2 transition-colors" />
+                    <span className="text-xs font-semibold text-zinc-650 block">
+                      Drag & drop or browse from your folders
+                    </span>
+                    <span className="text-[10px] text-zinc-400 block mt-1">
+                      PNG, JPG, or WEBP (Max 5 photos)
+                    </span>
+                  </div>
+
+                  {/* Thumbnails list */}
+                  {galleryPhotos.length > 0 && (
+                    <div className="flex flex-wrap gap-3 mt-3">
+                      {galleryPhotos.map((photo, idx) => (
+                        <div key={idx} className="relative h-16 w-16 rounded-xl border border-zinc-200 overflow-hidden group shadow-sm bg-zinc-50">
+                          <img src={photo} alt={`Uploaded gallery ${idx + 1}`} className="h-full w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setGalleryPhotos(prev => prev.filter((_, i) => i !== idx))}
+                            className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"
+                            title="Remove photo"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
