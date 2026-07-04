@@ -531,12 +531,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         <div className="w-full h-full flex items-center justify-between pl-0 pr-0">
           {/* Logo / brand */}
           <div className="flex items-center h-full">
-            <div 
-              onClick={onBackToHome}
-              className="h-full bg-brand text-white px-6 flex items-center justify-center cursor-pointer hover:bg-brand-hover transition-colors"
-              title="Back to Website Home"
-            >
-              <span className="font-mono text-sm font-extrabold tracking-[0.25em] uppercase">
+            <div className="h-full bg-brand text-white px-6 flex items-center justify-center">
+              <span className="font-mono text-sm font-extrabold tracking-[0.25em] uppercase select-none">
                 [R]
               </span>
             </div>
