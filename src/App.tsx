@@ -32,6 +32,7 @@ import GalleryPage from './pages/GalleryPage';
 import NewsPage from './pages/NewsPage';
 import ArticleDetailsPage from './pages/ArticleDetailsPage';
 import ContactPage from './pages/ContactPage';
+import AdminPage from './pages/AdminPage';
 
 import {
   mockEvents,
@@ -47,12 +48,159 @@ import { mockCommunityPosts } from './data/mockData';
 
 export const App: React.FC = () => {
   
-  const [page, setPage] = useState<string>('home');
+  const [page, setPage] = useState<string>(() => {
+    const path = window.location.pathname;
+    if (path === '/admin_page') return 'admin-login';
+    if (path === '/admin_registrations') return 'admin-registrations';
+    if (path === '/admin_create_event') return 'admin-create-event';
+    return 'home';
+  });
+
+  // Elevate events state (initial load from mockEvents and sync with localStorage)
+  const [events, setEvents] = useState<EventItem[]>(() => {
+    const stored = localStorage.getItem('runnicle_events');
+    return stored ? JSON.parse(stored) : mockEvents;
+  });
+
+  // Handle adding a new event
+  const handleAddEvent = (newEvent: EventItem) => {
+    const updated = [newEvent, ...events];
+    setEvents(updated);
+    localStorage.setItem('runnicle_events', JSON.stringify(updated));
+  };
+
+  // Elevate registrations state (initial load from mock + sync with localStorage)
+  const [registrations, setRegistrations] = useState<any[]>(() => {
+    const stored = localStorage.getItem('runnicle_registrations');
+    if (stored) return JSON.parse(stored);
+    
+    // Default pre-populated list
+    const defaults = [
+      {
+        id: 'reg-1',
+        firstName: 'Juan',
+        lastName: 'Dela Cruz',
+        email: 'juan.delacruz@example.com',
+        phone: '09171234567',
+        gender: 'Male',
+        eventTitle: 'MegaWorld Fun Run',
+        distance: '10K',
+        size: 'Unisex - Medium (M)',
+        paymentMethod: 'GCash',
+        referenceNumber: '1029384756102',
+        registeredBib: '245',
+        emergencyContact: 'Maria Dela Cruz',
+        emergencyPhone: '09187654321',
+        registrationDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'Verified'
+      },
+      {
+        id: 'reg-2',
+        firstName: 'Samantha',
+        lastName: 'Santos',
+        email: 'sam.santos@example.com',
+        phone: '09192233445',
+        gender: 'Female',
+        eventTitle: 'MegaWorld Fun Run',
+        distance: '5K',
+        size: 'Unisex - Small (S)',
+        paymentMethod: 'Maya',
+        referenceNumber: '9988776655443',
+        registeredBib: '189',
+        emergencyContact: 'David Santos',
+        emergencyPhone: '09201122334',
+        registrationDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'Verified'
+      },
+      {
+        id: 'reg-3',
+        firstName: 'Mark',
+        lastName: 'Lee',
+        email: 'mark.lee@example.com',
+        phone: '09154433221',
+        gender: 'Male',
+        eventTitle: 'Guimaras Mountain Challenge',
+        distance: '21K',
+        size: 'Unisex - Large (L)',
+        paymentMethod: 'Bank Deposit',
+        referenceNumber: 'BDO-TRSF-5839',
+        registeredBib: '412',
+        emergencyContact: 'Lin Lee',
+        emergencyPhone: '09088899001',
+        registrationDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'Verified'
+      }
+    ];
+    return defaults;
+  });
+
+  const handleUpdateRegistrations = (newRegs: any[]) => {
+    setRegistrations(newRegs);
+    localStorage.setItem('runnicle_registrations', JSON.stringify(newRegs));
+  };
+
+  const handleRegisterComplete = (newRegistration: any) => {
+    const record = {
+      id: `reg-${Date.now()}`,
+      registrationDate: new Date().toISOString(),
+      status: 'Pending',
+      ...newRegistration
+    };
+    const updated = [record, ...registrations];
+    setRegistrations(updated);
+    localStorage.setItem('runnicle_registrations', JSON.stringify(updated));
+  };
 
   
   React.useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
+
+    // Sync path with page state & implement Auth Guard
+    const currentPath = window.location.pathname;
+    const isLoggedIn = sessionStorage.getItem('runnicle_admin_logged') === 'true' || localStorage.getItem('runnicle_admin_logged') === 'true';
+    const isAdminView = ['admin-login', 'admin-registrations', 'admin-create-event'].includes(page);
+
+    if (isAdminView && !isLoggedIn && page !== 'admin-login') {
+      setPage('admin-login');
+      return;
+    }
+
+    if (page === 'admin-login') {
+      if (currentPath !== '/admin_page') {
+        window.history.pushState(null, '', '/admin_page');
+      }
+    } else if (page === 'admin-registrations') {
+      if (currentPath !== '/admin_registrations') {
+        window.history.pushState(null, '', '/admin_registrations');
+      }
+    } else if (page === 'admin-create-event') {
+      if (currentPath !== '/admin_create_event') {
+        window.history.pushState(null, '', '/admin_create_event');
+      }
+    } else if (page === 'home') {
+      if (currentPath !== '/') {
+        window.history.pushState(null, '', '/');
+      }
+    }
   }, [page]);
+
+  React.useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path === '/admin_page') {
+        setPage('admin-login');
+      } else if (path === '/admin_registrations') {
+        setPage('admin-registrations');
+      } else if (path === '/admin_create_event') {
+        setPage('admin-create-event');
+      } else if (path === '/') {
+        setPage('home');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
   
   
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -166,7 +314,7 @@ export const App: React.FC = () => {
   
   const getNearestUpcomingEvent = () => {
     const now = new Date().getTime();
-    const upcoming = mockEvents.filter(e => e.badge !== 'PAST EVENT');
+    const upcoming = events.filter(e => e.badge !== 'PAST EVENT');
     
     
     const sorted = [...upcoming].sort((a, b) => {
@@ -175,7 +323,7 @@ export const App: React.FC = () => {
       return timeA - timeB;
     });
 
-    const nearest = sorted.find(e => new Date(e.date).getTime() > now) || sorted[0] || mockEvents[0];
+    const nearest = sorted.find(e => new Date(e.date).getTime() > now) || sorted[0] || events[0];
     return nearest;
   };
 
@@ -295,14 +443,16 @@ export const App: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-white text-zinc-800 antialiased selection:bg-orange-500 selection:text-white">
       
       {}
-      <Navbar
-        activeTab={getNavbarActiveTab()}
-        setActiveTab={handleTabChange}
-        onJoinClick={() => {
-          setSelectedEvent(null);
-          setPage('register');
-        }}
-      />
+      {!['admin-login', 'admin-registrations', 'admin-create-event'].includes(page) && (
+        <Navbar
+          activeTab={getNavbarActiveTab()}
+          setActiveTab={handleTabChange}
+          onJoinClick={() => {
+            setSelectedEvent(null);
+            setPage('register');
+          }}
+        />
+      )}
 
       {}
       {cartTotalItems > 0 && page !== 'cart' && page !== 'checkout' && page !== 'order-confirmation' && (
@@ -345,6 +495,7 @@ export const App: React.FC = () => {
                 
                 {}
                 <UpcomingEvents
+                  events={events}
                   onViewDetailsClick={(event) => {
                     setSelectedEvent(event);
                     setPage('event-details');
@@ -395,7 +546,7 @@ export const App: React.FC = () => {
 
             {page === 'events' && (
               <EventsPage
-                events={mockEvents}
+                events={events}
                 onRegisterClick={(event) => {
                   setSelectedEvent(event);
                   setPage('register');
@@ -432,6 +583,7 @@ export const App: React.FC = () => {
             {page === 'register' && (
               <RegistrationPage
                 event={selectedEvent}
+                onRegisterComplete={handleRegisterComplete}
                 onBack={() => {
                   if (selectedEvent) setPage('event-details');
                   else setPage('events');
@@ -772,18 +924,60 @@ export const App: React.FC = () => {
               />
             )}
 
+            {page === 'admin-login' && (
+              <AdminPage
+                view="login"
+                events={events}
+                onAddEvent={handleAddEvent}
+                registrations={registrations}
+                onUpdateRegistrations={handleUpdateRegistrations}
+                onBackToHome={() => setPage('home')}
+                onNavigate={(route) => setPage(route)}
+                onLoginSuccess={() => setPage('admin-registrations')}
+              />
+            )}
+
+            {page === 'admin-registrations' && (
+              <AdminPage
+                view="registrations"
+                events={events}
+                onAddEvent={handleAddEvent}
+                registrations={registrations}
+                onUpdateRegistrations={handleUpdateRegistrations}
+                onBackToHome={() => setPage('home')}
+                onNavigate={(route) => setPage(route)}
+                onLoginSuccess={() => setPage('admin-registrations')}
+              />
+            )}
+
+            {page === 'admin-create-event' && (
+              <AdminPage
+                view="create-event"
+                events={events}
+                onAddEvent={handleAddEvent}
+                registrations={registrations}
+                onUpdateRegistrations={handleUpdateRegistrations}
+                onBackToHome={() => setPage('home')}
+                onNavigate={(route) => setPage(route)}
+                onLoginSuccess={() => setPage('admin-registrations')}
+              />
+            )}
+
           </motion.div>
         </AnimatePresence>
       </main>
 
       {}
-      <Footer onPlatformClick={(item) => {
-        if (item === 'Event Calendar') setPage('events');
-        else if (item === 'Contact Us') setPage('contact');
-        else {
-          alert(`You clicked ${item}. This is a demonstration link with placeholder content.`);
-        }
-      }} />
+      {!['admin-login', 'admin-registrations', 'admin-create-event'].includes(page) && (
+        <Footer onPlatformClick={(item) => {
+          if (item === 'Event Calendar') setPage('events');
+          else if (item === 'Contact Us') setPage('contact');
+          else if (item === 'Admin Panel') setPage('admin-login');
+          else {
+            alert(`You clicked ${item}. This is a demonstration link with placeholder content.`);
+          }
+        }} />
+      )}
 
       {}
       <Modal

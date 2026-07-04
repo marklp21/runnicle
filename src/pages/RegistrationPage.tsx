@@ -6,12 +6,14 @@ interface RegistrationPageProps {
   event: EventItem | null;
   defaultTitle?: string;
   onBack: () => void;
+  onRegisterComplete?: (registration: any) => void;
 }
 
 export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   event,
   defaultTitle = 'Early-Bird Registration',
   onBack,
+  onRegisterComplete,
 }) => {
   const [step, setStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState('GCash');
@@ -573,10 +575,28 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      
                       const randomBib = Math.floor(100 + Math.random() * 900).toString();
                       setRegisteredName(`${formData.firstName} ${formData.lastName}`);
                       setRegisteredBib(randomBib);
+                      
+                      if (onRegisterComplete) {
+                        onRegisterComplete({
+                          firstName: formData.firstName,
+                          lastName: formData.lastName,
+                          email: formData.email,
+                          phone: formData.phone,
+                          gender: formData.gender,
+                          distance: formData.distance,
+                          size: formData.size,
+                          emergencyContact: formData.emergencyContact,
+                          emergencyPhone: formData.emergencyPhone,
+                          eventTitle: eventTitle,
+                          paymentMethod: paymentMethod,
+                          referenceNumber: referenceNumber || 'CARD-PAID',
+                          registeredBib: randomBib
+                        });
+                      }
+
                       setStep(3);
                       window.scrollTo({ top: 0, behavior: 'instant' });
                     }}

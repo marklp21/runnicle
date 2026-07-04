@@ -80,7 +80,11 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onJoinC
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="xl:hidden border-t border-zinc-200 bg-white px-4 pt-2 pb-6 space-y-4"
+            transition={{
+              height: { duration: 0.18, ease: [0.16, 1, 0.3, 1] },
+              opacity: { duration: 0.12, ease: 'linear' }
+            }}
+            className="xl:hidden overflow-hidden border-t border-zinc-200 bg-white px-4 pt-2 pb-6 space-y-4"
           >
             <div className="flex flex-col space-y-2">
               {navItems.map((item) => (

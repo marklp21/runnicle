@@ -1,13 +1,15 @@
 import React from 'react';
 import { Calendar, MapPin, ArrowRight } from 'lucide-react';
-import { type EventItem, mockEvents } from '../data/mockData';
+import { type EventItem } from '../data/mockData';
 
 interface UpcomingEventsProps {
+  events: EventItem[];
   onViewDetailsClick: (event: EventItem) => void;
   onViewAllClick: () => void;
 }
 
 export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
+  events,
   onViewDetailsClick,
   onViewAllClick,
 }) => {
@@ -51,7 +53,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
 
         {}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {mockEvents.slice(0, 3).map((event) => (
+          {events.slice(0, 3).map((event) => (
             <div
               key={event.id}
               onClick={() => onViewDetailsClick(event)}

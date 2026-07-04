@@ -37,7 +37,7 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
               Platform
             </h4>
             <ul className="space-y-3 text-xs font-bold text-zinc-500">
-              {['Event Calendar'].map((item) => (
+              {['Event Calendar', 'Admin Panel'].map((item) => (
                 <li key={item}>
                   <button
                     onClick={() => onPlatformClick(item)}
