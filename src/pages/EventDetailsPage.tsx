@@ -215,9 +215,20 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
           </div>
 
           <div className="border-t border-zinc-200 pt-6 space-y-3.5 text-xs text-zinc-500 font-semibold">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-start">
               <span className="text-zinc-400">Route Map</span>
-              <span className="text-zinc-800 text-right">{event.details.route}</span>
+              <div className="text-zinc-800 text-right space-y-1 max-w-[65%]">
+                {event.details.routes && Object.keys(event.details.routes).length > 0 ? (
+                  Object.entries(event.details.routes).map(([dist, rPath]) => (
+                    <div key={dist} className="text-xs">
+                      <span className="font-mono font-black text-brand mr-1">{dist}:</span>
+                      <span className="font-medium text-zinc-700">{rPath}</span>
+                    </div>
+                  ))
+                ) : (
+                  <span className="font-medium text-zinc-700">{event.details.route}</span>
+                )}
+              </div>
             </div>
             <div className="flex justify-between">
               <span className="text-zinc-400">Timer Method</span>

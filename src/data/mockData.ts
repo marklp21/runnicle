@@ -2,6 +2,7 @@ export interface EventDetails {
   time: string;
   fee: string;
   route: string;
+  routes?: Record<string, string>;
   slotsLeft?: number;
   schedule: string[];
   perks: string[];

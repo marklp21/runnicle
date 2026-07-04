@@ -100,6 +100,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   // Uploader error message state
   const [uploaderError, setUploaderError] = useState<string | null>(null);
 
+  // Distance specific routes state
+  const [distanceRoutes, setDistanceRoutes] = useState<Record<string, string>>({});
+
   // Create Event Form state
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -193,6 +196,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     setNewEvent(prev => {
       const exists = prev.distances.includes(distance);
       if (exists) {
+        setDistanceRoutes(routes => {
+          const next = { ...routes };
+          delete next[distance];
+          return next;
+        });
         return { ...prev, distances: prev.distances.filter(d => d !== distance) };
       } else {
         return { ...prev, distances: [...prev.distances, distance] };
@@ -214,6 +222,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     }
 
     const cleanFee = newEvent.fee.startsWith('₱') ? newEvent.fee : `₱${newEvent.fee}`;
+    const firstRoute = newEvent.distances.length > 0 ? (distanceRoutes[newEvent.distances[0]] || 'Official Course Route Loop') : 'Official Course Route Loop';
 
     if (editingEvent) {
       // EDIT MODE
@@ -233,7 +242,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               ...evt.details,
               time: newEvent.time,
               fee: cleanFee,
-              route: newEvent.route || 'Official Course Route Loop',
+              route: firstRoute,
+              routes: distanceRoutes,
               slotsLeft: newEvent.slotsLimit,
               perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Timing Chip', 'Finisher Medal']
             },
@@ -266,12 +276,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         details: {
           time: newEvent.time,
           fee: cleanFee,
-          route: newEvent.route || 'Official Course Route Loop',
+          route: firstRoute,
+          routes: distanceRoutes,
           slotsLeft: newEvent.slotsLimit,
           schedule: [
             '04:30 AM - Assembly & Timing Tag Inspection',
             '05:00 AM - Race Gunstart',
-            '08:00 AM - Awarding & Post-race Program'
+            '08:05 AM - Awarding & Post-race Program'
           ],
           perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Timing Chip', 'Finisher Medal']
         },
@@ -303,6 +314,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       iconType: 'compass'
     });
     setGalleryPhotos([]);
+    setDistanceRoutes({});
 
     // Navigate to respective lists
     if (editingEvent) {
@@ -1017,6 +1029,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     iconType: 'compass'
                   });
                   setGalleryPhotos([]);
+                  setDistanceRoutes({});
                   onNavigate('admin-create-event');
                 }}
                 className="rounded-full bg-brand hover:bg-brand-hover text-white text-xs font-mono font-black uppercase tracking-widest py-3 px-6 cursor-pointer transition-colors shadow-sm"
@@ -1104,6 +1117,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                             iconType: evt.iconType || 'compass'
                           });
                           setGalleryPhotos(evt.galleryImages || [evt.image]);
+                          const initialRoutes: Record<string, string> = {};
+                          evt.distances.forEach(d => {
+                            initialRoutes[d] = evt.details.routes?.[d] || evt.details.route || '';
+                          });
+                          setDistanceRoutes(initialRoutes);
                         }}
                         className="flex-1 rounded-full border border-zinc-200 hover:border-zinc-950 bg-white py-2.5 text-center text-[10px] font-black text-zinc-750 hover:text-zinc-900 transition-colors uppercase tracking-widest cursor-pointer shadow-sm"
                       >
@@ -1234,8 +1252,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 </div>
               </div>
 
-              {/* Fee, Limit, Route, Icon Type */}
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
+              {/* Fee & Limit */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
                     Entry Fee (PHP)
@@ -1260,18 +1278,39 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono text-center"
                   />
                 </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">
-                    Timing Route Loop
-                  </label>
-                  <input
-                    type="text"
-                    value={newEvent.route}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, route: e.target.value }))}
-                    placeholder="e.g. Lacson Main Street to Plaza Loop"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
-                  />
-                </div>
+              </div>
+
+              {/* Route Maps / Path descriptions per category */}
+              <div>
+                <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2.5 font-mono">
+                  Route Maps / Path descriptions per category <span className="text-brand">*</span>
+                </label>
+                {newEvent.distances.length === 0 ? (
+                  <div className="text-[10px] font-mono bg-zinc-55 text-zinc-450 border border-zinc-200 rounded-xl p-4 text-center">
+                    Please select at least one distance category above to specify routes.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-50 rounded-xl border border-zinc-200 p-4">
+                    {newEvent.distances.map((dist) => (
+                      <div key={dist} className="space-y-1.5 animate-fade-in">
+                        <div className="flex justify-between items-center">
+                          <span className="bg-brand text-white font-mono font-black text-[9px] px-2 py-0.5 rounded uppercase tracking-wider">{dist} category</span>
+                        </div>
+                        <input
+                          type="text"
+                          required
+                          value={distanceRoutes[dist] || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setDistanceRoutes(prev => ({ ...prev, [dist]: val }));
+                          }}
+                          placeholder={`e.g. ${dist} race course loop description`}
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Distances Category checklist */}
