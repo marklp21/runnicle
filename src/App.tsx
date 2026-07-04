@@ -508,7 +508,7 @@ export const App: React.FC = () => {
       )}
 
       {}
-      <main className="flex-1">
+      <main className="flex-1 overflow-x-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={page}

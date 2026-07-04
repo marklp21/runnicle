@@ -727,7 +727,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       </AnimatePresence>
 
       {/* Main Admin Workspace Area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pt-26 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pt-26 space-y-8 overflow-x-hidden">
         {/* Success Alert Toast */}
         {successToast && (
           <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-zinc-900 border border-zinc-800 text-white px-5 py-4 flex items-center gap-3.5 shadow-2xl font-mono text-xs uppercase tracking-wider animate-fade-in border-l-4 border-l-brand">
