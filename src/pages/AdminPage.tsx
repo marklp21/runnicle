@@ -545,10 +545,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
           {/* Center Tabs Navigation (for desktop views) */}
           {view !== 'registration-details' ? (
-            <div className="hidden lg:flex items-center space-x-6">
+            <div className="hidden lg:flex items-center space-x-6 h-full">
               <button
                 onClick={() => onNavigate('admin-dashboard')}
-                className={`font-mono text-[10px] font-black tracking-widest uppercase transition-colors duration-200 cursor-pointer flex items-center gap-1.5 group ${
+                className={`relative font-mono text-[10px] font-black tracking-widest uppercase transition-colors duration-200 cursor-pointer flex items-center gap-1.5 group h-full ${
                   view === 'dashboard' ? 'text-zinc-900 font-extrabold' : 'text-zinc-450 hover:text-zinc-900'
                 }`}
               >
@@ -556,11 +556,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 <span className="text-brand font-light text-[9px] opacity-75 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-150 inline-block">
                   [{view === 'dashboard' ? '=' : '>'}]
                 </span>
+                {view === 'dashboard' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-brand rounded-t-full" />
+                )}
               </button>
 
               <button
                 onClick={() => onNavigate('admin-registrations')}
-                className={`font-mono text-[10px] font-black tracking-widest uppercase transition-colors duration-200 cursor-pointer flex items-center gap-1.5 group ${
+                className={`relative font-mono text-[10px] font-black tracking-widest uppercase transition-colors duration-200 cursor-pointer flex items-center gap-1.5 group h-full ${
                   view === 'registrations' ? 'text-zinc-900 font-extrabold' : 'text-zinc-450 hover:text-zinc-900'
                 }`}
               >
@@ -568,11 +571,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 <span className="text-brand font-light text-[9px] opacity-75 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-150 inline-block">
                   [{view === 'registrations' ? '=' : '>'}]
                 </span>
+                {view === 'registrations' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-brand rounded-t-full" />
+                )}
               </button>
 
               <button
                 onClick={() => onNavigate('admin-events')}
-                className={`font-mono text-[10px] font-black tracking-widest uppercase transition-colors duration-200 cursor-pointer flex items-center gap-1.5 group ${
+                className={`relative font-mono text-[10px] font-black tracking-widest uppercase transition-colors duration-200 cursor-pointer flex items-center gap-1.5 group h-full ${
                   view === 'events' ? 'text-zinc-900 font-extrabold' : 'text-zinc-450 hover:text-zinc-900'
                 }`}
               >
@@ -580,11 +586,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 <span className="text-brand font-light text-[9px] opacity-75 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-150 inline-block">
                   [{view === 'events' ? '=' : '>'}]
                 </span>
+                {view === 'events' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-brand rounded-t-full" />
+                )}
               </button>
 
               <button
                 onClick={() => onNavigate('admin-create-event')}
-                className={`font-mono text-[10px] font-black tracking-widest uppercase transition-colors duration-200 cursor-pointer flex items-center gap-1.5 group ${
+                className={`relative font-mono text-[10px] font-black tracking-widest uppercase transition-colors duration-200 cursor-pointer flex items-center gap-1.5 group h-full ${
                   view === 'create-event' ? 'text-zinc-900 font-extrabold' : 'text-zinc-450 hover:text-zinc-900'
                 }`}
               >
@@ -592,6 +601,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 <span className="text-brand font-light text-[9px] opacity-75 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-150 inline-block">
                   [{view === 'create-event' ? '=' : '>'}]
                 </span>
+                {view === 'create-event' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-brand rounded-t-full" />
+                )}
               </button>
             </div>
           ) : (
@@ -1188,32 +1200,32 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           <h3 className="font-sans font-extrabold text-zinc-900 text-base leading-snug uppercase tracking-tight line-clamp-2">
                             {evt.title}
                           </h3>
-                          <span className="text-[9px] font-bold text-zinc-450 uppercase tracking-wider block mt-1.5 font-mono">
+                          <span className="text-[11px] font-bold text-zinc-600 uppercase tracking-wider block mt-1.5 font-mono">
                             {evt.date} | {evt.location}
                           </span>
                         </div>
 
                         {/* Details Grid */}
-                        <div className="grid grid-cols-2 gap-3 text-[10px] font-mono border-t border-b border-zinc-100 py-3 text-zinc-650">
+                        <div className="grid grid-cols-2 gap-3 text-xs font-mono border-t border-b border-zinc-100 py-3 text-zinc-700">
                           <div>
-                            <span className="text-zinc-400 font-bold uppercase block text-[8px]">Fee</span>
-                            <span className="text-zinc-800 font-bold">{evt.details.fee}</span>
+                            <span className="text-zinc-500 font-bold uppercase block text-[10px]">Fee</span>
+                            <span className="text-zinc-900 font-bold">{evt.details.fee}</span>
                           </div>
                           <div>
-                            <span className="text-zinc-400 font-bold uppercase block text-[8px]">Slots Left</span>
-                            <span className="text-zinc-850 font-bold">{evt.details.slotsLeft || 500}</span>
+                            <span className="text-zinc-500 font-bold uppercase block text-[10px]">Slots Left</span>
+                            <span className="text-zinc-900 font-bold">{evt.details.slotsLeft || 500}</span>
                           </div>
                           <div>
-                            <span className="text-zinc-400 font-bold uppercase block text-[8px]">Distances</span>
+                            <span className="text-zinc-500 font-bold uppercase block text-[10px]">Distances</span>
                             <div className="flex flex-wrap gap-1 mt-0.5">
                               {evt.distances.map(d => (
-                                <span key={d} className="bg-zinc-50 border border-zinc-200 px-1.5 py-0.2 rounded font-black text-brand text-[8px]">{d}</span>
+                                <span key={d} className="bg-zinc-50 border border-zinc-200 px-1.5 py-0.5 rounded font-black text-brand text-[10px]">{d}</span>
                               ))}
                             </div>
                           </div>
                           <div>
-                            <span className="text-zinc-400 font-bold uppercase block text-[8px]">Subscribers</span>
-                            <span className="text-zinc-850 font-bold">{verifiedRunners} Verified</span>
+                            <span className="text-zinc-500 font-bold uppercase block text-[10px]">Subscribers</span>
+                            <span className="text-zinc-900 font-bold">{verifiedRunners} Verified</span>
                           </div>
                         </div>
                       </div>
@@ -1251,7 +1263,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           setKitPhoto(evt.kitImage || '');
                           setFormStep(1);
                         }}
-                        className="flex-1 rounded-full border border-zinc-200 hover:border-zinc-950 bg-white py-2.5 text-center text-[10px] font-black text-zinc-750 hover:text-zinc-900 transition-colors uppercase tracking-widest cursor-pointer shadow-sm"
+                        className="flex-1 rounded-full border border-zinc-200 hover:border-zinc-950 bg-white py-2.5 text-center text-[11px] font-black text-zinc-750 hover:text-zinc-900 transition-colors uppercase tracking-widest cursor-pointer shadow-sm"
                       >
                         Edit Info
                       </button>
