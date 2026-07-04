@@ -124,11 +124,14 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
           </div>
           
           <div>
-            <h1 className="font-display text-4xl font-black text-white tracking-tight">
+            <h1 className="font-display text-4xl font-black text-zinc-900 tracking-tight">
               Registration Confirmed!
             </h1>
-            <p className="mt-3 text-zinc-500 text-sm max-w-md mx-auto leading-relaxed font-semibold">
-              You are officially registered. Your race packet details and training links have been sent to <span className="text-zinc-900">{formData.email}</span>.
+            <p className="mt-3 text-zinc-600 text-sm max-w-md mx-auto leading-relaxed font-semibold">
+              You are officially registered. Your race packet details and training links have been sent to <span className="text-zinc-950 font-bold">{formData.email}</span>.
+            </p>
+            <p className="mt-2 text-brand text-xs font-black uppercase tracking-wider">
+              ⚠️ Save or print this pass. You must present this to claim your race kit.
             </p>
           </div>
 
@@ -167,6 +170,13 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                 <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-0.5">Emergency Contact</span>
                 <span className="text-zinc-900 truncate block max-w-[140px]">{formData.emergencyContact || 'Not Specified'}</span>
               </div>
+            </div>
+
+            {/* Kit pickup instruction notice */}
+            <div className="py-2.5 px-4 bg-orange-50 border border-orange-200/40 rounded-xl mb-4 text-center select-none">
+              <span className="text-[9px] font-black text-brand uppercase tracking-wider block">
+                ⚠️ Present this pass to claim your race kit
+              </span>
             </div>
 
             {}
