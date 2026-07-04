@@ -13,6 +13,7 @@
 
 html {
   scroll-behavior: smooth;
+  overscroll-behavior-y: none;
 }
 
 @layer base {
@@ -20,6 +21,7 @@ html {
     font-family: var(--font-sans);
     background-color: #ffffff;
     color: #27272a;
+    overscroll-behavior-y: none;
   }
   
   h1, h2 {
