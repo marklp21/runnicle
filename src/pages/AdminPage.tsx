@@ -616,13 +616,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           {/* Right Actions Section (for desktop views) */}
           <div className="hidden lg:flex items-center h-full gap-6">
             <button
-              onClick={onBackToHome}
-              className="font-mono text-[10px] font-black tracking-widest text-zinc-450 hover:text-zinc-900 transition-colors uppercase cursor-pointer"
-            >
-              Portal View
-            </button>
-
-            <button
               onClick={handleLogout}
               className="h-full bg-zinc-950 hover:bg-black text-white text-[10px] font-mono font-black tracking-widest px-8 flex items-center justify-center transition-colors uppercase cursor-pointer"
             >
@@ -714,15 +707,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </div>
 
             <div className="pt-4 border-t border-zinc-200 flex flex-col gap-2">
-              <button
-                onClick={() => {
-                  onBackToHome();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full border border-zinc-200 py-3 text-center text-xs font-mono font-bold tracking-widest uppercase text-zinc-700 hover:bg-zinc-50 transition-colors"
-              >
-                Portal View
-              </button>
               <button
                 onClick={handleLogout}
                 className="w-full bg-zinc-950 py-3 text-center text-xs font-mono font-black tracking-widest uppercase text-white hover:bg-black transition-colors"
