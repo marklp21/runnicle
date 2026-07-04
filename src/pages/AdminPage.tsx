@@ -45,7 +45,7 @@ const coverPresets = [
 ];
 
 interface AdminPageProps {
-  view: 'login' | 'registrations' | 'create-event' | 'registration-details';
+  view: 'login' | 'dashboard' | 'registrations' | 'create-event' | 'registration-details';
   selectedRegId?: string | null;
   events: EventItem[];
   onAddEvent: (event: EventItem) => void;
@@ -487,6 +487,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         ) : (
           <div className="flex border-b border-zinc-200 pb-px gap-6">
             <button
+              onClick={() => onNavigate('admin-dashboard')}
+              className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
+                view === 'dashboard' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
+              }`}
+            >
+              Dashboard
+              {view === 'dashboard' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
+              )}
+            </button>
+            <button
               onClick={() => onNavigate('admin-registrations')}
               className={`pb-4 text-xs font-mono font-black uppercase tracking-widest relative transition-colors cursor-pointer relative ${
                 view === 'registrations' ? 'text-brand' : 'text-zinc-400 hover:text-zinc-600'
@@ -520,8 +531,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         )}
 
         {/* Content Tabs */}
-        {view === 'registrations' ? (
-          <div className="space-y-6">
+        {view === 'dashboard' && (
+          <div className="space-y-8">
             
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -534,15 +545,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   <span className="text-xl font-bold text-zinc-900 mt-1 block leading-none">{totalRegistrations}</span>
                 </div>
               </div>
+
               <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm flex items-center gap-4">
                 <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
                   <DollarSign className="h-5 w-5" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block font-mono">Mock Revenue</span>
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block font-mono">Total Revenue</span>
                   <span className="text-xl font-bold text-zinc-900 mt-1 block leading-none">₱{totalRevenue.toLocaleString()}</span>
                 </div>
               </div>
+
               <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm flex items-center gap-4">
                 <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
                   <Check className="h-5 w-5" />
@@ -552,6 +565,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   <span className="text-xl font-bold text-zinc-900 mt-1 block leading-none">{verifiedCount}</span>
                 </div>
               </div>
+
               <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm flex items-center gap-4">
                 <div className="h-10 w-10 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center flex-shrink-0">
                   <AlertCircle className="h-5 w-5" />
@@ -562,6 +576,132 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 </div>
               </div>
             </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              
+              {/* Left Side: Upcoming Events slots analysis (2 columns wide) */}
+              <div className="lg:col-span-2 bg-white rounded-3xl border border-zinc-200 p-6 shadow-sm space-y-6">
+                <div className="flex justify-between items-center border-b border-zinc-100 pb-4">
+                  <div>
+                    <h3 className="font-display text-lg font-black text-zinc-900 uppercase tracking-tight">
+                      Race Events Overview
+                    </h3>
+                    <p className="text-[10px] text-zinc-450 mt-0.5 font-mono uppercase tracking-wider">
+                      Registration slots and status tracking
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => onNavigate('admin-create-event')}
+                    className="rounded-full bg-brand hover:bg-brand-hover text-white text-[9px] font-mono font-black uppercase tracking-widest py-2 px-4 flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
+                  >
+                    + Launch Event
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {events.map((evt) => {
+                    const runnersForEvt = registrations.filter(r => r.eventTitle === evt.title && r.status === 'Verified').length;
+                    const fillPercentage = Math.min(100, Math.round((runnersForEvt / (evt.details.slotsLeft || 500)) * 100));
+                    
+                    return (
+                      <div key={evt.id} className="border border-zinc-150 rounded-2xl p-4 space-y-3 font-mono text-xs">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-sans font-extrabold text-zinc-900 uppercase text-sm leading-tight">
+                              {evt.title}
+                            </h4>
+                            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block mt-1">
+                              Date: {evt.date} | Limit: {evt.details.slotsLeft || 500} Slots
+                            </span>
+                          </div>
+                          <span className={`rounded-full border px-2 py-0.5 text-[8px] font-black uppercase ${
+                            evt.badge === 'OPEN'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                              : 'bg-red-50 text-red-600 border-red-100'
+                          }`}>
+                            {evt.badge || 'OPEN'}
+                          </span>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-[9px] font-bold text-zinc-500 uppercase tracking-wider">
+                            <span>Slots Filled: {runnersForEvt} / {evt.details.slotsLeft || 500}</span>
+                            <span>{fillPercentage}%</span>
+                          </div>
+                          <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
+                            <div 
+                              className="bg-brand h-full rounded-full transition-all duration-500" 
+                              style={{ width: `${fillPercentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Right Side: Recent Registrations Activity list (1 column wide) */}
+              <div className="bg-white rounded-3xl border border-zinc-200 p-6 shadow-sm space-y-6 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="border-b border-zinc-100 pb-4">
+                    <h3 className="font-display text-lg font-black text-zinc-900 uppercase tracking-tight">
+                      Recent Signups
+                    </h3>
+                    <p className="text-[10px] text-zinc-455 mt-0.5 font-mono uppercase tracking-wider">
+                      Latest 5 registered athletes
+                    </p>
+                  </div>
+
+                  <div className="divide-y divide-zinc-100 font-mono text-xs">
+                    {registrations.slice(0, 5).map((reg) => (
+                      <div 
+                        key={reg.id}
+                        onClick={() => {
+                          if (onSelectReg) onSelectReg(reg.id);
+                          onNavigate('admin-registration-details');
+                        }}
+                        className="py-3 flex justify-between items-center cursor-pointer hover:bg-zinc-50/50 px-2 rounded-lg transition-colors"
+                      >
+                        <div className="truncate pr-2">
+                          <span className="font-sans font-extrabold text-zinc-900 text-xs block leading-tight">
+                            {reg.firstName} {reg.lastName}
+                          </span>
+                          <span className="text-[8px] text-zinc-400 block mt-0.5 uppercase truncate max-w-[150px]">
+                            {reg.eventTitle || 'Timing Portal'}
+                          </span>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <span className="font-black text-brand block">{reg.distance}</span>
+                          <span className={`inline-block rounded-full px-1.5 py-0.5 text-[8px] font-black uppercase mt-1 ${
+                            reg.status === 'Verified' 
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-yellow-50 text-yellow-600'
+                          }`}>
+                            {reg.status || 'Pending'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => onNavigate('admin-registrations')}
+                  className="w-full rounded-full border border-zinc-200 bg-white hover:border-zinc-950 hover:bg-zinc-50 py-3 text-center text-xs font-mono font-black text-zinc-800 transition-colors uppercase tracking-widest cursor-pointer mt-4"
+                >
+                  View All Registrations
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        )}
+
+        {view === 'registrations' && (
+          <div className="space-y-6">
 
             {/* Filter / Control Bar */}
             <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm space-y-4">
@@ -783,8 +923,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </div>
 
           </div>
-        ) : (
-          /* Create Event View Form */
+        )}
+
+        {view === 'create-event' && (
           <div className="bg-white rounded-3xl border border-zinc-200 p-6 md:p-8 shadow-sm max-w-4xl mx-auto relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-brand animate-pulse" />
             
