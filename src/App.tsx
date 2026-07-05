@@ -12,10 +12,11 @@ import {
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import UpcomingEvents from './components/UpcomingEvents';
-import CommunityPulse from './components/CommunityPulse';
-import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import Modal from './components/Modal';
+import FeaturedGallery from './components/FeaturedGallery';
+import BibsAndMerch from './components/BibsAndMerch';
+import GetInTouch from './components/GetInTouch';
 
 import EventDetailsPage from './pages/EventDetailsPage';
 import RegistrationPage from './pages/RegistrationPage';
@@ -367,22 +368,24 @@ export const App: React.FC = () => {
     return nearest;
   };
 
-  const nearestEvent = getNearestUpcomingEvent();
+  const nearestEvent = getNearestUpcomingEvent() || mockEvents[0];
 
   
   const getNavbarActiveTab = () => {
-    if (page === 'home') return 'Community';
+    if (page === 'home') return 'Dashboard';
     if (['events', 'event-details', 'event-results', 'register'].includes(page)) return 'Events';
-    if (page === 'gallery') return 'Gallery';
+    if (page === 'news' || page === 'article-details') return 'News';
+    if (page === 'store' || page === 'product-details' || page === 'cart' || page === 'checkout' || page === 'order-confirmation') return 'Merch';
     if (page === 'contact') return 'Contact';
-    return 'Community';
+    return 'Dashboard';
   };
 
   
   const handleTabChange = (tab: string) => {
-    if (tab === 'Community') setPage('home');
+    if (tab === 'Dashboard') setPage('home');
     else if (tab === 'Events') setPage('events');
-    else if (tab === 'Gallery') setPage('gallery');
+    else if (tab === 'News') setPage('news');
+    else if (tab === 'Merch') setPage('store');
     else if (tab === 'Contact') setPage('contact');
   };
 
@@ -498,7 +501,7 @@ export const App: React.FC = () => {
       {cartTotalItems > 0 && page !== 'cart' && page !== 'checkout' && page !== 'order-confirmation' && (
         <div 
           onClick={() => setPage('cart')}
-          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg hover:scale-105 transition-transform cursor-pointer hover:bg-orange-600 shadow-orange-500/20"
+          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded bg-orange-500 text-white shadow-lg hover:scale-105 transition-transform cursor-pointer hover:bg-orange-600 shadow-orange-500/20"
         >
           <ShoppingBag className="h-6 w-6" />
           <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-black text-orange-600 border border-orange-200 shadow-sm">
@@ -527,10 +530,7 @@ export const App: React.FC = () => {
                     setPage('register');
                   }}
                   onViewCalendarClick={() => setPage('events')}
-                  targetEventName={nearestEvent.title}
-                  targetEventDate={nearestEvent.date}
-                  targetEventDeadline={nearestEvent.deadline}
-                  targetEventTimestamp={new Date(nearestEvent.date).getTime()}
+                  targetEventTimestamp={nearestEvent ? new Date(nearestEvent.date).getTime() : new Date().getTime()}
                 />
                 
                 {}
@@ -543,44 +543,17 @@ export const App: React.FC = () => {
                   onViewAllClick={() => setPage('events')}
                 />
 
-                {}
-                <section className="relative bg-zinc-900 text-white py-24 overflow-hidden select-none">
-                  <div className="absolute inset-0 opacity-30">
-                    <img
-                      src="https://images.unsplash.com/photo-1502224562085-639556652f33?auto=format&fit=crop&w=1600&q=80"
-                      alt="Athletes running a marathon on the road"
-                      className="w-full h-full object-cover filter grayscale contrast-125"
-                    />
-                  </div>
-                  <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 z-10 flex flex-col items-start text-left max-w-2xl">
-                    <span className="font-mono text-[9px] font-black tracking-widest text-brand uppercase">
-                      [ CORE SYSTEM 
-                    </span>
-                    <h2 className="mt-4 font-display text-5xl sm:text-6xl font-black uppercase tracking-tight leading-[0.95] text-white">
-                      EMPOWERING EVERY RUNNER.
-                    </h2>
-                    <p className="mt-4 font-mono text-[10px] tracking-wide text-zinc-300 leading-relaxed uppercase">
-                      
-                    </p>
-                    <button
-                      onClick={() => {
-                        setSelectedEvent(null);
-                        setPage('register');
-                      }}
-                      className="mt-8 bg-brand hover:bg-brand-hover text-white text-[10px] font-mono font-black tracking-widest uppercase px-8 py-3.5 transition-all cursor-pointer flex items-center justify-center gap-1.5 group"
-                    >
-                      <span>JOIN THE MOVEMENT</span>
-                      <span className="group-hover:translate-x-1 transition-transform duration-200">{"[>]"}</span>
-                    </button>
-                  </div>
-                </section>
+                <FeaturedGallery />
                 
-                {}
-                <CommunityPulse
-                  onPostClick={(post) => setSelectedPost(post)}
+                <BibsAndMerch 
+                  products={mockProducts} 
+                  onProductClick={(product) => {
+                    setSelectedProduct(product);
+                    setPage('product-details');
+                  }}
+                  onViewAllClick={() => setPage('store')}
                 />
                 
-                <Newsletter />
               </>
             )}
 
@@ -727,7 +700,7 @@ export const App: React.FC = () => {
                 {}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
                   {}
-                  <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden p-6 hover:border-orange-200 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
+                  <div className="rounded border border-zinc-200 bg-white overflow-hidden p-6 hover:border-orange-200 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
                     <div>
                       <img
                         src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=300&h=300&q=80"
@@ -748,14 +721,14 @@ export const App: React.FC = () => {
                         setSelectedCoach('Coach Dan');
                         setPage('book-consultation');
                       }}
-                      className="w-full rounded-md bg-orange-500 py-3.5 mt-4 text-xs font-bold text-white hover:bg-orange-600 transition-all cursor-pointer uppercase tracking-wider shadow-md shadow-orange-500/10"
+                      className="w-full rounded bg-orange-500 py-3.5 mt-4 text-xs font-bold text-white hover:bg-orange-600 transition-all cursor-pointer uppercase tracking-wider shadow-md shadow-orange-500/10"
                     >
                       Book Consultation
                     </button>
                   </div>
 
                   {}
-                  <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden p-6 hover:border-orange-200 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
+                  <div className="rounded border border-zinc-200 bg-white overflow-hidden p-6 hover:border-orange-200 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
                     <div>
                       <img
                         src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&h=300&q=80"
@@ -776,14 +749,14 @@ export const App: React.FC = () => {
                         setSelectedCoach('Coach Clara');
                         setPage('book-consultation');
                       }}
-                      className="w-full rounded-md bg-orange-500 py-3.5 mt-4 text-xs font-bold text-white hover:bg-orange-600 transition-all cursor-pointer uppercase tracking-wider shadow-md shadow-orange-500/10"
+                      className="w-full rounded bg-orange-500 py-3.5 mt-4 text-xs font-bold text-white hover:bg-orange-600 transition-all cursor-pointer uppercase tracking-wider shadow-md shadow-orange-500/10"
                     >
                       Book Consultation
                     </button>
                   </div>
 
                   {}
-                  <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden p-6 hover:border-orange-200 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
+                  <div className="rounded border border-zinc-200 bg-white overflow-hidden p-6 hover:border-orange-200 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
                     <div>
                       <img
                         src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80"
@@ -804,14 +777,14 @@ export const App: React.FC = () => {
                         setSelectedCoach('Coach Alex');
                         setPage('book-consultation');
                       }}
-                      className="w-full rounded-md bg-orange-500 py-3.5 mt-4 text-xs font-bold text-white hover:bg-orange-600 transition-all cursor-pointer uppercase tracking-wider shadow-md shadow-orange-500/10"
+                      className="w-full rounded bg-orange-500 py-3.5 mt-4 text-xs font-bold text-white hover:bg-orange-600 transition-all cursor-pointer uppercase tracking-wider shadow-md shadow-orange-500/10"
                     >
                       Book Consultation
                     </button>
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-orange-100 bg-gradient-to-r from-orange-50 to-orange-100/30 p-8 text-center shadow-sm">
+                <div className="rounded border border-orange-100 bg-gradient-to-r from-orange-50 to-orange-100/30 p-8 text-center shadow-sm">
                   <h4 className="text-lg font-bold text-zinc-900 mb-2">Not sure which coach is right for you?</h4>
                   <p className="text-xs text-zinc-650 mb-6">Take our placement program and schedule a session with our panel organizer.</p>
                   <button
@@ -819,7 +792,7 @@ export const App: React.FC = () => {
                       setSelectedCoach('Runnicle Head Coach');
                       setPage('book-consultation');
                     }}
-                    className="rounded-full bg-orange-500 px-6 py-2.5 text-xs font-bold text-white hover:bg-orange-600 transition-all cursor-pointer shadow-md shadow-orange-500/10"
+                    className="rounded bg-orange-500 px-6 py-2.5 text-xs font-bold text-white hover:bg-orange-600 transition-all cursor-pointer shadow-md shadow-orange-500/10"
                   >
                     Match Me Now
                   </button>
@@ -1062,12 +1035,11 @@ export const App: React.FC = () => {
       {}
       {!['admin-login', 'admin-dashboard', 'admin-registrations', 'admin-events', 'admin-create-event', 'admin-registration-details'].includes(page) && (
         <Footer onPlatformClick={(item) => {
-          if (item === 'Event Calendar') setPage('events');
-          else if (item === 'Contact Us') setPage('contact');
-          else if (item === 'Admin Panel') setPage('admin-login');
-          else {
-            alert(`You clicked ${item}. This is a demonstration link with placeholder content.`);
-          }
+          if (item === 'Dashboard') setPage('home');
+          else if (item === 'Events') setPage('events');
+          else if (item === 'Gallery') setPage('gallery');
+          else if (item === 'Merch') setPage('store');
+          else if (item === 'Contact') setPage('contact');
         }} />
       )}
 

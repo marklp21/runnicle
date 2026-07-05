@@ -113,7 +113,7 @@ export const mockEvents: EventItem[] = [
       ]
     },
     iconType: 'compass',
-    image: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80',
+    image: '/images/event-1.png',
     kitImage: 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=600&q=80',
     routeMapImage: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=600&q=80'
   },

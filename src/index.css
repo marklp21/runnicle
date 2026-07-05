@@ -1,14 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-display: "Bebas Neue", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-sans: "Geist", system-ui, -apple-system, sans-serif;
+  --font-display: "Apple Garamond", "EB Garamond", serif;
+  --font-mono: "Geist Mono", monospace;
+  --font-serif: "Apple Garamond", "EB Garamond", serif;
   
-  --color-brand: #f97316;
-  --color-brand-hover: #ea580c;
-  --color-brand-glow: rgba(249, 115, 22, 0.15);
+  --color-brand: #FF4400;
+  --color-brand-hover: #E63D00;
+  --color-brand-glow: rgba(255, 68, 0, 0.15);
   --color-bg-dark: #ffffff;
+  
+  --color-orange-50: #FFF3EB;
+  --color-orange-100: #FFE6D6;
+  --color-orange-200: #FFCDAD;
+  --color-orange-300: #FFB385;
+  --color-orange-400: #FF8A33;
+  --color-orange-500: #FF4400;
+  --color-orange-600: #E63D00;
+  --color-orange-700: #B33000;
+  --color-orange-800: #802200;
+  --color-orange-900: #4D1400;
 }
 
 html {
@@ -24,12 +36,12 @@ html {
     overscroll-behavior-y: none;
   }
   
-  h1, h2 {
+  h1 {
     font-family: var(--font-display);
     color: #09090b;
   }
   
-  h3, h4, h5, h6 {
+  h2, h3, h4, h5, h6 {
     font-family: var(--font-sans);
     color: #09090b;
   }

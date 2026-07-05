@@ -1,29 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, AlertCircle } from 'lucide-react';
 
 interface HeroProps {
   onSecureSlotClick: () => void;
   onViewCalendarClick: () => void;
-  targetEventName: string;
-  targetEventDate: string;
-  targetEventDeadline: string;
   targetEventTimestamp: number;
 }
 
 export const Hero: React.FC<HeroProps> = ({
   onSecureSlotClick,
   onViewCalendarClick,
-  targetEventName,
-  targetEventDate,
-  targetEventDeadline,
   targetEventTimestamp,
 }) => {
   const [timeLeft, setTimeLeft] = useState({
     days: '00',
     hours: '00',
     minutes: '00',
-    seconds: '00',
   });
 
   useEffect(() => {
@@ -32,210 +24,127 @@ export const Hero: React.FC<HeroProps> = ({
       const difference = targetEventTimestamp - now;
 
       if (difference <= 0) {
-        setTimeLeft({ days: '00', hours: '00', minutes: '00', seconds: '00' });
+        setTimeLeft({ days: '00', hours: '00', minutes: '00' });
         return;
       }
 
       const d = Math.floor(difference / (1000 * 60 * 60 * 24));
       const h = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const m = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((difference % (1000 * 60)) / 1000);
 
       setTimeLeft({
         days: d.toString().padStart(2, '0'),
         hours: h.toString().padStart(2, '0'),
         minutes: m.toString().padStart(2, '0'),
-        seconds: s.toString().padStart(2, '0'),
       });
     };
 
-    tick(); 
-    const interval = setInterval(tick, 1000);
+    tick();
+    const interval = setInterval(tick, 1000 * 60);
     return () => clearInterval(interval);
   }, [targetEventTimestamp]);
 
   return (
-    <section className="relative overflow-hidden pt-16 pb-20 bg-white border-b border-zinc-200 select-none">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center relative">
-          
-          {}
-          <div className="md:col-span-7 flex flex-col items-center md:items-start text-center md:text-left">
-            
-            {}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="inline-flex flex-col items-center lg:items-start gap-2"
-            >
-              <span className="font-mono text-[9px] font-black tracking-widest text-brand uppercase">
-                [ TARGET PROTOCOL 
-              </span>
-              <span className="text-zinc-500 font-mono text-[10px] font-bold mt-1 flex items-center gap-1.5 uppercase">
-                <Calendar className="h-3.5 w-3.5 text-zinc-400" />
-                {targetEventName} • {targetEventDate}
-              </span>
-            </motion.div>
+    <section className="relative overflow-hidden min-h-[85vh] flex items-center justify-center pt-24 pb-20 bg-black select-none">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/images/hero-bg.png"
+          alt="Runner in motion"
+          className="w-full h-full object-cover grayscale brightness-150 contrast-125"
+        />
+        {/* Dark overlay gradients */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/80 via-transparent to-transparent" />
+      </div>
 
-            {}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="mt-6 font-display text-5xl sm:text-6xl md:text-7xl font-black leading-[0.95] tracking-tight text-zinc-900 uppercase"
-            >
-              Bacolod Speed<br className="hidden sm:inline" />
-              System.
-            </motion.h1>
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
 
-            {}
-            <motion.p
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="mt-5 max-w-md font-mono text-[10px] tracking-wide text-zinc-500 leading-relaxed uppercase"
-            >
-              
-            </motion.p>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center justify-center rounded-full bg-[#FF4400] px-5 py-1.5 mb-8"
+        >
+          <span className="font-mono text-xs font-normal tracking-widest text-white uppercase">
+            MEGAWORLD FUN RUN 2026
+          </span>
+        </motion.div>
 
-            {}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex justify-center md:justify-start items-center gap-4 sm:gap-6 mt-8 w-full font-mono"
-            >
-              {}
-              <div className="w-14 sm:w-16">
-                <span className="font-display text-4xl sm:text-5xl font-black tracking-tight text-zinc-900 block">
-                  {timeLeft.days}
-                </span>
-                <span className="mt-1 text-[8px] sm:text-[9px] font-bold tracking-widest text-brand uppercase block">
-                  [DAYS]
-                </span>
-              </div>
+        {/* Main Headline */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="font-sans text-5xl sm:text-6xl md:text-[80px] font-bold leading-[1.1] tracking-tight text-white mb-6"
+        >
+          Every Mile Has a <span className="font-serif italic text-[#FF4400] normal-case font-bold tracking-normal">Story</span><br />
+          Write Yours
+        </motion.h1>
 
-              <div className="text-xl text-zinc-300 font-light select-none pb-3.5">:</div>
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="max-w-2xl text-sm sm:text-base text-zinc-300 font-normal leading-relaxed mb-10"
+        >
+          Registration closes when the clock hits zero. Secure your slot, track your pace, and write your next chapter in the Runnicle archive.
+        </motion.p>
 
-              {}
-              <div className="w-14 sm:w-16">
-                <span className="font-display text-4xl sm:text-5xl font-black tracking-tight text-zinc-900 block">
-                  {timeLeft.hours}
-                </span>
-                <span className="mt-1 text-[8px] sm:text-[9px] font-bold tracking-widest text-brand uppercase block">
-                  [HRS]
-                </span>
-              </div>
+        {/* Countdown Timer */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="flex flex-col items-center mb-14"
+        >
+          <span className="font-mono text-xs font-bold tracking-widest text-[#FF4400] uppercase mb-4">
+            REGISTRATION CLOSES IN:
+          </span>
 
-              <div className="text-xl text-zinc-300 font-light select-none pb-3.5">:</div>
+          <div className="flex items-center gap-4 sm:gap-6 mt-2">
+            {/* Days */}
+            <div className="flex flex-col items-center justify-center w-24 h-24 sm:w-28 sm:h-28 border border-[#FF4400] rounded-[7px] bg-transparent">
+              <span className="font-sans text-4xl sm:text-5xl font-bold text-white leading-none">{timeLeft.days}</span>
+              <span className="text-sm font-bold text-[#FF4400] mt-0.5 uppercase tracking-widest font-mono">DAYS</span>
+            </div>
 
-              {}
-              <div className="w-14 sm:w-16">
-                <span className="font-display text-4xl sm:text-5xl font-black tracking-tight text-zinc-900 block">
-                  {timeLeft.minutes}
-                </span>
-                <span className="mt-1 text-[8px] sm:text-[9px] font-bold tracking-widest text-brand uppercase block">
-                  [MINS]
-                </span>
-              </div>
+            {/* Hours */}
+            <div className="flex flex-col items-center justify-center w-24 h-24 sm:w-28 sm:h-28 border border-[#FF4400] rounded-[7px] bg-transparent">
+              <span className="font-sans text-4xl sm:text-5xl font-bold text-white leading-none">{timeLeft.hours}</span>
+              <span className="text-sm font-bold text-[#FF4400] mt-0.5 uppercase tracking-widest font-mono">HRS</span>
+            </div>
 
-              <div className="text-xl text-zinc-300 font-light select-none pb-3.5">:</div>
-
-              {}
-              <div className="w-14 sm:w-16">
-                <span className="font-display text-4xl sm:text-5xl font-black tracking-tight text-brand block animate-pulse">
-                  {timeLeft.seconds}
-                </span>
-                <span className="mt-1 text-[8px] sm:text-[9px] font-bold tracking-widest text-brand uppercase block">
-                  [SECS]
-                </span>
-              </div>
-            </motion.div>
-
-            {}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="mt-6 font-mono text-[9px] text-zinc-400 font-bold uppercase flex items-center justify-center md:justify-start gap-1.5"
-            >
-              <AlertCircle className="h-3.5 w-3.5 text-zinc-400" />
-              REGISTRATION TERMINAL DEACTIVATION ON {targetEventDeadline}
-            </motion.p>            {}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="mt-8 flex flex-col sm:flex-row gap-3 w-full justify-center md:justify-start"
-            >
-              <button
-                onClick={onSecureSlotClick}
-                className="w-full sm:w-auto bg-brand hover:bg-brand-hover px-8 py-3.5 text-[10px] font-mono font-black tracking-widest uppercase text-white transition-all cursor-pointer shadow-lg shadow-brand/5 flex items-center justify-center gap-1.5 group"
-              >
-                <span>REGISTER NOW</span>
-                <span className="group-hover:translate-x-1 transition-transform duration-200">{"[>]"}</span>
-              </button>
-              
-              <button
-                onClick={onViewCalendarClick}
-                className="w-full sm:w-auto border border-zinc-300 hover:border-zinc-400 bg-white px-8 py-3.5 text-[10px] font-mono font-black tracking-widest uppercase text-zinc-900 transition-all cursor-pointer flex items-center justify-center gap-1.5 group"
-              >
-                <span>VIEW CALENDAR</span>
-                <span className="group-hover:translate-x-1 transition-transform duration-200">{"[>]"}</span>
-              </button>
-            </motion.div>
-          </div>
-
-          {}
-          <div className="hidden md:block md:col-span-5 relative w-full aspect-[4/5] bg-zinc-50 border border-zinc-200/80 p-2">
-            
-            {}
-            <span className="absolute top-1.5 left-1.5 text-[9px] font-light text-zinc-400/60 select-none">+</span>
-            <span className="absolute top-1.5 right-1.5 text-[9px] font-light text-zinc-400/60 select-none">+</span>
-            <span className="absolute bottom-1.5 left-1.5 text-[9px] font-light text-zinc-400/60 select-none">+</span>
-            <span className="absolute bottom-1.5 right-1.5 text-[9px] font-light text-zinc-400/60 select-none">+</span>
-
-            <div className="relative w-full h-full overflow-hidden border border-zinc-200">
-              <img
-                src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80"
-                alt="Elite athlete training"
-                className="h-full w-full object-cover opacity-90 filter grayscale contrast-110"
-              />
-              {}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-              
-              {}
-              <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3.5 py-2.5 border border-zinc-200 shadow-md flex items-center gap-2.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
-                <div className="font-mono">
-                  <div className="text-[7.5px] font-black text-zinc-400 uppercase tracking-widest">PROTOCOL ACTIVE</div>
-                  <div className="text-[10px] font-black text-zinc-900 uppercase tracking-wide">1,840 ACTIVE RUNNERS</div>
-                </div>
-              </div>
-
-              {}
-              <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3.5 border border-zinc-200 shadow-lg flex items-center justify-between font-mono">
-                <div>
-                  <div className="text-[7px] font-black text-brand uppercase tracking-widest">WEEKLY TARGET PROTOCOL</div>
-                  <div className="text-[11px] font-black text-zinc-900 mt-0.5 uppercase tracking-wide">Bacolod Coastal Run</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-[7.5px] font-black text-zinc-400 uppercase tracking-widest">PB LOG</div>
-                  <div className="text-[10px] font-black text-brand mt-0.5 tracking-wide">38:45 [10K]</div>
-                </div>
-              </div>
+            {/* Minutes */}
+            <div className="flex flex-col items-center justify-center w-24 h-24 sm:w-28 sm:h-28 border border-[#FF4400] rounded-[7px] bg-transparent">
+              <span className="font-sans text-4xl sm:text-5xl font-bold text-white leading-none">{timeLeft.minutes}</span>
+              <span className="text-sm font-bold text-[#FF4400] mt-0.5 uppercase tracking-widest font-mono">MINS</span>
             </div>
           </div>
+        </motion.div>
 
-          {}
-          <div className="absolute right-[-135px] top-1/2 -translate-y-1/2 rotate-90 select-none pointer-events-none hidden 2xl:block">
-            <span className="font-display text-[95px] font-black tracking-[0.18em] uppercase whitespace-nowrap block" style={{ WebkitTextStroke: '1px var(--color-brand-glow)', color: 'transparent' }}>
-              RUNNICLE
-            </span>
-          </div>
+        {/* Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
+        >
+          <button
+            onClick={onSecureSlotClick}
+            className="bg-[#FF4400] hover:bg-[#E63D00] px-8 py-4 text-xs font-semibold tracking-widest uppercase text-white transition-all cursor-pointer min-w-[240px] rounded-[7px]"
+          >
+            SECURE YOUR SLOT
+          </button>
 
-        </div>
+          <button
+            onClick={onViewCalendarClick}
+            className="bg-transparent border border-[#FF4400] hover:bg-[#FF4400]/10 px-8 py-4 text-xs font-semibold tracking-widest uppercase text-[#FF4400] transition-all cursor-pointer min-w-[240px] rounded-[7px]"
+          >
+            VIEW EVENT & DETAILS
+          </button>
+        </motion.div>
+
       </div>
     </section>
   );
