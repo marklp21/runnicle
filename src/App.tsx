@@ -16,7 +16,6 @@ import Footer from './components/Footer';
 import Modal from './components/Modal';
 import FeaturedGallery from './components/FeaturedGallery';
 import BibsAndMerch from './components/BibsAndMerch';
-import GetInTouch from './components/GetInTouch';
 
 import EventDetailsPage from './pages/EventDetailsPage';
 import RegistrationPage from './pages/RegistrationPage';
