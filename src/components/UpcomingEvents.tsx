@@ -63,7 +63,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
 
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
           <div>
-            <h2 className="font-serif text-4xl font-bold tracking-tight text-zinc-900 mb-2">
+            <h2 className="font-serif text-4xl font-bold not-italic tracking-tight text-zinc-900 mb-2">
               Race <span className="font-serif italic text-[#FF4400] font-normal">Calendar</span>
             </h2>
             <p className="text-sm text-black font-normal">
