@@ -46,16 +46,66 @@ import {
 
 import { mockCommunityPosts } from './data/mockData';
 
+const getPathFromPage = (pageName: string): string => {
+  switch (pageName) {
+    case 'home': return '/';
+    case 'events': return '/events';
+    case 'event-details': return '/event-details';
+    case 'event-results': return '/event-results';
+    case 'register': return '/register';
+    case 'gallery': return '/gallery';
+    case 'news': return '/news';
+    case 'article-details': return '/article-details';
+    case 'store': return '/store';
+    case 'product-details': return '/product-details';
+    case 'cart': return '/cart';
+    case 'checkout': return '/checkout';
+    case 'order-confirmation': return '/order-confirmation';
+    case 'contact': return '/contact';
+    case 'admin-login': return '/admin_page';
+    case 'admin-dashboard': return '/admin_dashboard';
+    case 'admin-registrations': return '/admin_registrations';
+    case 'admin-events': return '/admin_events';
+    case 'admin-create-event': return '/admin_create_event';
+    case 'admin-registration-details': return '/admin_registration_details';
+    default: return '/';
+  }
+};
+
+const getPageFromPath = (path: string): string => {
+  switch (path) {
+    case '/': return 'home';
+    case '/events': return 'events';
+    case '/event-details': return 'event-details';
+    case '/event-results': return 'event-results';
+    case '/register': return 'register';
+    case '/gallery': return 'gallery';
+    case '/news': return 'news';
+    case '/article-details': return 'article-details';
+    case '/store': return 'store';
+    case '/product-details': return 'product-details';
+    case '/cart': return 'cart';
+    case '/checkout': return 'checkout';
+    case '/order-confirmation': return 'order-confirmation';
+    case '/contact': return 'contact';
+    case '/admin_page': return 'admin-login';
+    case '/admin_dashboard': return 'admin-dashboard';
+    case '/admin_registrations': return 'admin-registrations';
+    case '/admin_events': return 'admin-events';
+    case '/admin_create_event': return 'admin-create-event';
+    case '/admin_registration_details': return 'admin-registration-details';
+    default: return 'home';
+  }
+};
+
 export const App: React.FC = () => {
   
   const [page, setPage] = useState<string>(() => {
     const path = window.location.pathname;
-    if (path === '/admin_page') return 'admin-login';
-    if (path === '/admin_dashboard') return 'admin-dashboard';
-    if (path === '/admin_registrations') return 'admin-registrations';
-    if (path === '/admin_events') return 'admin-events';
-    if (path === '/admin_create_event') return 'admin-create-event';
-    if (path === '/admin_registration_details') return 'admin-registration-details';
+    const matchedPage = getPageFromPath(path);
+    if (matchedPage !== 'home') {
+      return matchedPage;
+    }
     
     const savedPage = sessionStorage.getItem('runnicle_current_page');
     if (savedPage && !['admin-login', 'admin-dashboard', 'admin-registrations', 'admin-events', 'admin-create-event', 'admin-registration-details'].includes(savedPage)) {
@@ -198,62 +248,24 @@ export const App: React.FC = () => {
       return;
     }
 
-    if (page === 'admin-login') {
-      if (currentPath !== '/admin_page') {
-        window.history.pushState(null, '', '/admin_page');
-      }
-    } else if (page === 'admin-dashboard') {
-      if (currentPath !== '/admin_dashboard') {
-        window.history.pushState(null, '', '/admin_dashboard');
-      }
-    } else if (page === 'admin-registrations') {
-      if (currentPath !== '/admin_registrations') {
-        window.history.pushState(null, '', '/admin_registrations');
-      }
-    } else if (page === 'admin-events') {
-      if (currentPath !== '/admin_events') {
-        window.history.pushState(null, '', '/admin_events');
-      }
-    } else if (page === 'admin-create-event') {
-      if (currentPath !== '/admin_create_event') {
-        window.history.pushState(null, '', '/admin_create_event');
-      }
-    } else if (page === 'admin-registration-details') {
-      if (currentPath !== '/admin_registration_details') {
-        window.history.pushState(null, '', '/admin_registration_details');
-      }
-    } else if (page === 'home') {
-      if (currentPath !== '/') {
-        window.history.pushState(null, '', '/');
-      }
-      sessionStorage.setItem('runnicle_current_page', 'home');
+    const targetPath = getPathFromPage(page);
+    if (currentPath !== targetPath) {
+      window.history.pushState(null, '', targetPath);
+    }
+
+    // Persist to sessionStorage if it's not an admin page
+    if (!isAdminView) {
+      sessionStorage.setItem('runnicle_current_page', page);
     } else {
-      if (!isAdminView) {
-        sessionStorage.setItem('runnicle_current_page', page);
-      } else {
-        sessionStorage.removeItem('runnicle_current_page');
-      }
+      sessionStorage.removeItem('runnicle_current_page');
     }
   }, [page]);
 
   React.useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname;
-      if (path === '/admin_page') {
-        setPage('admin-login');
-      } else if (path === '/admin_dashboard') {
-        setPage('admin-dashboard');
-      } else if (path === '/admin_registrations') {
-        setPage('admin-registrations');
-      } else if (path === '/admin_events') {
-        setPage('admin-events');
-      } else if (path === '/admin_create_event') {
-        setPage('admin-create-event');
-      } else if (path === '/admin_registration_details') {
-        setPage('admin-registration-details');
-      } else if (path === '/') {
-        setPage('home');
-      }
+      const matchedPage = getPageFromPath(path);
+      setPage(matchedPage);
     };
 
     window.addEventListener('popstate', handlePopState);
