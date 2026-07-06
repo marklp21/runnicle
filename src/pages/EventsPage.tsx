@@ -54,30 +54,30 @@ export const EventsPage: React.FC<EventsPageProps> = ({
         <div className="flex flex-wrap justify-center gap-2.5 mb-10">
           <button
             onClick={() => setActiveTab('all')}
-            className={`rounded-full px-5 py-2 text-[10px] font-mono font-bold uppercase tracking-widest transition-all cursor-pointer border ${
+            className={`rounded-full px-5 py-2.5 text-xs font-sans font-bold uppercase transition-all cursor-pointer border ${
               activeTab === 'all'
-                ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-sm shadow-[#FF4400]/10'
-                : 'border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-[#FF4400] bg-white'
+                ? 'bg-[#FF4400] text-white border-[#FF4400]'
+                : 'border-zinc-300 text-zinc-500 hover:text-zinc-800 bg-[#F5F5F5]'
             }`}
           >
             ALL ({events.length})
           </button>
           <button
             onClick={() => setActiveTab('upcoming')}
-            className={`rounded-full px-5 py-2 text-[10px] font-mono font-bold uppercase tracking-widest transition-all cursor-pointer border ${
+            className={`rounded-full px-5 py-2.5 text-xs font-sans font-bold uppercase transition-all cursor-pointer border ${
               activeTab === 'upcoming'
-                ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-sm shadow-[#FF4400]/10'
-                : 'border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-[#FF4400] bg-white'
+                ? 'bg-[#FF4400] text-white border-[#FF4400]'
+                : 'border-zinc-300 text-zinc-500 hover:text-zinc-800 bg-[#F5F5F5]'
             }`}
           >
             UPCOMING EVENTS ({upcomingEvents.length})
           </button>
           <button
             onClick={() => setActiveTab('past')}
-            className={`rounded-full px-5 py-2 text-[10px] font-mono font-bold uppercase tracking-widest transition-all cursor-pointer border ${
+            className={`rounded-full px-5 py-2.5 text-xs font-sans font-bold uppercase transition-all cursor-pointer border ${
               activeTab === 'past'
-                ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-sm shadow-[#FF4400]/10'
-                : 'border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-[#FF4400] bg-white'
+                ? 'bg-[#FF4400] text-white border-[#FF4400]'
+                : 'border-zinc-300 text-zinc-500 hover:text-zinc-800 bg-[#F5F5F5]'
             }`}
           >
             PAST EVENTS ({pastEvents.length})
