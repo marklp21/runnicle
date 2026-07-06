@@ -236,8 +236,6 @@ export const App: React.FC = () => {
 
   
   React.useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-
     // Sync path with page state & implement Auth Guard
     const currentPath = window.location.pathname;
     const isLoggedIn = sessionStorage.getItem('runnicle_admin_logged') === 'true' || localStorage.getItem('runnicle_admin_logged') === 'true';
@@ -253,12 +251,18 @@ export const App: React.FC = () => {
       window.history.pushState(null, '', targetPath);
     }
 
+    const scrollTimer = setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }, 80);
+
     // Persist to sessionStorage if it's not an admin page
     if (!isAdminView) {
       sessionStorage.setItem('runnicle_current_page', page);
     } else {
       sessionStorage.removeItem('runnicle_current_page');
     }
+
+    return () => clearTimeout(scrollTimer);
   }, [page]);
 
   React.useEffect(() => {
@@ -607,10 +611,10 @@ export const App: React.FC = () => {
         <AnimatePresence mode="wait">
           <motion.div
             key={page}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: 'easeInOut' }}
           >
             
             {page === 'home' && (
