@@ -56,6 +56,11 @@ export const App: React.FC = () => {
     if (path === '/admin_events') return 'admin-events';
     if (path === '/admin_create_event') return 'admin-create-event';
     if (path === '/admin_registration_details') return 'admin-registration-details';
+    
+    const savedPage = sessionStorage.getItem('runnicle_current_page');
+    if (savedPage && !['admin-login', 'admin-dashboard', 'admin-registrations', 'admin-events', 'admin-create-event', 'admin-registration-details'].includes(savedPage)) {
+      return savedPage;
+    }
     return 'home';
   });
 
@@ -221,6 +226,13 @@ export const App: React.FC = () => {
       if (currentPath !== '/') {
         window.history.pushState(null, '', '/');
       }
+      sessionStorage.setItem('runnicle_current_page', 'home');
+    } else {
+      if (!isAdminView) {
+        sessionStorage.setItem('runnicle_current_page', page);
+      } else {
+        sessionStorage.removeItem('runnicle_current_page');
+      }
     }
   }, [page]);
 
@@ -249,13 +261,74 @@ export const App: React.FC = () => {
   }, []);
   
   
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    const stored = localStorage.getItem('runnicle_cart_items');
+    return stored ? JSON.parse(stored) : [];
+  });
   
   
-  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(() => {
+    const stored = sessionStorage.getItem('runnicle_selected_event');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(() => {
+    const stored = sessionStorage.getItem('runnicle_selected_product');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
   const [selectedCoach, setSelectedCoach] = useState<string | null>(null);
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(() => {
+    const stored = sessionStorage.getItem('runnicle_selected_article');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem('runnicle_cart_items', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  React.useEffect(() => {
+    if (selectedEvent) {
+      sessionStorage.setItem('runnicle_selected_event', JSON.stringify(selectedEvent));
+    } else {
+      sessionStorage.removeItem('runnicle_selected_event');
+    }
+  }, [selectedEvent]);
+
+  React.useEffect(() => {
+    if (selectedProduct) {
+      sessionStorage.setItem('runnicle_selected_product', JSON.stringify(selectedProduct));
+    } else {
+      sessionStorage.removeItem('runnicle_selected_product');
+    }
+  }, [selectedProduct]);
+
+  React.useEffect(() => {
+    if (selectedArticle) {
+      sessionStorage.setItem('runnicle_selected_article', JSON.stringify(selectedArticle));
+    } else {
+      sessionStorage.removeItem('runnicle_selected_article');
+    }
+  }, [selectedArticle]);
 
   
   const [confirmedOrder, setConfirmedOrder] = useState<any | null>(null);
