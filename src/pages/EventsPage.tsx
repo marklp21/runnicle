@@ -42,10 +42,10 @@ export const EventsPage: React.FC<EventsPageProps> = ({
 
         {/* Header section */}
         <div className="mb-10 text-center">
-          <h1 className="font-sans text-4xl font-extrabold tracking-tight text-zinc-900 sm:text-5xl">
-            Race <span className="font-serif italic text-[#FF4400] font-normal">Calendar</span>
+          <h1 className="font-sans text-4xl font-semibold tracking-tight text-zinc-900 sm:text-5xl">
+            Race <span className="font-serif italic text-[#FF4400] font-bold">Calendar</span>
           </h1>
-          <p className="mt-3 text-zinc-500 text-sm font-normal">
+          <p className="mt-3 text-black text-sm font-normal">
             Events designed for every pace. Push your boundaries on the track.
           </p>
         </div>
