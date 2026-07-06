@@ -693,6 +693,7 @@ export const App: React.FC = () => {
             {page === 'register' && (
               <RegistrationPage
                 event={selectedEvent}
+                allEvents={events}
                 onRegisterComplete={handleRegisterComplete}
                 onBack={() => {
                   if (selectedEvent) setPage('event-details');

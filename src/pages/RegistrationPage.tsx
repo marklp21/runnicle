@@ -4,6 +4,7 @@ import { type EventItem } from '../data/mockData';
 
 interface RegistrationPageProps {
   event: EventItem | null;
+  allEvents: EventItem[];
   defaultTitle?: string;
   onBack: () => void;
   onRegisterComplete?: (registration: any) => void;
@@ -11,10 +12,17 @@ interface RegistrationPageProps {
 
 export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   event,
+  allEvents,
   defaultTitle = 'Early-Bird Registration',
   onBack,
   onRegisterComplete,
 }) => {
+  const [selectedEventItem, setSelectedEventItem] = useState<EventItem | null>(() => {
+    if (event) return event;
+    const upcoming = allEvents.filter(e => new Date(e.date).getTime() >= new Date().getTime());
+    return upcoming.length > 0 ? upcoming[0] : null;
+  });
+
   const [step, setStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState('GCash');
   const [referenceNumber, setReferenceNumber] = useState('');
@@ -27,7 +35,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
     email: '',
     phone: '',
     gender: 'Male',
-    distance: event ? event.distances[0] : '10K',
+    distance: event ? event.distances[0] : (allEvents.filter(e => new Date(e.date).getTime() >= new Date().getTime())[0]?.distances[0] || '10K'),
     size: 'Unisex - Medium (M)',
     emergencyContact: '',
     emergencyPhone: '',
@@ -37,7 +45,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   const [registeredBib, setRegisteredBib] = useState('');
   const [registeredName, setRegisteredName] = useState('');
 
-  const eventTitle = event ? event.title : defaultTitle;
+  const eventTitle = selectedEventItem ? selectedEventItem.title : defaultTitle;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -150,7 +158,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
               </div>
               <div className="text-right">
                 <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block">Race Date</span>
-                <span className="text-xs font-bold text-zinc-700 mt-1 block">{event ? event.date : 'Upcoming Season'}</span>
+                <span className="text-xs font-bold text-zinc-700 mt-1 block">{selectedEventItem ? selectedEventItem.date : 'Upcoming Season'}</span>
               </div>
             </div>
 
@@ -336,6 +344,26 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">2. Event Logistics</h3>
                   
                   <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Select Event / Run</label>
+                      <select
+                        name="eventId"
+                        value={selectedEventItem?.id || ''}
+                        onChange={(e) => {
+                          const newEvent = allEvents.find(ev => ev.id === e.target.value);
+                          if (newEvent) {
+                            setSelectedEventItem(newEvent);
+                            setFormData(prev => ({ ...prev, distance: newEvent.distances[0] }));
+                          }
+                        }}
+                        className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-700 focus:border-brand focus:outline-none animate-none"
+                      >
+                        {allEvents.filter(e => new Date(e.date).getTime() >= new Date().getTime()).map((ev) => (
+                          <option key={ev.id} value={ev.id}>{ev.title} ({ev.date})</option>
+                        ))}
+                      </select>
+                    </div>
+
                     <div>
                       <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Selected Distance</label>
                       <select
@@ -344,8 +372,8 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                         onChange={handleChange}
                         className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-700 focus:border-brand focus:outline-none animate-none"
                       >
-                        {event ? (
-                          event.distances.map((d) => (
+                        {selectedEventItem ? (
+                          selectedEventItem.distances.map((d) => (
                             <option key={d} value={d}>{d}</option>
                           ))
                         ) : (
@@ -511,7 +539,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                     {paymentMethod === 'GCash' && (
                       <div className="space-y-3 font-mono text-xs text-zinc-600 leading-relaxed uppercase">
                         <p className="font-extrabold text-zinc-950">GCash Payment Instructions:</p>
-                        <p>1. Send amount {event ? event.details.fee : '₱1,250.00'} to GCash number: <span className="text-brand font-black">0917 123 4567</span> (Runnicle timing Corp).</p>
+                        <p>1. Send amount {selectedEventItem ? selectedEventItem.details.fee : '₱1,250.00'} to GCash number: <span className="text-brand font-black">0917 123 4567</span> (Runnicle timing Corp).</p>
                         <p>2. Enter your 13-digit GCash Transaction Reference number below to verify your entry slot.</p>
                       </div>
                     )}
@@ -519,7 +547,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                     {paymentMethod === 'Maya' && (
                       <div className="space-y-3 font-mono text-xs text-zinc-600 leading-relaxed uppercase">
                         <p className="font-extrabold text-zinc-950">Maya Payment Instructions:</p>
-                        <p>1. Send amount {event ? event.details.fee : '₱1,250.00'} to merchant code: <span className="text-brand font-black">@runnicle.ph</span> or via QR code scanning.</p>
+                        <p>1. Send amount {selectedEventItem ? selectedEventItem.details.fee : '₱1,250.00'} to merchant code: <span className="text-brand font-black">@runnicle.ph</span> or via QR code scanning.</p>
                         <p>2. Enter your transaction reference number below to verify your entry slot.</p>
                       </div>
                     )}
@@ -527,7 +555,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                     {paymentMethod === 'Bank' && (
                       <div className="space-y-3 font-mono text-xs text-zinc-600 leading-relaxed uppercase">
                         <p className="font-extrabold text-zinc-950">Bank Deposit Instructions:</p>
-                        <p>1. Deposit amount {event ? event.details.fee : '₱1,250.00'} to BDO Account: <span className="text-brand font-black">0012-3456-7890</span> (Runnicle Athletics Corp).</p>
+                        <p>1. Deposit amount {selectedEventItem ? selectedEventItem.details.fee : '₱1,250.00'} to BDO Account: <span className="text-brand font-black">0012-3456-7890</span> (Runnicle Athletics Corp).</p>
                         <p>2. Enter your deposit transaction reference ID below.</p>
                       </div>
                     )}
@@ -697,11 +725,11 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                 <div className="grid grid-cols-2 gap-4 text-xs font-semibold">
                   <div>
                     <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Location</span>
-                    <span className="text-zinc-700 mt-1 block">{event ? event.location : 'Bacolod City'}</span>
+                    <span className="text-zinc-700 mt-1 block">{selectedEventItem ? selectedEventItem.location : 'Bacolod City'}</span>
                   </div>
                   <div>
                     <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Race Date</span>
-                    <span className="text-zinc-700 mt-1 block">{event ? event.date : 'Upcoming Season'}</span>
+                    <span className="text-zinc-700 mt-1 block">{selectedEventItem ? selectedEventItem.date : 'Upcoming Season'}</span>
                   </div>
                 </div>
               </div>
@@ -709,7 +737,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
               <div className="border-t border-zinc-200 pt-6 space-y-3 text-xs font-semibold text-zinc-500">
                 <div className="flex justify-between">
                   <span>Standard Entry Fee</span>
-                  <span className="text-zinc-900">{event ? event.details.fee : '₱1,250.00'}</span>
+                  <span className="text-zinc-900">{selectedEventItem ? selectedEventItem.details.fee : '₱1,250.00'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Athlete Insurance</span>
@@ -721,7 +749,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                 </div>
                 <div className="border-t border-zinc-200 pt-4 flex justify-between text-sm font-bold">
                   <span className="text-zinc-900">Total Charge</span>
-                  <span className="text-brand">{event ? event.details.fee : '₱1,250.00'}</span>
+                  <span className="text-brand">{selectedEventItem ? selectedEventItem.details.fee : '₱1,250.00'}</span>
                 </div>
               </div>
 
