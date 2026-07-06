@@ -32,8 +32,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onJoinC
               <button
                 key={item}
                 onClick={() => setActiveTab(item)}
-                className={`text-sm font-normal transition-colors duration-200 cursor-pointer ${
-                  activeTab === item ? 'text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'
+                className={`text-sm font-medium transition-colors duration-200 cursor-pointer ${
+                  activeTab === item ? 'text-[#FF4400] font-semibold' : 'text-zinc-500 hover:text-[#FF4400]'
                 }`}
               >
                 {item}
