@@ -64,7 +64,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
           <div>
             <h2 className="text-4xl font-bold tracking-tight text-zinc-900 mb-2">
-              Upcoming <span className="font-serif italic text-[#FF4400] font-semibold">Events</span>
+              Race <span className="font-serif italic text-[#FF4400] font-semibold">Calendar</span>
             </h2>
             <p className="text-sm text-black font-normal">
               Events designed for every pace. Push your boundaries on the track.
