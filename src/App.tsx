@@ -75,6 +75,12 @@ export const App: React.FC = () => {
   // Elevate events state (initial load from mockEvents and sync with localStorage)
   const [events, setEvents] = useState<EventItem[]>(() => {
     const stored = localStorage.getItem('runnicle_events');
+    const hasReset = localStorage.getItem('runnicle_events_redesign_v2');
+    if (!hasReset) {
+      localStorage.setItem('runnicle_events_redesign_v2', 'true');
+      localStorage.setItem('runnicle_events', JSON.stringify(mockEvents));
+      return mockEvents;
+    }
     return stored ? JSON.parse(stored) : mockEvents;
   });
 
@@ -373,6 +379,7 @@ export const App: React.FC = () => {
   const getNavbarActiveTab = () => {
     if (page === 'home') return 'Dashboard';
     if (['events', 'event-details', 'event-results', 'register'].includes(page)) return 'Events';
+    if (page === 'gallery') return 'Gallery';
     if (page === 'news' || page === 'article-details') return 'News';
     if (page === 'store' || page === 'product-details' || page === 'cart' || page === 'checkout' || page === 'order-confirmation') return 'Merch';
     if (page === 'contact') return 'Contact';
@@ -383,6 +390,7 @@ export const App: React.FC = () => {
   const handleTabChange = (tab: string) => {
     if (tab === 'Dashboard') setPage('home');
     else if (tab === 'Events') setPage('events');
+    else if (tab === 'Gallery') setPage('gallery');
     else if (tab === 'News') setPage('news');
     else if (tab === 'Merch') setPage('store');
     else if (tab === 'Contact') setPage('contact');
@@ -559,6 +567,7 @@ export const App: React.FC = () => {
             {page === 'events' && (
               <EventsPage
                 events={events}
+                onBack={() => setPage('home')}
                 onRegisterClick={(event) => {
                   setSelectedEvent(event);
                   setPage('register');
