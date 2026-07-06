@@ -365,7 +365,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const totalRevenue = filteredRegistrations.reduce((acc, curr) => {
     if (curr.status === 'Cancelled') return acc;
     // Calculate basic revenue, parse fee out of the event or assume standard 1250 if not present
-    const feeStr = curr.eventTitle ? (events.find(e => e.title === curr.eventTitle)?.details.fee || '₱1,250.00') : '₱1,250.00';
+    const feeStr = curr.fee || (curr.eventTitle ? (events.find(e => e.title === curr.eventTitle)?.details.fee || '₱1,250.00') : '₱1,250.00');
     const numericFee = parseInt(feeStr.replace(/\D/g, '')) || 0;
     return acc + numericFee;
   }, 0);

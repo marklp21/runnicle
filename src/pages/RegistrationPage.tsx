@@ -2,6 +2,94 @@ import React, { useState } from 'react';
 import { ArrowLeft, Printer, ClipboardCheck, ArrowRight, ShieldCheck } from 'lucide-react';
 import { type EventItem } from '../data/mockData';
 
+export const getRegistrationDetails = (event: EventItem | null, distance: string, allEvents: EventItem[]) => {
+  let fee = '₱1,250.00';
+  let perks = [
+    'Official Runnicle Dry-Fit Singlet',
+    'RFID-equipped Timing Bib',
+    'Official Finisher Medal',
+    'Sponsor Goodie Vouchers'
+  ];
+
+  const targetEvent = event || (allEvents.filter(e => new Date(e.date).getTime() >= new Date().getTime())[0] || null);
+
+  if (!targetEvent) {
+    if (distance === '3K') {
+      fee = '₱750.00';
+      perks = ['Runnicle Fun Run Singlet', 'Standard Race Bib', 'Finisher Medal'];
+    } else if (distance === '5K') {
+      fee = '₱950.00';
+      perks = ['Runnicle Tech Singlet', 'RFID Timing Bib', 'Finisher Medal', 'Refreshment Access'];
+    } else {
+      fee = '₱1,250.00';
+      perks = ['Runnicle Premium Singlet', 'RFID Timing Bib', 'Finisher Medal', 'Refreshment Access', 'Finisher Shirt'];
+    }
+    return { fee, perks };
+  }
+
+  // Calculate based on event fee
+  const baseFeeStr = targetEvent.details.fee || '₱1,250.00';
+  const baseFeeNumber = parseInt(baseFeeStr.replace(/\D/g, '')) || 1250;
+
+  if (distance.toUpperCase().includes('3K')) {
+    fee = `₱${(baseFeeNumber - 500).toLocaleString()}.00`;
+    perks = [
+      'Official Runnicle Dry-Fit Singlet',
+      'Standard Race Bib',
+      'Official Finisher Medal',
+      'Sponsor Discount Vouchers'
+    ];
+  } else if (distance.toUpperCase().includes('5K')) {
+    fee = `₱${(baseFeeNumber - 300).toLocaleString()}.00`;
+    perks = [
+      'Official Runnicle Dry-Fit Singlet',
+      'RFID-equipped Timing Bib',
+      'Official Finisher Medal',
+      'Sponsor Discount Vouchers',
+      'Hydration Station Access'
+    ];
+  } else if (distance.toUpperCase().includes('10K')) {
+    fee = `₱${baseFeeNumber.toLocaleString()}.00`;
+    perks = [
+      'Official Runnicle Dry-Fit Singlet',
+      'RFID-equipped Timing Bib',
+      'Official Finisher Medal',
+      'Sponsor Discount Vouchers',
+      'Hydration Station Access',
+      'Free Entrance to Post-Race Music Festival'
+    ];
+  } else if (distance.toUpperCase().includes('21K') || distance.toUpperCase().includes('HALF')) {
+    fee = `₱${(baseFeeNumber + 600).toLocaleString()}.00`;
+    perks = [
+      'Official Runnicle Dry-Fit Singlet',
+      'RFID-equipped Timing Bib',
+      'Official Finisher Medal',
+      'Sponsor Discount Vouchers',
+      'Hydration Station Access',
+      'Free Entrance to Post-Race Music Festival',
+      'Exclusive 21K Finisher Tech Tee'
+    ];
+  } else if (distance.toUpperCase().includes('MARATHON') || distance.toUpperCase().includes('42K')) {
+    fee = `₱${(baseFeeNumber + 1200).toLocaleString()}.00`;
+    perks = [
+      'Official Runnicle Dry-Fit Singlet',
+      'RFID-equipped Timing Bib',
+      'Official Finisher Medal',
+      'Sponsor Discount Vouchers',
+      'Hydration & Recovery Station Access',
+      'Free Entrance to Post-Race Music Festival',
+      'Exclusive 42K Finisher Tech Tee',
+      'Finisher Recovery Towel',
+      'Complimentary Hot Post-Race Recovery Meal'
+    ];
+  } else {
+    fee = baseFeeStr;
+    perks = targetEvent.details.perks || perks;
+  }
+
+  return { fee, perks };
+};
+
 interface RegistrationPageProps {
   event: EventItem | null;
   allEvents: EventItem[];
@@ -46,6 +134,8 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   const [registeredName, setRegisteredName] = useState('');
 
   const eventTitle = selectedEventItem ? selectedEventItem.title : defaultTitle;
+
+  const { fee, perks } = getRegistrationDetails(selectedEventItem, formData.distance, allEvents);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -736,8 +826,8 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
 
               <div className="border-t border-zinc-200 pt-6 space-y-3 text-xs font-semibold text-zinc-500">
                 <div className="flex justify-between">
-                  <span>Standard Entry Fee</span>
-                  <span className="text-zinc-900">{selectedEventItem ? selectedEventItem.details.fee : '₱1,250.00'}</span>
+                  <span>Entry Fee ({formData.distance})</span>
+                  <span className="text-zinc-900">{fee}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Athlete Insurance</span>
@@ -747,9 +837,20 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   <span>RFID Timing Tag</span>
                   <span className="text-zinc-900">Included</span>
                 </div>
+
+                {/* Dynamic Distance Inclusions */}
+                <div className="border-t border-zinc-200 pt-4 space-y-2">
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block mb-1">Inclusions for {formData.distance}</span>
+                  <ul className="list-disc pl-4 space-y-1 text-[11px] text-zinc-600 font-medium normal-case">
+                    {perks.map((perk, idx) => (
+                      <li key={idx}>{perk}</li>
+                    ))}
+                  </ul>
+                </div>
+
                 <div className="border-t border-zinc-200 pt-4 flex justify-between text-sm font-bold">
                   <span className="text-zinc-900">Total Charge</span>
-                  <span className="text-brand">{selectedEventItem ? selectedEventItem.details.fee : '₱1,250.00'}</span>
+                  <span className="text-brand">{fee}</span>
                 </div>
               </div>
 
