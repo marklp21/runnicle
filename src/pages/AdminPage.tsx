@@ -2509,11 +2509,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
               {formStep === 2 && (
                 <div className="space-y-6 animate-fade-in">
-                  {/* Event Gallery Image Upload (Max 5 photos) */}
+                  {/* Event Gallery Image Upload (Max 3 photos) */}
                   <div className="space-y-3">
                     <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 flex items-center gap-1.5">
                       <ImageIcon className="h-4 w-4 text-zinc-500" />
-                      <span>Upload Race Event Gallery Photos (Max 5 images from folders) <span className="text-brand">*</span></span>
+                      <span>Upload Race Event Gallery Photos (Max 3 images from folders) <span className="text-brand">*</span></span>
                     </label>
 
                     {uploaderError && (
@@ -2531,8 +2531,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         accept="image/*"
                         onChange={(e) => {
                           const files = Array.from(e.target.files || []);
-                          if (galleryPhotos.length + files.length > 5) {
-                            setUploaderError("You can upload a maximum of 5 gallery photos.");
+                          if (galleryPhotos.length + files.length > 3) {
+                            setUploaderError("You can upload a maximum of 3 gallery photos.");
                             setTimeout(() => {
                               setUploaderError(null);
                             }, 4000);
@@ -2557,7 +2557,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         Drag & drop or browse from your folders
                       </span>
                       <span className="text-xs text-zinc-500 block mt-1">
-                        PNG, JPG, or WEBP (Max 5 photos)
+                        PNG, JPG, or WEBP (Max 3 photos)
                       </span>
                     </div>
 
