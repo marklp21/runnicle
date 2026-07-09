@@ -13,7 +13,7 @@ export const BibsAndMerch: React.FC<BibsAndMerchProps> = ({ onViewAllClick }) =>
     {
       id: 1,
       image: 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?auto=format&fit=crop&w=800&q=80',
-      tag: 'RUNNING GEAR / ACCESSORIES',
+      tag: 'Running gear / accessories',
       title: 'MegaWorld Fun Run Singlet',
       sub: 'Includes sponsor logos',
       price: 'P 250',
@@ -22,7 +22,7 @@ export const BibsAndMerch: React.FC<BibsAndMerchProps> = ({ onViewAllClick }) =>
     {
       id: 2,
       image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=800&q=80',
-      tag: 'RUNNING GEAR / ACCESSORIES',
+      tag: 'Running gear / accessories',
       title: 'MegaWorld Fun Run Race Kit',
       sub: 'Includes race bib & gear',
       price: 'P 600',
@@ -31,7 +31,7 @@ export const BibsAndMerch: React.FC<BibsAndMerchProps> = ({ onViewAllClick }) =>
     {
       id: 3,
       image: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80',
-      tag: 'RUNNING GEAR / ACCESSORIES',
+      tag: 'Running gear / accessories',
       title: 'MegaWorld Fun Run Race Kit',
       sub: 'Includes race bib & gear',
       price: 'P 600',
@@ -46,8 +46,8 @@ export const BibsAndMerch: React.FC<BibsAndMerchProps> = ({ onViewAllClick }) =>
 
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
           <div>
-            <h2 className="text-4xl font-bold tracking-tight text-zinc-900 mb-2">
-              Bibs & <span className="font-serif italic text-[#FF4400] font-semibold">Merch</span>
+            <h2 className="font-sans text-4xl font-bold tracking-tight text-zinc-900 mb-2">
+              Bibs & <span className="font-serif italic text-[#FF4400] font-bold">Merch</span>
             </h2>
             <p className="text-sm text-black font-normal">
               Every race is a milestone. Wear yours proud.
@@ -55,9 +55,9 @@ export const BibsAndMerch: React.FC<BibsAndMerchProps> = ({ onViewAllClick }) =>
           </div>
           <button
             onClick={onViewAllClick}
-            className="font-mono mt-4 sm:mt-0 text-xs sm:text-sm font-semibold tracking-widest text-black hover:text-[#FF4400] transition-colors uppercase inline-flex items-center gap-2 cursor-pointer"
+            className="font-sans mt-4 sm:mt-0 text-sm sm:text-base font-bold tracking-wider text-black hover:text-[#FF4400] transition-colors inline-flex items-center gap-2 cursor-pointer"
           >
-            VIEW ALL <ArrowRight className="h-4 w-4" />
+            View all <ArrowRight className="h-4 w-4" />
           </button>
         </div>
 
@@ -73,7 +73,7 @@ export const BibsAndMerch: React.FC<BibsAndMerchProps> = ({ onViewAllClick }) =>
               </div>
               <div className="p-5 flex flex-col flex-1">
                 <div className="mb-4">
-                  <span className="font-mono inline-block rounded-[4px] border border-[#FF4400] px-3 py-0.5 text-[11px] font-semibold tracking-widest text-[#FF4400] uppercase">
+                  <span className="font-sans inline-block rounded-[4px] border border-[#FF4400] px-3 py-1 text-[11px] font-bold tracking-wider text-[#FF4400]">
                     {product.tag}
                   </span>
                 </div>
@@ -86,9 +86,9 @@ export const BibsAndMerch: React.FC<BibsAndMerchProps> = ({ onViewAllClick }) =>
                 </div>
                 <div className="mt-auto">
                   <button
-                    className={`font-mono w-full py-3 text-[10px] font-semibold tracking-widest uppercase transition-colors rounded-[7px] ${product.buttonClass}`}
+                    className={`font-sans w-full py-3.5 text-[12px] font-bold tracking-wider transition-colors rounded-[7px] ${product.buttonClass}`}
                   >
-                    VIEW DETAILS
+                    View details
                   </button>
                 </div>
               </div>

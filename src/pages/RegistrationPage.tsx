@@ -1,94 +1,6 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Printer, ClipboardCheck, ArrowRight, ShieldCheck } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { type EventItem } from '../data/mockData';
-
-export const getRegistrationDetails = (event: EventItem | null, distance: string, allEvents: EventItem[]) => {
-  let fee = '₱1,250.00';
-  let perks = [
-    'Official Runnicle Dry-Fit Singlet',
-    'RFID-equipped Timing Bib',
-    'Official Finisher Medal',
-    'Sponsor Goodie Vouchers'
-  ];
-
-  const targetEvent = event || (allEvents.filter(e => new Date(e.date).getTime() >= new Date().getTime())[0] || null);
-
-  if (!targetEvent) {
-    if (distance === '3K') {
-      fee = '₱750.00';
-      perks = ['Runnicle Fun Run Singlet', 'Standard Race Bib', 'Finisher Medal'];
-    } else if (distance === '5K') {
-      fee = '₱950.00';
-      perks = ['Runnicle Tech Singlet', 'RFID Timing Bib', 'Finisher Medal', 'Refreshment Access'];
-    } else {
-      fee = '₱1,250.00';
-      perks = ['Runnicle Premium Singlet', 'RFID Timing Bib', 'Finisher Medal', 'Refreshment Access', 'Finisher Shirt'];
-    }
-    return { fee, perks };
-  }
-
-  // Calculate based on event fee
-  const baseFeeStr = targetEvent.details.fee || '₱1,250.00';
-  const baseFeeNumber = parseInt(baseFeeStr.replace(/\D/g, '')) || 1250;
-
-  if (distance.toUpperCase().includes('3K')) {
-    fee = `₱${(baseFeeNumber - 500).toLocaleString()}.00`;
-    perks = [
-      'Official Runnicle Dry-Fit Singlet',
-      'Standard Race Bib',
-      'Official Finisher Medal',
-      'Sponsor Discount Vouchers'
-    ];
-  } else if (distance.toUpperCase().includes('5K')) {
-    fee = `₱${(baseFeeNumber - 300).toLocaleString()}.00`;
-    perks = [
-      'Official Runnicle Dry-Fit Singlet',
-      'RFID-equipped Timing Bib',
-      'Official Finisher Medal',
-      'Sponsor Discount Vouchers',
-      'Hydration Station Access'
-    ];
-  } else if (distance.toUpperCase().includes('10K')) {
-    fee = `₱${baseFeeNumber.toLocaleString()}.00`;
-    perks = [
-      'Official Runnicle Dry-Fit Singlet',
-      'RFID-equipped Timing Bib',
-      'Official Finisher Medal',
-      'Sponsor Discount Vouchers',
-      'Hydration Station Access',
-      'Free Entrance to Post-Race Music Festival'
-    ];
-  } else if (distance.toUpperCase().includes('21K') || distance.toUpperCase().includes('HALF')) {
-    fee = `₱${(baseFeeNumber + 600).toLocaleString()}.00`;
-    perks = [
-      'Official Runnicle Dry-Fit Singlet',
-      'RFID-equipped Timing Bib',
-      'Official Finisher Medal',
-      'Sponsor Discount Vouchers',
-      'Hydration Station Access',
-      'Free Entrance to Post-Race Music Festival',
-      'Exclusive 21K Finisher Tech Tee'
-    ];
-  } else if (distance.toUpperCase().includes('MARATHON') || distance.toUpperCase().includes('42K')) {
-    fee = `₱${(baseFeeNumber + 1200).toLocaleString()}.00`;
-    perks = [
-      'Official Runnicle Dry-Fit Singlet',
-      'RFID-equipped Timing Bib',
-      'Official Finisher Medal',
-      'Sponsor Discount Vouchers',
-      'Hydration & Recovery Station Access',
-      'Free Entrance to Post-Race Music Festival',
-      'Exclusive 42K Finisher Tech Tee',
-      'Finisher Recovery Towel',
-      'Complimentary Hot Post-Race Recovery Meal'
-    ];
-  } else {
-    fee = baseFeeStr;
-    perks = targetEvent.details.perks || perks;
-  }
-
-  return { fee, perks };
-};
 
 interface RegistrationPageProps {
   event: EventItem | null;
@@ -98,773 +10,1059 @@ interface RegistrationPageProps {
   onRegisterComplete?: (registration: any) => void;
 }
 
+const getBaseDistanceFee = (distance: string): { fee: number; inclusions: string[] } => {
+  const normalized = distance.toUpperCase();
+  if (normalized.includes('3K')) {
+    return { fee: 500, inclusions: ['Runnicle Dry-Fity Singlet', 'Race Bib'] };
+  }
+  if (normalized.includes('5K')) {
+    return { fee: 750, inclusions: ['Runnicle Dry-Fity Singlet', 'Race Bib', 'RFID Timing Tag'] };
+  }
+  if (normalized.includes('10K')) {
+    return { fee: 1000, inclusions: ['Runnicle Dry-Fity Singlet', 'Race Bib', 'RFID Timing Tag', 'Finisher Medal'] };
+  }
+  if (normalized.includes('21K') || normalized.includes('HALF')) {
+    return { fee: 1500, inclusions: ['Runnicle Premium Singlet', 'Race Bib', 'RFID Timing Tag', 'Finisher Medal', 'Finisher Shirt'] };
+  }
+  if (normalized.includes('42K') || normalized.includes('MARATHON')) {
+    return { fee: 2500, inclusions: ['Runnicle Elite Singlet', 'Race Bib', 'RFID Timing Tag', 'Finisher Medal', 'Finisher Shirt', 'Finisher Trophy'] };
+  }
+  return { fee: 500, inclusions: ['Runnicle Dry-Fity Singlet', 'Race Bib'] };
+};
+
+const SINGLET_SIZES = ['None', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+
 export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   event,
   allEvents,
-  defaultTitle = 'Early-Bird Registration',
+  defaultTitle = 'MegaWorld Fun Run',
   onBack,
   onRegisterComplete,
 }) => {
-  const [selectedEventItem, setSelectedEventItem] = useState<EventItem | null>(() => {
-    if (event) return event;
+  const selectedEventItem = useMemo(() => {
+    if (event) {
+      return allEvents.find(e => e.id === event.id) || event;
+    }
     const upcoming = allEvents.filter(e => new Date(e.date).getTime() >= new Date().getTime());
     return upcoming.length > 0 ? upcoming[0] : null;
-  });
+  }, [event, allEvents]);
+
+  const eventTitle = selectedEventItem ? selectedEventItem.title : defaultTitle;
+  const eventDate = selectedEventItem ? selectedEventItem.date : 'Oct 24, 2026';
+  const eventLocation = selectedEventItem ? selectedEventItem.location : 'Bacolod City';
+
+  const distanceOptions = selectedEventItem?.distances || ['3K', '5K', '10K'];
 
   const [step, setStep] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState('GCash');
-  const [referenceNumber, setReferenceNumber] = useState('');
-  const [paymentProof, setPaymentProof] = useState<string>('');
-  const [proofError, setProofError] = useState<string | null>(null);
-
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    gender: 'Male',
-    distance: event ? event.distances[0] : (allEvents.filter(e => new Date(e.date).getTime() >= new Date().getTime())[0]?.distances[0] || '10K'),
-    size: 'Unisex - Medium (M)',
-    emergencyContact: '',
+    sex: 'Male',
+    distance: distanceOptions[0] || '3K',
+    singletSize: 'None',
+    emergencyName: '',
     emergencyPhone: '',
-    waiver: false,
+    waiver: true,
   });
 
-  const [registeredBib, setRegisteredBib] = useState('');
-  const [registeredName, setRegisteredName] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'GCash' | 'Maya' | 'Bank'>('GCash');
+  const [referenceNumber, setReferenceNumber] = useState('');
+  const [paymentProof, setPaymentProof] = useState<string>('');
+  const [paymentProofName, setPaymentProofName] = useState<string>('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [registeredBib, setRegisteredBib] = useState('718');
 
-  const eventTitle = selectedEventItem ? selectedEventItem.title : defaultTitle;
+  // Dynamic Pricing & Inclusions Resolvers
+  const getDynamicPricing = (distance: string) => {
+    if (selectedEventItem?.distanceFees && selectedEventItem.distanceFees[distance] !== undefined) {
+      const fee = selectedEventItem.distanceFees[distance];
+      return { 
+        fee, 
+        inclusions: selectedEventItem.inclusions || ['Dry-Fit Singlet', 'Race Bib']
+      };
+    }
+    return getBaseDistanceFee(distance);
+  };
 
-  const { fee, perks } = getRegistrationDetails(selectedEventItem, formData.distance, allEvents);
+  const isEarlyBirdActive = (() => {
+    if (!selectedEventItem?.earlyBirdDeadline) return false;
+    const deadlineTime = new Date(selectedEventItem.earlyBirdDeadline).getTime();
+    if (isNaN(deadlineTime)) return false;
+    const now = new Date().getTime();
+    return now <= deadlineTime;
+  })();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const discountPercent = isEarlyBirdActive 
+    ? (selectedEventItem?.earlyBirdDiscountPercent !== undefined ? selectedEventItem.earlyBirdDiscountPercent : 20) 
+    : 0;
+
+  // Pricing calculations
+  const baseDetails = getDynamicPricing(formData.distance);
+  const discountAmount = Math.round(baseDetails.fee * (discountPercent / 100));
+  const baseFeeAfterDiscount = baseDetails.fee - discountAmount;
+  const jerseyAddonFee = formData.singletSize && formData.singletSize !== 'None' 
+    ? (selectedEventItem?.jerseyFee !== undefined ? selectedEventItem.jerseyFee : 250) 
+    : 0;
+  const totalFee = baseFeeAfterDiscount + jerseyAddonFee;
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
-      setFormData((prev) => ({ ...prev, [name]: checked }));
+      setFormData(prev => ({ ...prev, [name]: checked } as any));
     } else if (name === 'phone' || name === 'emergencyPhone') {
-      
       const cleaned = value.replace(/(?!^\+)\D/g, '');
-      
       const hasPlus = cleaned.startsWith('+');
       const digits = cleaned.replace(/\D/g, '');
-      
-      const maxDigits = digits.startsWith('63') ? 12 : digits.startsWith('09') ? 11 : 12;
+      const maxDigits = digits.startsWith('63') ? 12 : 11;
       const capped = digits.slice(0, maxDigits);
-      setFormData((prev) => ({ ...prev, [name]: hasPlus ? '+' + capped : capped }));
+      setFormData(prev => ({ ...prev, [name]: hasPlus ? '+' + capped : capped } as any));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData(prev => ({ ...prev, [name]: value } as any));
+    }
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name] : '' }));
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.waiver) return;
-
-    
-    setStep(2);
-    window.scrollTo({ top: 0, behavior: 'instant' });
+  const validateStep1 = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email address is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format';
+    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+    if (!formData.emergencyName.trim()) newErrors.emergencyName = 'Emergency name is required';
+    if (!formData.emergencyPhone.trim()) newErrors.emergencyPhone = 'Emergency phone is required';
+    if (!formData.waiver) newErrors.waiver = 'You must agree to safety requirements';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  
+  const validateStep2 = () => {
+    const newErrors: Record<string, string> = {};
+    if (!referenceNumber.trim()) newErrors.referenceNumber = 'Reference number is required';
+    if (!paymentProof) newErrors.paymentProof = 'Proof of payment is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleProceedToPayment = () => {
+    if (validateStep1()) {
+      setStep(2);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  };
+
+  const handlePayAndComplete = () => {
+    if (validateStep2()) {
+      const randomBib = Math.floor(100 + Math.random() * 900).toString();
+      setRegisteredBib(randomBib);
+
+      if (onRegisterComplete) {
+        onRegisterComplete({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          sex: formData.sex,
+          distance: formData.distance,
+          size: formData.singletSize,
+          singletSize: formData.singletSize,
+          emergencyName: formData.emergencyName,
+          emergencyPhone: formData.emergencyPhone,
+          eventTitle: eventTitle,
+          paymentMethod: paymentMethod,
+          referenceNumber: referenceNumber,
+          paymentProof: paymentProof,
+          registeredBib: randomBib,
+          totalAmount: totalFee,
+        });
+      }
+      setStep(3);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-      
-      {}
-      <div className="max-w-md w-full mx-auto mb-10 font-mono text-[10px] sm:text-xs font-black tracking-widest text-zinc-500 uppercase select-none px-4">
-        <div className="flex justify-between items-center relative">
-          
-          {}
-          <div className="absolute top-[13px] left-6 right-6 h-[1px] bg-zinc-200 -z-0" />
-          <div className="absolute top-[13px] left-6 h-[1px] bg-orange-500 transition-all duration-300 -z-0" style={{ width: step === 2 ? '50%' : step === 3 ? '100%' : '0%' }} />
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4 pb-10 min-h-screen bg-white">
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #print-pass-card-container, #print-pass-card-container * {
+            visibility: visible !important;
+          }
+          #print-pass-card-container {
+            position: absolute !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 450px !important;
+            border: 1px solid #e4e4e7 !important;
+            border-radius: 24px !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 24px !important;
+            background-color: white !important;
+          }
+        }
+      `}} />
 
-          {}
-          <div className={`flex flex-col items-center gap-1.5 z-10 transition-colors duration-200 ${step >= 1 ? 'text-orange-600 font-extrabold' : 'text-zinc-550'}`}>
-            <div className={`h-6.5 w-6.5 rounded-full border flex items-center justify-center transition-all ${
-              step === 1 ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/10' : step > 1 ? 'bg-zinc-100 border-zinc-300 text-zinc-900' : 'bg-white border-zinc-200 text-zinc-400'
-            }`}>
-              1
+      {step < 3 ? (
+        <>
+          {/* Back Button Navigation - Static */}
+          <div className="mb-6">
+            <button
+              onClick={onBack}
+              className="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-zinc-555 hover:text-brand transition-colors cursor-pointer uppercase font-sans"
+            >
+              <ArrowLeft className="h-4.5 w-4.5" /> BACK TO HOME
+            </button>
+          </div>
+
+          {/* Stepper Header - Sticky right below the Navbar */}
+          <div className="lg:sticky lg:top-20 lg:z-30 bg-white py-4 border-b border-zinc-100 select-none">
+            <div className="max-w-xl w-full mx-auto px-4">
+              <div className="flex items-center justify-between relative">
+                {/* Background Connecting Line */}
+                <div className="absolute top-[16px] left-[16.6%] right-[16.6%] h-[1.5px] bg-zinc-200 z-0" />
+                
+                {/* Active Orange Line Fill */}
+                <div 
+                  className="absolute top-[16px] left-[16.6%] h-[1.5px] bg-brand transition-all duration-300 z-0" 
+                  style={{ 
+                    width: step === 2 ? '33.3%' : step === 3 ? '66.6%' : '0%' 
+                  }}
+                />
+                
+                {/* Step 1 */}
+                <div className="flex flex-col items-center relative z-10 w-1/3 bg-transparent">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center font-sans text-xs font-bold border transition-colors ${
+                    step >= 1 
+                      ? 'bg-brand border-brand text-white shadow-sm' 
+                      : 'bg-white border-zinc-200 text-zinc-400'
+                  }`}>
+                    1
+                  </div>
+                  <span className={`mt-2 text-[10px] tracking-wider font-extrabold uppercase transition-colors ${
+                    step >= 1 ? 'text-brand' : 'text-zinc-400'
+                  }`}>
+                    REGISTRATION
+                  </span>
+                </div>
+
+                {/* Step 2 */}
+                <div className="flex flex-col items-center relative z-10 w-1/3 bg-transparent">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center font-sans text-xs font-bold border transition-colors ${
+                    step >= 2 
+                      ? 'bg-brand border-brand text-white shadow-sm' 
+                      : 'bg-white border-zinc-200 text-zinc-400'
+                  }`}>
+                    2
+                  </div>
+                  <span className={`mt-2 text-[10px] tracking-wider font-extrabold uppercase transition-colors ${
+                    step >= 2 ? 'text-brand' : 'text-zinc-400'
+                  }`}>
+                    PAYMENT
+                  </span>
+                </div>
+
+                {/* Step 3 */}
+                <div className="flex flex-col items-center relative z-10 w-1/3 bg-transparent">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center font-sans text-xs font-bold border transition-colors ${
+                    step === 3 
+                      ? 'bg-brand border-brand text-white shadow-sm' 
+                      : 'bg-white border-zinc-200 text-zinc-400'
+                  }`}>
+                    3
+                  </div>
+                  <span className={`mt-2 text-[10px] tracking-wider font-extrabold uppercase transition-colors ${
+                    step === 3 ? 'text-brand' : 'text-zinc-400'
+                  }`}>
+                    FINISH
+                  </span>
+                </div>
+              </div>
             </div>
-            <span>REGISTRATION</span>
           </div>
 
-          {}
-          <div className={`flex flex-col items-center gap-1.5 z-10 transition-colors duration-200 ${step >= 2 ? 'text-orange-600 font-extrabold' : 'text-zinc-550'}`}>
-            <div className={`h-6.5 w-6.5 rounded-full border flex items-center justify-center transition-all ${
-              step === 2 ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/10' : step > 2 ? 'bg-zinc-100 border-zinc-300 text-zinc-900' : 'bg-white border-zinc-200 text-zinc-400'
-            }`}>
-              2
+          {/* Step 1 Main Content Container */}
+          {step === 1 && (
+            <div className="space-y-6 mt-8">
+              
+              {/* Title block */}
+              <div className="border-b border-zinc-200 pb-5">
+                <h1 className="font-sans text-4xl font-extrabold tracking-tight text-zinc-900">
+                  Runner <span className="font-serif italic font-bold text-brand">Registration</span>
+                </h1>
+                <p className="mt-2 text-sm text-zinc-500 font-medium">
+                  Complete your profile information to verify your slot for the <span className="text-zinc-800 font-bold">{eventTitle}</span>.
+                </p>
+              </div>
+
+              {/* Grid Content */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                
+                {/* Form Column */}
+                <div className="lg:col-span-2 space-y-8">
+                  
+                  {/* Personal Data */}
+                  <div className="space-y-5">
+                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-900">
+                      PERSONAL DATA
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-900 mb-1.5 block">
+                          FIRST NAME
+                        </label>
+                        <input 
+                          type="text" 
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleInputChange}
+                          placeholder="Juan" 
+                          className={`w-full rounded-md border bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors ${
+                            errors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-200 focus:border-brand'
+                          }`}
+                        />
+                        {errors.firstName && <p className="text-[10px] text-red-500 font-bold mt-1 font-sans">{errors.firstName}</p>}
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-900 mb-1.5 block">
+                          LAST NAME
+                        </label>
+                        <input 
+                          type="text" 
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleInputChange}
+                          placeholder="De la Cruz" 
+                          className={`w-full rounded-md border bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors ${
+                            errors.lastName ? 'border-red-500 focus:border-red-500' : 'border-zinc-200 focus:border-brand'
+                          }`}
+                        />
+                        {errors.lastName && <p className="text-[10px] text-red-500 font-bold mt-1 font-sans">{errors.lastName}</p>}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-900 mb-1.5 block">
+                          EMAIL ADDRESS
+                        </label>
+                        <input 
+                          type="email" 
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="jundelacruz@gmail.com" 
+                          className={`w-full rounded-md border bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors ${
+                            errors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-200 focus:border-brand'
+                          }`}
+                        />
+                        {errors.email && <p className="text-[10px] text-red-500 font-bold mt-1 font-sans">{errors.email}</p>}
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-900 mb-1.5 block">
+                          PHONE NUMBER
+                        </label>
+                        <input 
+                          type="tel" 
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="09123456789" 
+                          className={`w-full rounded-md border bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors ${
+                            errors.phone ? 'border-red-500 focus:border-red-500' : 'border-zinc-200 focus:border-brand'
+                          }`}
+                        />
+                        {errors.phone && <p className="text-[10px] text-red-500 font-bold mt-1 font-sans">{errors.phone}</p>}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-900 mb-1.5 block">
+                        GENDER IDENTIFICATION
+                      </label>
+                      <div className="relative">
+                        <select 
+                          name="sex"
+                          value={formData.sex}
+                          onChange={handleInputChange}
+                          className="w-full rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 focus:outline-none focus:border-brand transition-colors appearance-none cursor-pointer"
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Non-binary">Non-binary</option>
+                          <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                          <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Event Selection */}
+                  <div className="space-y-5 pt-2">
+                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-900">
+                      EVENT SELECTION
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-900 mb-1.5 block">
+                          SELECTED DISTANCE
+                        </label>
+                        <div className="relative">
+                          <select 
+                            name="distance"
+                            value={formData.distance}
+                            onChange={handleInputChange}
+                            className="w-full rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 focus:outline-none focus:border-brand transition-colors appearance-none cursor-pointer"
+                          >
+                            {distanceOptions.map(dist => (
+                              <option key={dist} value={dist}>{dist}</option>
+                            ))}
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-900 mb-1.5 block">
+                          JERSEY SIZE (OPTIONAL)
+                        </label>
+                        <div className="relative">
+                          <select 
+                            name="singletSize"
+                            value={formData.singletSize}
+                            onChange={handleInputChange}
+                            className="w-full rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 focus:outline-none focus:border-brand transition-colors appearance-none cursor-pointer"
+                          >
+                            {SINGLET_SIZES.map(sz => (
+                              <option key={sz} value={sz}>{sz}</option>
+                            ))}
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Emergency Contact */}
+                  <div className="space-y-5 pt-2">
+                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-900">
+                      EMERGENCY CONTACT
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-900 mb-1.5 block">
+                          EMERGENCY NAME
+                        </label>
+                        <input 
+                          type="text" 
+                          name="emergencyName"
+                          value={formData.emergencyName}
+                          onChange={handleInputChange}
+                          placeholder="Maria De la Cruz" 
+                          className={`w-full rounded-md border bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors ${
+                            errors.emergencyName ? 'border-red-500 focus:border-red-500' : 'border-zinc-200 focus:border-brand'
+                          }`}
+                        />
+                        {errors.emergencyName && <p className="text-[10px] text-red-500 font-bold mt-1 font-sans">{errors.emergencyName}</p>}
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-900 mb-1.5 block">
+                          EMERGENCY PHONE NUMBER
+                        </label>
+                        <input 
+                          type="tel" 
+                          name="emergencyPhone"
+                          value={formData.emergencyPhone}
+                          onChange={handleInputChange}
+                          placeholder="09123456789" 
+                          className={`w-full rounded-md border bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors ${
+                            errors.emergencyPhone ? 'border-red-500 focus:border-red-500' : 'border-zinc-200 focus:border-brand'
+                          }`}
+                        />
+                        {errors.emergencyPhone && <p className="text-[10px] text-red-500 font-bold mt-1 font-sans">{errors.emergencyPhone}</p>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consent Checkbox */}
+                  <div className="pt-2">
+                    <label className="flex items-start gap-3.5 cursor-pointer select-none">
+                      <div className="relative mt-1">
+                        <input 
+                          type="checkbox" 
+                          name="waiver"
+                          checked={formData.waiver}
+                          onChange={handleInputChange}
+                          className="sr-only" 
+                        />
+                        <div className={`w-4.5 h-4.5 rounded border flex items-center justify-center transition-colors ${
+                          formData.waiver ? 'bg-brand border-brand' : 'bg-white border-zinc-300'
+                        }`}>
+                          {formData.waiver && (
+                            <svg className="w-3.5 h-3.5 text-white fill-current animate-fade-in" viewBox="0 0 20 20">
+                              <path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/>
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-[11.5px] font-semibold leading-relaxed text-zinc-550">
+                        I agree to the official Runnicle safety requirements and rules of conduct. I confirm that I am fit and sufficiently trained to perform in this competitive category.
+                      </span>
+                    </label>
+                    {errors.waiver && <p className="text-[10px] text-red-500 font-bold mt-1.5">{errors.waiver}</p>}
+                  </div>
+
+                  {/* Proceed Button */}
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={handleProceedToPayment}
+                      className="w-full bg-brand text-white font-bold py-4 rounded-[6px] tracking-widest text-xs uppercase hover:bg-brand-hover active:scale-[0.99] transition-all duration-150 cursor-pointer shadow-sm shadow-brand/10"
+                    >
+                      PROCEED TO PAYMENT
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sidebar Column - Sticky below stepper */}
+                <div className="lg:col-span-1 lg:sticky lg:top-[170px] z-20">
+                  <RegistrationSummaryCard 
+                    eventTitle={eventTitle}
+                    eventLocation={eventLocation}
+                    eventDate={eventDate}
+                    distance={formData.distance}
+                    baseFee={baseDetails.fee}
+                    jerseyFee={jerseyAddonFee}
+                    totalFee={totalFee}
+                    inclusions={baseDetails.inclusions}
+                    discountAmount={discountAmount}
+                    discountPercent={discountPercent}
+                  />
+                </div>
+
+              </div>
             </div>
-            <span>PAYMENT</span>
-          </div>
+          )}
 
-          {}
-          <div className={`flex flex-col items-center gap-1.5 z-10 transition-colors duration-200 ${step >= 3 ? 'text-orange-600 font-extrabold' : 'text-zinc-550'}`}>
-            <div className={`h-6.5 w-6.5 rounded-full border flex items-center justify-center transition-all ${
-              step === 3 ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/10' : 'bg-white border-zinc-200 text-zinc-400'
-            }`}>
-              3
+          {/* Step 2 Main Content Container */}
+          {step === 2 && (
+            <div className="space-y-6 mt-8">
+              
+              {/* Title block */}
+              <div className="border-b border-zinc-200 pb-5">
+                <h1 className="font-sans text-4xl font-extrabold tracking-tight text-zinc-900">
+                  Registration <span className="font-serif italic font-bold text-brand">Payment</span>
+                </h1>
+                <p className="mt-2 text-sm text-zinc-500 font-medium">
+                  Complete your payment to verify your slot for the <span className="text-zinc-800 font-bold">{eventTitle}</span>.
+                </p>
+              </div>
+
+              {/* Grid Content */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                
+                {/* Form Column */}
+                <div className="lg:col-span-2 space-y-8">
+                  {/* Payment Method */}
+                  <div className="space-y-5">
+                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-950">
+                      PAYMENT METHOD
+                    </h3>
+
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      {/* GCash Box */}
+                      <div
+                        onClick={() => setPaymentMethod('GCash')}
+                        className={`flex-1 rounded-xl border p-4.5 flex items-center gap-3.5 cursor-pointer transition-all select-none ${
+                          paymentMethod === 'GCash' 
+                            ? 'border-brand bg-brand-glow/40 text-brand font-bold' 
+                            : 'border-zinc-200 bg-white hover:border-zinc-300 text-zinc-500'
+                        }`}
+                      >
+                        <div className={`h-4.5 w-4.5 rounded-full border flex items-center justify-center ${
+                          paymentMethod === 'GCash' ? 'border-brand' : 'border-zinc-300'
+                        }`}>
+                          {paymentMethod === 'GCash' && <div className="h-2.5 w-2.5 rounded-full bg-brand" />}
+                        </div>
+                        <span className="text-xs font-extrabold uppercase tracking-wider">
+                          GCASH (MOBILE WALLET)
+                        </span>
+                      </div>
+
+                      {/* Maya Box */}
+                      <div
+                        onClick={() => setPaymentMethod('Maya')}
+                        className={`flex-1 rounded-xl border p-4.5 flex items-center gap-3.5 cursor-pointer transition-all select-none ${
+                          paymentMethod === 'Maya' 
+                            ? 'border-brand bg-brand-glow/40 text-brand font-bold' 
+                            : 'border-zinc-200 bg-white hover:border-zinc-300 text-zinc-500'
+                        }`}
+                      >
+                        <div className={`h-4.5 w-4.5 rounded-full border flex items-center justify-center ${
+                          paymentMethod === 'Maya' ? 'border-brand' : 'border-zinc-300'
+                        }`}>
+                          {paymentMethod === 'Maya' && <div className="h-2.5 w-2.5 rounded-full bg-brand" />}
+                        </div>
+                        <span className="text-xs font-extrabold uppercase tracking-wider">
+                          MAYA (MOBILE WALLET)
+                        </span>
+                      </div>
+
+                      {/* Bank Transfer Box */}
+                      <div
+                        onClick={() => setPaymentMethod('Bank')}
+                        className={`flex-1 rounded-xl border p-4.5 flex items-center gap-3.5 cursor-pointer transition-all select-none ${
+                          paymentMethod === 'Bank' 
+                            ? 'border-brand bg-brand-glow/40 text-brand font-bold' 
+                            : 'border-zinc-200 bg-white hover:border-zinc-300 text-zinc-500'
+                        }`}
+                      >
+                        <div className={`h-4.5 w-4.5 rounded-full border flex items-center justify-center ${
+                          paymentMethod === 'Bank' ? 'border-brand' : 'border-zinc-300'
+                        }`}>
+                          {paymentMethod === 'Bank' && <div className="h-2.5 w-2.5 rounded-full bg-brand" />}
+                        </div>
+                        <span className="text-xs font-extrabold uppercase tracking-wider">
+                          BANK TRANSFER (BDO/BPI)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Instructions text */}
+                  <div className="space-y-3 font-sans text-xs text-zinc-550 border-t border-zinc-150 pt-6">
+                    {paymentMethod === 'GCash' && (
+                      <>
+                        <h4 className="font-extrabold uppercase text-zinc-950 mb-3 tracking-wider">
+                          GCASH PAYMENT INSTRUCTIONS:
+                        </h4>
+                        <p className="leading-relaxed font-semibold">
+                          1. SEND YOUR TOTAL CHARGE TO GCASH NUMBER: <span className="text-brand font-extrabold">0917 123 4567</span> ( RUNNICLE GCASH ) .
+                        </p>
+                        <p className="leading-relaxed font-semibold">
+                          2. ENTER YOUR 13-DIGIT GCASH TRANSACTION REFERENCE NUMBER BELOW TO VERIFY YOUR ENTRY SLOT.
+                        </p>
+                      </>
+                    )}
+                    {paymentMethod === 'Maya' && (
+                      <>
+                        <h4 className="font-extrabold uppercase text-zinc-950 mb-3 tracking-wider">
+                          MAYA PAYMENT INSTRUCTIONS:
+                        </h4>
+                        <p className="leading-relaxed font-semibold">
+                          1. SEND YOUR TOTAL CHARGE TO MERCHANT CODE: <span className="text-brand font-extrabold">@runnicle.ph</span> or via QR code scanning.
+                        </p>
+                        <p className="leading-relaxed font-semibold">
+                          2. ENTER YOUR TRANSACTION REFERENCE NUMBER BELOW TO VERIFY YOUR ENTRY SLOT.
+                        </p>
+                      </>
+                    )}
+                    {paymentMethod === 'Bank' && (
+                      <>
+                        <h4 className="font-extrabold uppercase text-zinc-950 mb-3 tracking-wider">
+                          BANK DEPOSIT INSTRUCTIONS:
+                        </h4>
+                        <p className="leading-relaxed font-semibold">
+                          1. DEPOSIT AMOUNT TO BDO Account: <span className="text-brand font-extrabold">0012-3456-7890</span> (RUNNICLE ATHLETICS CORP).
+                        </p>
+                        <p className="leading-relaxed font-semibold">
+                          2. ENTER YOUR TRANSACTION REFERENCE NUMBER BELOW TO VERIFY YOUR ENTRY SLOT.
+                        </p>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Form Input Group */}
+                  <div className="space-y-6 pt-2">
+                    <div>
+                      <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-950 mb-1.5 block">
+                        REFERENCE NUMBER
+                      </label>
+                      <input 
+                        type="text" 
+                        name="referenceNumber"
+                        value={referenceNumber}
+                        onChange={(e) => {
+                          setReferenceNumber(e.target.value.replace(/\D/g, ''));
+                          if (errors.referenceNumber) {
+                            setErrors(prev => ({ ...prev, referenceNumber: '' }));
+                          }
+                        }}
+                        placeholder="e.g. 1234567890123" 
+                        className={`w-full rounded-md border bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors ${
+                          errors.referenceNumber ? 'border-red-500 focus:border-red-500' : 'border-zinc-200 focus:border-brand'
+                        }`}
+                      />
+                      {errors.referenceNumber && <p className="text-[10px] text-red-500 font-bold mt-1 font-sans">{errors.referenceNumber}</p>}
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-950 mb-1.5 block">
+                        UPLOAD PROOF OF PAYMENT
+                      </label>
+                      
+                      {paymentProof ? (
+                        <div className="relative rounded-xl border border-zinc-200 bg-white p-4 flex items-center justify-between shadow-sm">
+                          <div className="flex items-center gap-3 truncate">
+                            <svg className="w-8 h-8 text-zinc-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <div className="truncate">
+                              <span className="text-xs font-bold text-zinc-900 block truncate">
+                                {paymentProofName || 'screenshot.png'}
+                              </span>
+                              <span className="text-[10px] text-zinc-400 block mt-0.5">
+                                Uploaded successfully
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPaymentProof('');
+                              setPaymentProofName('');
+                            }}
+                            className="text-xs font-extrabold text-red-500 hover:text-red-700 transition-colors uppercase px-3 py-1 cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <div className={`border-2 border-dashed rounded-xl bg-white p-8 text-center transition-colors cursor-pointer hover:border-brand relative h-40 flex flex-col justify-center items-center ${
+                          errors.paymentProof ? 'border-red-500 bg-red-50/10' : 'border-zinc-200'
+                        }`}>
+                          <input 
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setPaymentProofName(file.name);
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  if (typeof reader.result === 'string') {
+                                    setPaymentProof(reader.result);
+                                    if (errors.paymentProof) {
+                                      setErrors(prev => ({ ...prev, paymentProof: '' }));
+                                    }
+                                  }
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          />
+                          <span className="text-zinc-700 text-sm font-bold block">
+                            Browse or Upload Screenshot
+                          </span>
+                          <span className="text-zinc-400 text-xs mt-1 block">
+                            PNG, JPEG, OR WEBP
+                          </span>
+                        </div>
+                      )}
+                      {errors.paymentProof && <p className="text-[10px] text-red-500 font-bold mt-1.5 font-sans">{errors.paymentProof}</p>}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStep(1);
+                        setErrors({});
+                      }}
+                      className="flex-1 rounded-[6px] border border-brand text-brand bg-white hover:bg-brand/5 py-4 text-center text-xs font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-[0.99]"
+                    >
+                      BACK TO FORM
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handlePayAndComplete}
+                      className="flex-1 rounded-[6px] bg-brand hover:bg-brand-hover text-white py-4 text-center text-xs font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-[0.99] shadow-sm shadow-brand/10"
+                    >
+                      PAY AND COMPLETE
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sidebar Column - Sticky below stepper */}
+                <div className="lg:col-span-1 lg:sticky lg:top-[170px] z-20">
+                  <RegistrationSummaryCard 
+                    eventTitle={eventTitle}
+                    eventLocation={eventLocation}
+                    eventDate={eventDate}
+                    distance={formData.distance}
+                    baseFee={baseDetails.fee}
+                    jerseyFee={jerseyAddonFee}
+                    totalFee={totalFee}
+                    inclusions={baseDetails.inclusions}
+                    discountAmount={discountAmount}
+                    discountPercent={discountPercent}
+                  />
+                </div>
+
+              </div>
             </div>
-            <span>FINISH</span>
-          </div>
-
-        </div>
-      </div>
-
-      {}
-      {step === 3 ? (
-        <div className="max-w-3xl mx-auto text-center py-10 space-y-8 animate-fade-in">
-          
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-950/40 border border-emerald-500 text-emerald-400">
-            <ShieldCheck className="h-8 w-8" />
-          </div>
+          )}
+        </>
+      ) : (
+        /* Confirmed screen (Step 3) */
+        <div className="max-w-xl mx-auto text-center space-y-6 pt-4 animate-fade-in">
           
           <div>
-            <h1 className="font-display text-4xl font-black text-zinc-900 tracking-tight">
-              Registration Confirmed!
+            <h1 className="font-sans text-4xl sm:text-5xl font-extrabold tracking-tight text-zinc-950">
+              Registration <span className="font-serif italic font-bold text-brand">Confirmed!</span>
             </h1>
-            <p className="mt-3 text-zinc-600 text-sm max-w-md mx-auto leading-relaxed font-semibold">
-              You are officially registered. Your race packet details and training links have been sent to <span className="text-zinc-950 font-bold">{formData.email}</span>.
+            <p className="mt-4 text-sm text-zinc-550 font-semibold max-w-md mx-auto leading-relaxed">
+              You have officially registered. Your racing details have been sent to <span className="text-zinc-950 font-bold">{formData.email || 'markl@gmail.com'}</span>.
             </p>
-            <p className="mt-2 text-brand text-xs font-black uppercase tracking-wider">
-              ⚠️ Save or print this pass. You must present this to claim your race kit.
+            <p className="mt-3 text-brand text-[10.5px] font-black uppercase tracking-wider font-sans px-4">
+              SAVE OR PRINT THIS PASS. YOU MUST PRESENT THIS TO CLAIM YOUR RACE KIT.
             </p>
           </div>
 
-          {}
-          <div className="relative mx-auto max-w-md rounded-2xl border border-zinc-200 bg-zinc-50 p-8 shadow-md overflow-hidden">
-            <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-orange-500/5 blur-[50px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-orange-500/5 blur-[50px] pointer-events-none" />
-            
-            {}
-            <div className="flex justify-between items-center border-b border-zinc-200 pb-5 mb-5 text-left">
+          {/* Timing Pass Ticket Card */}
+          <div 
+            id="print-pass-card-container"
+            className="bg-white rounded-2xl border border-zinc-200 shadow-md p-6 max-w-md w-full mx-auto relative overflow-hidden text-left font-sans"
+          >
+            {/* Upper Section */}
+            <div className="grid grid-cols-2 gap-4 pb-4 border-b border-zinc-150">
               <div>
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block">Runnicle Race Pass</span>
-                <span className="text-sm font-bold text-zinc-900 mt-1 block truncate max-w-[200px]">{eventTitle}</span>
+                <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+                  RUNNICLE RACE PASS
+                </span>
+                <span className="text-zinc-955 text-sm font-bold mt-1 block truncate">
+                  {eventTitle}
+                </span>
               </div>
               <div className="text-right">
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block">Race Date</span>
-                <span className="text-xs font-bold text-zinc-700 mt-1 block">{selectedEventItem ? selectedEventItem.date : 'Upcoming Season'}</span>
+                <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+                  RACE DATE
+                </span>
+                <span className="text-zinc-955 text-xs font-bold mt-1 block">
+                  {eventDate}
+                </span>
               </div>
             </div>
 
-            {}
-            <div className="grid grid-cols-2 gap-4 text-left border-b border-zinc-200 pb-5 mb-5 text-xs font-semibold text-zinc-500">
+            {/* Details Fields */}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-4 py-4.5">
               <div>
-                <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-0.5">Athlete</span>
-                <span className="text-zinc-900 text-sm font-bold">{registeredName}</span>
+                <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+                  RUNNER NAME
+                </span>
+                <span className="text-zinc-955 text-xs font-bold mt-1 block truncate">
+                  {formData.firstName || 'Jero Niko'} {formData.lastName || 'Palenge'}
+                </span>
               </div>
               <div>
-                <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-0.5">Category</span>
-                <span className="text-zinc-900">{formData.distance} Run</span>
+                <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+                  CATEGORY
+                </span>
+                <span className="text-zinc-955 text-xs font-bold mt-1 block">
+                  {formData.distance}
+                </span>
               </div>
               <div>
-                <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-0.5">Jersey Size</span>
-                <span className="text-zinc-900">{formData.size}</span>
+                <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+                  SINGLET SIZE
+                </span>
+                <span className="text-zinc-955 text-xs font-bold mt-1 block">
+                  {formData.singletSize}
+                </span>
               </div>
               <div>
-                <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-0.5">Emergency Contact</span>
-                <span className="text-zinc-900 truncate block max-w-[140px]">{formData.emergencyContact || 'Not Specified'}</span>
+                <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+                  EMERGENCY CONTACT
+                </span>
+                <span className="text-zinc-955 text-xs font-bold mt-1 block truncate">
+                  {formData.emergencyPhone || '091231233123'}
+                </span>
               </div>
             </div>
 
-            {/* Kit pickup instruction notice */}
-            <div className="py-2.5 px-4 bg-orange-50 border border-orange-200/40 rounded-xl mb-4 text-center select-none">
+            {/* Ticket Present Banner */}
+            <div className="border border-brand rounded-md p-3.5 bg-orange-50/50 text-center mb-5 select-none">
               <span className="text-[9px] font-black text-brand uppercase tracking-wider block">
-                ⚠️ Present this pass to claim your race kit
+                PRESENT THIS TICKET TO CLAIM YOUR RACE KIT
               </span>
             </div>
 
-            {}
-            <div className="py-6 px-4 bg-white rounded-xl border border-zinc-200 shadow-sm text-center">
-              <span className="text-[9px] font-black text-zinc-400 uppercase tracking-wider block">Official Runner Bib</span>
-              <span className="font-display text-6xl font-black text-zinc-900 tracking-widest mt-1 block">
+            {/* Runner Bib Box */}
+            <div className="border border-zinc-200 rounded-md p-5 bg-zinc-50/50 text-center relative">
+              <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+                OFFICIAL RUNNER BIB
+              </span>
+              <span className="font-sans text-5xl font-black text-zinc-955 tracking-tight mt-1.5 block">
                 #{registeredBib}
               </span>
             </div>
 
-            {}
-            <div className="absolute top-1/2 -left-2.5 h-5 w-5 rounded-full bg-white border-r border-zinc-200" />
-            <div className="absolute top-1/2 -right-2.5 h-5 w-5 rounded-full bg-white border-l border-zinc-200" />
-            
-            {}
-            <div className="mt-6 border-t border-dashed border-zinc-200 pt-6 flex flex-col items-center">
-              <div className="h-10 w-full max-w-[200px] flex gap-[2px] items-center justify-center opacity-70">
-                {Array.from({ length: 30 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="bg-zinc-800 h-full"
-                    style={{ width: `${Math.random() > 0.4 ? (Math.random() > 0.7 ? 4 : 2) : 1}px` }}
-                  />
-                ))}
-              </div>
-              <span className="text-[9px] font-black tracking-widest text-zinc-500 uppercase mt-2.5">
-                RUN-R-TKT-{registeredBib}-{formData.distance}
-              </span>
-            </div>
+            {/* Ticket notched circles on the sides */}
+            <div className="absolute top-[48%] -left-3 h-6 w-6 rounded-full bg-white border-r border-zinc-200" />
+            <div className="absolute top-[48%] -right-3 h-6 w-6 rounded-full bg-white border-l border-zinc-200" />
+
           </div>
 
-          {}
+          {/* Bottom Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-sm mx-auto pt-4">
             <button
               onClick={handlePrint}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-6 py-3 text-xs font-bold text-zinc-700 hover:bg-zinc-50 transition-colors uppercase tracking-wider cursor-pointer shadow-sm"
+              className="w-full sm:w-1/2 rounded-[6px] border border-brand text-brand bg-white hover:bg-brand/5 py-3.5 text-center text-xs font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-[0.99]"
             >
-              <Printer className="h-4 w-4" />
-              Print Pass
+              PRINT PASS
             </button>
-            
             <button
               onClick={onBack}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-md bg-brand px-8 py-3 text-xs font-bold text-white hover:bg-brand-hover transition-colors uppercase tracking-wider cursor-pointer"
+              className="w-full sm:w-1/2 rounded-[6px] bg-brand hover:bg-brand-hover text-white py-3.5 text-center text-xs font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-[0.99] shadow-sm shadow-brand/10"
             >
-              Return Home
-              <ArrowRight className="h-4 w-4" />
+              RETURN HOME
             </button>
           </div>
 
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {}
-          <button
-            onClick={onBack}
-            className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-brand uppercase tracking-wider transition-colors cursor-pointer group"
-          >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            Cancel Registration
-          </button>
-
-          <div className="border-b border-zinc-200 pb-5">
-            <h1 className="font-display text-4xl font-black text-zinc-900 tracking-tight">
-              Athlete Registration
-            </h1>
-            <p className="mt-2 text-sm text-zinc-500 font-medium">
-              Complete your profile info to verify timing chips and jersey prints for the <span className="text-zinc-800 font-semibold">{eventTitle}</span>.
-            </p>
-          </div>
-
-          {}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
-            
-            {step === 1 ? (
-              
-              <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6">
-                
-                {}
-                <div className="space-y-4">
-                  <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">1. Athlete Profile</h3>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">First Name</label>
-                      <input
-                        type="text"
-                        name="firstName"
-                        required
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        placeholder="Jane"
-                        className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Last Name</label>
-                      <input
-                        type="text"
-                        name="lastName"
-                        required
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        placeholder="Doe"
-                        className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Email Address</label>
-                      <input
-                        type="email"
-                        name="email"
-                        required
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="runner@example.com"
-                        className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Phone Number</label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="09171234567 or +639171234567"
-                        maxLength={13}
-                        className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Gender Identification</label>
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleChange}
-                      className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-700 focus:border-brand focus:outline-none"
-                    >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Non-Binary">Non-Binary</option>
-                      <option value="Prefer not to say">Prefer not to say</option>
-                    </select>
-                  </div>
-                </div>
-
-                {}
-                <div className="space-y-4 pt-4">
-                  <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">2. Event Logistics</h3>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
-                      <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Select Event / Run</label>
-                      <select
-                        name="eventId"
-                        value={selectedEventItem?.id || ''}
-                        onChange={(e) => {
-                          const newEvent = allEvents.find(ev => ev.id === e.target.value);
-                          if (newEvent) {
-                            setSelectedEventItem(newEvent);
-                            setFormData(prev => ({ ...prev, distance: newEvent.distances[0] }));
-                          }
-                        }}
-                        className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-700 focus:border-brand focus:outline-none animate-none"
-                      >
-                        {allEvents.filter(e => new Date(e.date).getTime() >= new Date().getTime()).map((ev) => (
-                          <option key={ev.id} value={ev.id}>{ev.title} ({ev.date})</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Selected Distance</label>
-                      <select
-                        name="distance"
-                        value={formData.distance}
-                        onChange={handleChange}
-                        className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-700 focus:border-brand focus:outline-none animate-none"
-                      >
-                        {selectedEventItem ? (
-                          selectedEventItem.distances.map((d) => (
-                            <option key={d} value={d}>{d}</option>
-                          ))
-                        ) : (
-                          <>
-                            <option value="5K">5K Run</option>
-                            <option value="10K">10K Run</option>
-                            <option value="21K">Half Marathon (21K)</option>
-                          </>
-                        )}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Jersey Size (Tech Singlet)</label>
-                      <select
-                        name="size"
-                        value={formData.size}
-                        onChange={handleChange}
-                        className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-700 focus:border-brand focus:outline-none"
-                      >
-                        <option value="Unisex - Small (S)">Unisex - Small (S)</option>
-                        <option value="Unisex - Medium (M)">Unisex - Medium (M)</option>
-                        <option value="Unisex - Large (L)">Unisex - Large (L)</option>
-                        <option value="Unisex - Extra Large (XL)">Unisex - Extra Large (XL)</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {}
-                <div className="space-y-4 pt-4">
-                  <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">3. Emergency Contact</h3>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Emergency Name</label>
-                      <input
-                        type="text"
-                        name="emergencyContact"
-                        value={formData.emergencyContact}
-                        onChange={handleChange}
-                        placeholder="Jane Doe Sr."
-                        className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider mb-2">Emergency Phone</label>
-                      <input
-                        type="tel"
-                        name="emergencyPhone"
-                        value={formData.emergencyPhone}
-                        onChange={handleChange}
-                        placeholder="09187654321 or +639187654321"
-                        maxLength={13}
-                        className="w-full rounded border border-zinc-200 bg-white px-4 py-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {}
-                <div className="pt-4 space-y-4">
-                  <label className="flex items-start gap-3 cursor-pointer text-zinc-500 hover:text-brand transition-colors">
-                    <input
-                      type="checkbox"
-                      name="waiver"
-                      required
-                      checked={formData.waiver}
-                      onChange={handleChange}
-                      className="mt-1 h-4 w-4 rounded border-zinc-300 bg-white text-brand focus:ring-0 cursor-pointer"
-                    />
-                    <span className="text-[11px] font-medium leading-relaxed">
-                      I agree to the official Runnicle safety requirements, release waiver forms, and rules of conduct. I confirm that I am fit and sufficiently trained to perform in this competitive category.
-                    </span>
-                  </label>
-                </div>
-
-                {}
-                <button
-                  type="submit"
-                  className="w-full rounded-md bg-brand py-4 text-sm font-mono font-black text-white hover:bg-brand-hover active:scale-98 transition-all duration-200 uppercase tracking-wider cursor-pointer mt-4 shadow-md shadow-brand/10"
-                >
-                  PROCEED TO PAYMENT {"[>]"}
-                </button>
-              </form>
-            ) : (
-              
-              <div className="lg:col-span-2 space-y-6">
-                <div className="space-y-4">
-                  <h3 className="font-sans text-base font-bold text-zinc-900 uppercase tracking-wider border-b border-zinc-200 pb-2">
-                    2. Select Payment Method
-                  </h3>
-                  
-                  {}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {}
-                    <div
-                      onClick={() => setPaymentMethod('GCash')}
-                      className={`rounded-xl border p-4 flex items-center justify-between cursor-pointer select-none transition-all ${
-                        paymentMethod === 'GCash' ? 'border-brand bg-brand/5' : 'border-zinc-200 bg-white hover:border-zinc-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`h-4 w-4 rounded-full border-4 flex items-center justify-center ${
-                          paymentMethod === 'GCash' ? 'border-brand bg-brand' : 'border-zinc-300 bg-white'
-                        }`} />
-                        <span className="text-xs font-mono font-bold text-zinc-800 uppercase">GCASH (MOBILE WALLET)</span>
-                      </div>
-                      <span className="text-[9px] font-mono font-bold text-zinc-400">₱0.00 FEE</span>
-                    </div>
-
-                    {}
-                    <div
-                      onClick={() => setPaymentMethod('Maya')}
-                      className={`rounded-xl border p-4 flex items-center justify-between cursor-pointer select-none transition-all ${
-                        paymentMethod === 'Maya' ? 'border-brand bg-brand/5' : 'border-zinc-200 bg-white hover:border-zinc-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`h-4 w-4 rounded-full border-4 flex items-center justify-center ${
-                          paymentMethod === 'Maya' ? 'border-brand bg-brand' : 'border-zinc-300 bg-white'
-                        }`} />
-                        <span className="text-xs font-mono font-bold text-zinc-800 uppercase">MAYA (MOBILE WALLET)</span>
-                      </div>
-                      <span className="text-[9px] font-mono font-bold text-zinc-400">₱0.00 FEE</span>
-                    </div>
-
-                    {}
-                    <div
-                      onClick={() => setPaymentMethod('Bank')}
-                      className={`rounded-xl border p-4 flex items-center justify-between cursor-pointer select-none transition-all ${
-                        paymentMethod === 'Bank' ? 'border-brand bg-brand/5' : 'border-zinc-200 bg-white hover:border-zinc-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`h-4 w-4 rounded-full border-4 flex items-center justify-center ${
-                          paymentMethod === 'Bank' ? 'border-brand bg-brand' : 'border-zinc-300 bg-white'
-                        }`} />
-                        <span className="text-xs font-mono font-bold text-zinc-800 uppercase">BANK TRANSFER (BDO/BPI)</span>
-                      </div>
-                      <span className="text-[9px] font-mono font-bold text-zinc-400">₱0.00 FEE</span>
-                    </div>
-
-                    {}
-                    <div
-                      onClick={() => setPaymentMethod('Card')}
-                      className={`rounded-xl border p-4 flex items-center justify-between cursor-pointer select-none transition-all ${
-                        paymentMethod === 'Card' ? 'border-brand bg-brand/5' : 'border-zinc-200 bg-white hover:border-zinc-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`h-4 w-4 rounded-full border-4 flex items-center justify-center ${
-                          paymentMethod === 'Card' ? 'border-brand bg-brand' : 'border-zinc-300 bg-white'
-                        }`} />
-                        <span className="text-xs font-mono font-bold text-zinc-800 uppercase">CREDIT / DEBIT CARD</span>
-                      </div>
-                      <span className="text-[9px] font-mono font-bold text-zinc-400">₱0.00 FEE</span>
-                    </div>
-                  </div>
-
-                  {}
-                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 space-y-4 mt-6">
-                    {paymentMethod === 'GCash' && (
-                      <div className="space-y-3 font-mono text-xs text-zinc-600 leading-relaxed uppercase">
-                        <p className="font-extrabold text-zinc-950">GCash Payment Instructions:</p>
-                        <p>1. Send amount {selectedEventItem ? selectedEventItem.details.fee : '₱1,250.00'} to GCash number: <span className="text-brand font-black">0917 123 4567</span> (Runnicle timing Corp).</p>
-                        <p>2. Enter your 13-digit GCash Transaction Reference number below to verify your entry slot.</p>
-                      </div>
-                    )}
-
-                    {paymentMethod === 'Maya' && (
-                      <div className="space-y-3 font-mono text-xs text-zinc-600 leading-relaxed uppercase">
-                        <p className="font-extrabold text-zinc-950">Maya Payment Instructions:</p>
-                        <p>1. Send amount {selectedEventItem ? selectedEventItem.details.fee : '₱1,250.00'} to merchant code: <span className="text-brand font-black">@runnicle.ph</span> or via QR code scanning.</p>
-                        <p>2. Enter your transaction reference number below to verify your entry slot.</p>
-                      </div>
-                    )}
-
-                    {paymentMethod === 'Bank' && (
-                      <div className="space-y-3 font-mono text-xs text-zinc-600 leading-relaxed uppercase">
-                        <p className="font-extrabold text-zinc-950">Bank Deposit Instructions:</p>
-                        <p>1. Deposit amount {selectedEventItem ? selectedEventItem.details.fee : '₱1,250.00'} to BDO Account: <span className="text-brand font-black">0012-3456-7890</span> (Runnicle Athletics Corp).</p>
-                        <p>2. Enter your deposit transaction reference ID below.</p>
-                      </div>
-                    )}
-
-                    {paymentMethod === 'Card' && (
-                      <div className="space-y-4">
-                        <p className="font-mono text-xs font-extrabold text-zinc-950 uppercase">Credit / Debit Card details:</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          <div className="sm:col-span-2">
-                            <label className="block text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">Card Number</label>
-                            <input
-                              type="text"
-                              maxLength={16}
-                              placeholder="4111 2222 3333 4444"
-                              className="w-full rounded border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 font-mono">Expiry Date</label>
-                            <input
-                              type="text"
-                              placeholder="MM/YY"
-                              maxLength={5}
-                              className="w-full rounded border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono text-center"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {paymentMethod !== 'Card' && (
-                      <div className="mt-4 pt-2 space-y-4">
-                        <div>
-                          <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-widest mb-1.5 font-mono">Reference Number <span className="text-brand">*</span></label>
-                          <input
-                            type="text"
-                            required
-                            value={referenceNumber}
-                            onChange={(e) => setReferenceNumber(e.target.value.replace(/\D/g, ''))}
-                            placeholder="Reference Number (e.g. 1234567890123)"
-                            className="w-full rounded border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none font-mono"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-widest mb-1.5 font-mono">
-                            Upload Proof of Payment <span className="text-brand">*</span>
-                          </label>
-                          
-                          {paymentProof ? (
-                            <div className="relative h-44 rounded-xl border border-zinc-200 overflow-hidden group shadow-sm bg-white">
-                              <img src={paymentProof} alt="Payment Proof" className="h-full w-full object-contain p-2" />
-                              <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                                <button
-                                  type="button"
-                                  onClick={() => setPaymentProof('')}
-                                  className="rounded-full bg-red-655 hover:bg-red-700 text-white font-mono text-[9px] font-black uppercase tracking-wider px-3.5 py-2 cursor-pointer transition-colors shadow"
-                                >
-                                  Remove Proof
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="border-2 border-dashed border-zinc-200 hover:border-brand rounded-xl p-6 text-center transition-colors cursor-pointer relative bg-white hover:bg-brand/[0.01] group h-40 flex flex-col justify-center items-center">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                required
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => {
-                                      if (typeof reader.result === 'string') {
-                                        setPaymentProof(reader.result);
-                                        setProofError(null);
-                                      }
-                                    };
-                                    reader.readAsDataURL(file);
-                                  }
-                                }}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                              />
-                              <span className="text-xs font-bold text-zinc-700 block">Browse or Upload Screenshot / Receipt</span>
-                              <span className="text-[9px] text-zinc-500 block mt-1">PNG, JPG, or WEBP (Required)</span>
-                            </div>
-                          )}
-                          {proofError && (
-                            <p className="text-[10px] text-red-600 font-mono mt-1 font-bold">{proofError}</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {}
-                <div className="flex gap-4 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="flex-1 rounded-full border border-zinc-300 bg-white py-3 text-center text-[10px] font-mono font-black text-zinc-800 hover:bg-zinc-50 transition-colors uppercase tracking-widest cursor-pointer"
-                  >
-                    {"[ Back to Form ]"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (paymentMethod !== 'Card') {
-                        if (!referenceNumber) {
-                          alert('Please enter your transaction reference number.');
-                          return;
-                        }
-                        if (!paymentProof) {
-                          setProofError('Proof of payment screenshot/receipt is required.');
-                          alert('Please upload your proof of payment.');
-                          return;
-                        }
-                      }
-
-                      const randomBib = Math.floor(100 + Math.random() * 900).toString();
-                      setRegisteredName(`${formData.firstName} ${formData.lastName}`);
-                      setRegisteredBib(randomBib);
-                      
-                      if (onRegisterComplete) {
-                        onRegisterComplete({
-                          firstName: formData.firstName,
-                          lastName: formData.lastName,
-                          email: formData.email,
-                          phone: formData.phone,
-                          gender: formData.gender,
-                          distance: formData.distance,
-                          size: formData.size,
-                          emergencyContact: formData.emergencyContact,
-                          emergencyPhone: formData.emergencyPhone,
-                          eventTitle: eventTitle,
-                          paymentMethod: paymentMethod,
-                          referenceNumber: referenceNumber || 'CARD-PAID',
-                          paymentProof: paymentProof || '',
-                          registeredBib: randomBib
-                        });
-                      }
-
-                      setStep(3);
-                      window.scrollTo({ top: 0, behavior: 'instant' });
-                    }}
-                    className="flex-1 rounded-full bg-brand hover:bg-brand-hover py-3 text-center text-[10px] font-mono font-black text-white transition-colors uppercase tracking-widest cursor-pointer shadow-md shadow-brand/10"
-                  >
-                    Pay & Complete {"[>]"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {}
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-6 lg:sticky lg:top-24">
-              <h3 className="font-sans text-base font-bold text-zinc-900 tracking-tight uppercase border-b border-zinc-200 pb-4">
-                Registration Summary
-              </h3>
-
-              <div className="space-y-4">
-                <div>
-                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Selected Event</span>
-                  <span className="text-sm font-bold text-zinc-900 mt-1.5 block">{eventTitle}</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-xs font-semibold">
-                  <div>
-                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Location</span>
-                    <span className="text-zinc-700 mt-1 block">{selectedEventItem ? selectedEventItem.location : 'Bacolod City'}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Race Date</span>
-                    <span className="text-zinc-700 mt-1 block">{selectedEventItem ? selectedEventItem.date : 'Upcoming Season'}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-zinc-200 pt-6 space-y-3 text-xs font-semibold text-zinc-500">
-                <div className="flex justify-between">
-                  <span>Entry Fee ({formData.distance})</span>
-                  <span className="text-zinc-900">{fee}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Athlete Insurance</span>
-                  <span className="text-zinc-900">Included</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>RFID Timing Tag</span>
-                  <span className="text-zinc-900">Included</span>
-                </div>
-
-                {/* Dynamic Distance Inclusions */}
-                <div className="border-t border-zinc-200 pt-4 space-y-2">
-                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block mb-1">Inclusions for {formData.distance}</span>
-                  <ul className="list-disc pl-4 space-y-1 text-[11px] text-zinc-600 font-medium normal-case">
-                    {perks.map((perk, idx) => (
-                      <li key={idx}>{perk}</li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="border-t border-zinc-200 pt-4 flex justify-between text-sm font-bold">
-                  <span className="text-zinc-900">Total Charge</span>
-                  <span className="text-brand">{fee}</span>
-                </div>
-              </div>
-
-              <div className="rounded border border-zinc-200 bg-zinc-50 p-4 flex gap-2.5 text-[10px] text-zinc-500 leading-relaxed font-semibold">
-                <ClipboardCheck className="h-4 w-4 text-zinc-400 flex-shrink-0 mt-0.5" />
-                <span>You will receive an invoice packet and event countdown schedules directly to your registered email address immediately.</span>
-              </div>
-            </div>
-
-          </div>
         </div>
       )}
 
     </div>
   );
 };
+
+/* Internal Component: Registration Summary Sidebar */
+interface SummaryProps {
+  eventTitle: string;
+  eventLocation: string;
+  eventDate: string;
+  distance: string;
+  baseFee: number;
+  jerseyFee: number;
+  totalFee: number;
+  inclusions: string[];
+  discountAmount?: number;
+  discountPercent?: number;
+}
+
+const RegistrationSummaryCard: React.FC<SummaryProps> = ({
+  eventTitle,
+  eventLocation,
+  eventDate,
+  distance,
+  baseFee,
+  jerseyFee,
+  totalFee,
+  inclusions,
+  discountAmount,
+  discountPercent,
+}) => {
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm space-y-5 text-left font-sans">
+      <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-900">
+        REGISTRATION SUMMARY
+      </h3>
+
+      <div className="border-t border-zinc-150 pt-4 space-y-4">
+        <div>
+          <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+            SELECTED EVENT
+          </span>
+          <span className="text-sm font-bold text-zinc-900 mt-1 block">
+            {eventTitle}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+              LOCATION
+            </span>
+            <span className="text-xs font-semibold text-zinc-750 mt-1 block">
+              {eventLocation}
+            </span>
+          </div>
+          <div>
+            <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+              RACE DATE
+            </span>
+            <span className="text-xs font-semibold text-zinc-750 mt-1 block">
+              {eventDate}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-zinc-150 pt-4">
+        <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+          INCLUSIONS FOR {distance} EARLY BIRD
+        </span>
+        <ul className="mt-2.5 space-y-1.5 text-xs text-zinc-550 font-semibold list-none pl-0">
+          {inclusions.map((inclusion, idx) => (
+            <li key={idx} className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 flex-shrink-0" />
+              {inclusion}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Charge Breakdown */}
+      <div className="border-t border-zinc-150 pt-4 space-y-2">
+        <div className="flex justify-between items-center text-xs text-zinc-550 font-semibold">
+          <span>Base Fee ({distance})</span>
+          <span>P {baseFee.toLocaleString()}</span>
+        </div>
+        {discountAmount !== undefined && discountAmount > 0 ? (
+          <div className="flex justify-between items-center text-xs text-emerald-600 font-extrabold font-mono">
+            <span>Early Bird Discount ({discountPercent}%)</span>
+            <span>- P {discountAmount.toLocaleString()}</span>
+          </div>
+        ) : null}
+        {jerseyFee > 0 && (
+          <div className="flex justify-between items-center text-xs text-zinc-550 font-semibold">
+            <span>Jersey Size Add-on</span>
+            <span>P {jerseyFee.toLocaleString()}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="border-t border-zinc-150 pt-4 flex justify-between items-center">
+        <span className="text-sm font-bold text-zinc-900">
+          Total Charge
+        </span>
+        <span className="text-sm font-extrabold text-brand">
+          P {totalFee.toLocaleString()}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 export default RegistrationPage;

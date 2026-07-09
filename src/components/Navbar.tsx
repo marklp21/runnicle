@@ -8,7 +8,7 @@ interface NavbarProps {
   onJoinClick: () => void;
 }
 
-const navItems = ['Dashboard', 'Events', 'Gallery', 'Merch', 'Contact'];
+const navItems = ['Dashboard', 'Events', 'Gallery', 'Contact'];
 
 export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onJoinClick }) => {
   const [isOpen, setIsOpen] = useState(false);

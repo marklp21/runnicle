@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Award,
@@ -15,7 +15,7 @@ import UpcomingEvents from './components/UpcomingEvents';
 import Footer from './components/Footer';
 import Modal from './components/Modal';
 import FeaturedGallery from './components/FeaturedGallery';
-import BibsAndMerch from './components/BibsAndMerch';
+import FAQ from './components/FAQ';
 
 import EventDetailsPage from './pages/EventDetailsPage';
 import RegistrationPage from './pages/RegistrationPage';
@@ -33,6 +33,7 @@ import NewsPage from './pages/NewsPage';
 import ArticleDetailsPage from './pages/ArticleDetailsPage';
 import ContactPage from './pages/ContactPage';
 import AdminPage from './pages/AdminPage';
+import Newsletter from './components/Newsletter';
 
 import {
   mockEvents,
@@ -68,6 +69,8 @@ const getPathFromPage = (pageName: string): string => {
     case 'admin-events': return '/admin_events';
     case 'admin-create-event': return '/admin_create_event';
     case 'admin-registration-details': return '/admin_registration_details';
+    case 'admin-forms': return '/admin_forms';
+    case 'admin-settings': return '/admin_settings';
     default: return '/';
   }
 };
@@ -94,11 +97,25 @@ const getPageFromPath = (path: string): string => {
     case '/admin_events': return 'admin-events';
     case '/admin_create_event': return 'admin-create-event';
     case '/admin_registration_details': return 'admin-registration-details';
+    case '/admin_forms': return 'admin-forms';
+    case '/admin_settings': return 'admin-settings';
     default: return 'home';
   }
 };
 
+const ADMIN_PAGES = [
+  'admin-login',
+  'admin-dashboard',
+  'admin-registrations',
+  'admin-events',
+  'admin-create-event',
+  'admin-registration-details',
+  'admin-forms',
+  'admin-settings'
+];
+
 export const App: React.FC = () => {
+  const isFirstMount = React.useRef(true);
   
   const [page, setPage] = useState<string>(() => {
     const path = window.location.pathname;
@@ -108,15 +125,19 @@ export const App: React.FC = () => {
     }
     
     const savedPage = sessionStorage.getItem('runnicle_current_page');
-    if (savedPage && !['admin-login', 'admin-dashboard', 'admin-registrations', 'admin-events', 'admin-create-event', 'admin-registration-details'].includes(savedPage)) {
+    if (savedPage && !ADMIN_PAGES.includes(savedPage)) {
       return savedPage;
     }
     return 'home';
   });
 
+  const isAdminView = ADMIN_PAGES.includes(page);
+
   const [selectedRegId, setSelectedRegId] = useState<string | null>(() => {
     return sessionStorage.getItem('runnicle_selected_reg_id');
   });
+
+  const [isRegistrationConfirmed, setIsRegistrationConfirmed] = useState(false);
 
   const handleSelectReg = (id: string | null) => {
     setSelectedRegId(id);
@@ -130,9 +151,9 @@ export const App: React.FC = () => {
   // Elevate events state (initial load from mockEvents and sync with localStorage)
   const [events, setEvents] = useState<EventItem[]>(() => {
     const stored = localStorage.getItem('runnicle_events');
-    const hasReset = localStorage.getItem('runnicle_events_redesign_v2');
+    const hasReset = localStorage.getItem('runnicle_events_redesign_v3');
     if (!hasReset) {
-      localStorage.setItem('runnicle_events_redesign_v2', 'true');
+      localStorage.setItem('runnicle_events_redesign_v3', 'true');
       localStorage.setItem('runnicle_events', JSON.stringify(mockEvents));
       return mockEvents;
     }
@@ -152,69 +173,11 @@ export const App: React.FC = () => {
     localStorage.setItem('runnicle_events', JSON.stringify(newEvents));
   };
 
-  // Elevate registrations state (initial load from mock + sync with localStorage)
+  // Elevate registrations state (sync with localStorage, no pre-populated data)
   const [registrations, setRegistrations] = useState<any[]>(() => {
     const stored = localStorage.getItem('runnicle_registrations');
     if (stored) return JSON.parse(stored);
-    
-    // Default pre-populated list
-    const defaults = [
-      {
-        id: 'reg-1',
-        firstName: 'Juan',
-        lastName: 'Dela Cruz',
-        email: 'juan.delacruz@example.com',
-        phone: '09171234567',
-        gender: 'Male',
-        eventTitle: 'MegaWorld Fun Run',
-        distance: '10K',
-        size: 'Unisex - Medium (M)',
-        paymentMethod: 'GCash',
-        referenceNumber: '1029384756102',
-        registeredBib: '245',
-        emergencyContact: 'Maria Dela Cruz',
-        emergencyPhone: '09187654321',
-        registrationDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'Verified'
-      },
-      {
-        id: 'reg-2',
-        firstName: 'Samantha',
-        lastName: 'Santos',
-        email: 'sam.santos@example.com',
-        phone: '09192233445',
-        gender: 'Female',
-        eventTitle: 'MegaWorld Fun Run',
-        distance: '5K',
-        size: 'Unisex - Small (S)',
-        paymentMethod: 'Maya',
-        referenceNumber: '9988776655443',
-        registeredBib: '189',
-        emergencyContact: 'David Santos',
-        emergencyPhone: '09201122334',
-        registrationDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'Verified'
-      },
-      {
-        id: 'reg-3',
-        firstName: 'Mark',
-        lastName: 'Lee',
-        email: 'mark.lee@example.com',
-        phone: '09154433221',
-        gender: 'Male',
-        eventTitle: 'Guimaras Mountain Challenge',
-        distance: '21K',
-        size: 'Unisex - Large (L)',
-        paymentMethod: 'Bank Deposit',
-        referenceNumber: 'BDO-TRSF-5839',
-        registeredBib: '412',
-        emergencyContact: 'Lin Lee',
-        emergencyPhone: '09088899001',
-        registrationDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'Verified'
-      }
-    ];
-    return defaults;
+    return [];
   });
 
   const handleUpdateRegistrations = (newRegs: any[]) => {
@@ -232,6 +195,7 @@ export const App: React.FC = () => {
     const updated = [record, ...registrations];
     setRegistrations(updated);
     localStorage.setItem('runnicle_registrations', JSON.stringify(updated));
+    setIsRegistrationConfirmed(true);
   };
 
   
@@ -239,7 +203,7 @@ export const App: React.FC = () => {
     // Sync path with page state & implement Auth Guard
     const currentPath = window.location.pathname;
     const isLoggedIn = sessionStorage.getItem('runnicle_admin_logged') === 'true' || localStorage.getItem('runnicle_admin_logged') === 'true';
-    const isAdminView = ['admin-login', 'admin-dashboard', 'admin-registrations', 'admin-events', 'admin-create-event', 'admin-registration-details'].includes(page);
+    const isAdminView = ADMIN_PAGES.includes(page);
 
     if (isAdminView && !isLoggedIn && page !== 'admin-login') {
       setPage('admin-login');
@@ -251,9 +215,23 @@ export const App: React.FC = () => {
       window.history.pushState(null, '', targetPath);
     }
 
-    const scrollTimer = setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }, 80);
+    let scrollTimer: any;
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      // On initial load/refresh, restore the saved scroll position
+      const savedScrollY = sessionStorage.getItem('runnicle_scroll_y');
+      if (savedScrollY) {
+        const scrollY = parseInt(savedScrollY, 10);
+        scrollTimer = setTimeout(() => {
+          window.scrollTo({ top: scrollY, behavior: 'instant' });
+        }, 150);
+      }
+    } else {
+      // On subsequent page transitions, scroll to top
+      scrollTimer = setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }, 80);
+    }
 
     // Persist to sessionStorage if it's not an admin page
     if (!isAdminView) {
@@ -262,19 +240,44 @@ export const App: React.FC = () => {
       sessionStorage.removeItem('runnicle_current_page');
     }
 
-    return () => clearTimeout(scrollTimer);
+    return () => {
+      if (scrollTimer) clearTimeout(scrollTimer);
+    };
+  }, [page]);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const isAdminView = ADMIN_PAGES.includes(page);
+      if (!isAdminView) {
+        sessionStorage.setItem('runnicle_scroll_y', window.scrollY.toString());
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [page]);
+
+  React.useEffect(() => {
+    if (page !== 'register') {
+      setIsRegistrationConfirmed(false);
+    }
   }, [page]);
 
   React.useEffect(() => {
     const handlePopState = () => {
-      const path = window.location.pathname;
-      const matchedPage = getPageFromPath(path);
-      setPage(matchedPage);
+      if (page === 'register' && isRegistrationConfirmed) {
+        setIsRegistrationConfirmed(false);
+        setPage('home');
+        window.history.pushState(null, '', '/');
+      } else {
+        const path = window.location.pathname;
+        const matchedPage = getPageFromPath(path);
+        setPage(matchedPage);
+      }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [page, isRegistrationConfirmed]);
   
   
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
@@ -462,7 +465,37 @@ export const App: React.FC = () => {
     return nearest;
   };
 
-  const nearestEvent = getNearestUpcomingEvent() || mockEvents[0];
+  // Hero settings state
+  const [heroSettings, setHeroSettings] = useState(() => {
+    const stored = localStorage.getItem('runnicle_hero_settings');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        // Fallback
+      }
+    }
+    return {
+      promotedEventId: '',
+      heroBackgroundImage: '/images/hero-bg.png',
+    };
+  });
+
+  // Sync hero settings to local storage
+  useEffect(() => {
+    localStorage.setItem('runnicle_hero_settings', JSON.stringify(heroSettings));
+  }, [heroSettings]);
+
+  const nearestEvent = getNearestUpcomingEvent() || events[0] || null;
+
+  // Resolve promoted event dynamically
+  const promotedEvent = useMemo(() => {
+    if (heroSettings.promotedEventId) {
+      const found = events.find(e => e.id === heroSettings.promotedEventId);
+      if (found) return found;
+    }
+    return nearestEvent;
+  }, [events, heroSettings.promotedEventId, nearestEvent]);
 
   
   const getNavbarActiveTab = () => {
@@ -582,7 +615,7 @@ export const App: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-white text-zinc-800 antialiased selection:bg-orange-500 selection:text-white">
       
       {}
-      {!['admin-login', 'admin-dashboard', 'admin-registrations', 'admin-events', 'admin-create-event', 'admin-registration-details'].includes(page) && (
+      {!page.startsWith('admin-') && (
         <Navbar
           activeTab={getNavbarActiveTab()}
           setActiveTab={handleTabChange}
@@ -607,26 +640,57 @@ export const App: React.FC = () => {
       )}
 
       {}
-      <main className="flex-1 overflow-x-hidden">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={page}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15, ease: 'easeInOut' }}
-          >
+      <main className="flex-1 overflow-x-clip">
+        {isAdminView && page !== 'admin-login' ? (
+          <AdminPage
+            key="admin-portal"
+            view={page.replace('admin-', '') as any}
+            selectedRegId={selectedRegId}
+            events={events}
+            onAddEvent={handleAddEvent}
+            onUpdateEvents={handleUpdateEvents}
+            registrations={registrations}
+            onUpdateRegistrations={handleUpdateRegistrations}
+            onBackToHome={() => setPage('home')}
+            onNavigate={(route) => setPage(route)}
+            onLoginSuccess={() => setPage('admin-dashboard')}
+            onSelectReg={handleSelectReg}
+            heroSettings={heroSettings}
+            onUpdateHeroSettings={setHeroSettings}
+          />
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={page}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: 'easeInOut' }}
+            >
             
             {page === 'home' && (
               <>
                 {}
                 <Hero
+                  event={promotedEvent}
+                  backgroundImage={heroSettings.heroBackgroundImage}
                   onSecureSlotClick={() => {
-                    setSelectedEvent(nearestEvent);
-                    setPage('register');
+                    if (promotedEvent) {
+                      setSelectedEvent(promotedEvent);
+                      setPage('register');
+                    } else {
+                      setPage('events');
+                    }
                   }}
-                  onViewCalendarClick={() => setPage('events')}
-                  targetEventTimestamp={nearestEvent ? new Date(nearestEvent.date).getTime() : new Date().getTime()}
+                  onViewCalendarClick={() => {
+                    if (promotedEvent) {
+                      setSelectedEvent(promotedEvent);
+                      setPage('event-details');
+                    } else {
+                      setPage('events');
+                    }
+                  }}
+                  targetEventTimestamp={promotedEvent ? new Date(promotedEvent.deadline).getTime() : new Date().getTime()}
                 />
                 
                 {}
@@ -641,14 +705,8 @@ export const App: React.FC = () => {
 
                 <FeaturedGallery />
                 
-                <BibsAndMerch 
-                  products={mockProducts} 
-                  onProductClick={(product) => {
-                    setSelectedProduct(product);
-                    setPage('product-details');
-                  }}
-                  onViewAllClick={() => setPage('store')}
-                />
+                <FAQ />
+                <Newsletter />
                 
               </>
             )}
@@ -696,8 +754,13 @@ export const App: React.FC = () => {
                 allEvents={events}
                 onRegisterComplete={handleRegisterComplete}
                 onBack={() => {
-                  if (selectedEvent) setPage('event-details');
-                  else setPage('events');
+                  if (isRegistrationConfirmed) {
+                    setIsRegistrationConfirmed(false);
+                    setPage('home');
+                  } else {
+                    if (selectedEvent) setPage('event-details');
+                    else setPage('events');
+                  }
                 }}
               />
             )}
@@ -1050,88 +1113,13 @@ export const App: React.FC = () => {
               />
             )}
 
-            {page === 'admin-dashboard' && (
-              <AdminPage
-                view="dashboard"
-                events={events}
-                onAddEvent={handleAddEvent}
-                onUpdateEvents={handleUpdateEvents}
-                registrations={registrations}
-                onUpdateRegistrations={handleUpdateRegistrations}
-                onBackToHome={() => setPage('home')}
-                onNavigate={(route) => setPage(route)}
-                onLoginSuccess={() => setPage('admin-dashboard')}
-                onSelectReg={handleSelectReg}
-              />
-            )}
-
-            {page === 'admin-registrations' && (
-              <AdminPage
-                view="registrations"
-                events={events}
-                onAddEvent={handleAddEvent}
-                onUpdateEvents={handleUpdateEvents}
-                registrations={registrations}
-                onUpdateRegistrations={handleUpdateRegistrations}
-                onBackToHome={() => setPage('home')}
-                onNavigate={(route) => setPage(route)}
-                onLoginSuccess={() => setPage('admin-dashboard')}
-                onSelectReg={handleSelectReg}
-              />
-            )}
-
-            {page === 'admin-events' && (
-              <AdminPage
-                view="events"
-                events={events}
-                onAddEvent={handleAddEvent}
-                onUpdateEvents={handleUpdateEvents}
-                registrations={registrations}
-                onUpdateRegistrations={handleUpdateRegistrations}
-                onBackToHome={() => setPage('home')}
-                onNavigate={(route) => setPage(route)}
-                onLoginSuccess={() => setPage('admin-dashboard')}
-                onSelectReg={handleSelectReg}
-              />
-            )}
-
-            {page === 'admin-create-event' && (
-              <AdminPage
-                view="create-event"
-                events={events}
-                onAddEvent={handleAddEvent}
-                onUpdateEvents={handleUpdateEvents}
-                registrations={registrations}
-                onUpdateRegistrations={handleUpdateRegistrations}
-                onBackToHome={() => setPage('home')}
-                onNavigate={(route) => setPage(route)}
-                onLoginSuccess={() => setPage('admin-dashboard')}
-                onSelectReg={handleSelectReg}
-              />
-            )}
-
-            {page === 'admin-registration-details' && (
-              <AdminPage
-                view="registration-details"
-                selectedRegId={selectedRegId}
-                events={events}
-                onAddEvent={handleAddEvent}
-                onUpdateEvents={handleUpdateEvents}
-                registrations={registrations}
-                onUpdateRegistrations={handleUpdateRegistrations}
-                onBackToHome={() => setPage('home')}
-                onNavigate={(route) => setPage(route)}
-                onLoginSuccess={() => setPage('admin-dashboard')}
-                onSelectReg={handleSelectReg}
-              />
-            )}
-
           </motion.div>
         </AnimatePresence>
+      )}
       </main>
 
       {}
-      {!['admin-login', 'admin-dashboard', 'admin-registrations', 'admin-events', 'admin-create-event', 'admin-registration-details'].includes(page) && (
+      {!ADMIN_PAGES.includes(page) && (
         <Footer onPlatformClick={(item) => {
           if (item === 'Dashboard') setPage('home');
           else if (item === 'Events') setPage('events');

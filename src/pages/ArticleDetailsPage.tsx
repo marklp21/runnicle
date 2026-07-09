@@ -71,7 +71,7 @@ export const ArticleDetailsPage: React.FC<ArticleDetailsPageProps> = ({
           {}
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 flex gap-4">
             <Quote className="h-8 w-8 text-orange-500 flex-shrink-0" />
-            <p className="text-zinc-600 font-display italic font-semibold leading-relaxed">
+            <p className="text-zinc-600 font-serif italic font-semibold leading-relaxed">
               "Running teaches us that we are capable of so much more than we ever imagined. Rules of form, training miles, and recovery build the engine, but community builds the spirit."
             </p>
           </div>

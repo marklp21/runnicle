@@ -1,17 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { type EventItem } from '../data/mockData';
 
 interface HeroProps {
+  event: EventItem | null;
+  backgroundImage?: string;
   onSecureSlotClick: () => void;
   onViewCalendarClick: () => void;
   targetEventTimestamp: number;
 }
 
 export const Hero: React.FC<HeroProps> = ({
+  event,
+  backgroundImage,
   onSecureSlotClick,
   onViewCalendarClick,
   targetEventTimestamp,
 }) => {
+  const renderDynamicHeading = (title: string) => {
+    const regex = /\bRun\b/i;
+    const match = title.match(regex);
+    
+    if (match && match.index !== undefined) {
+      const runWord = match[0];
+      const before = title.substring(0, match.index);
+      const after = title.substring(match.index + runWord.length);
+      
+      return (
+        <>
+          {before}
+          <span className="font-serif italic text-[#FF4400] normal-case font-bold tracking-normal">
+            {runWord}
+          </span>
+          {after}
+        </>
+      );
+    }
+    
+    return title;
+  };
+
   const [timeLeft, setTimeLeft] = useState({
     days: '00',
     hours: '00',
@@ -44,12 +72,22 @@ export const Hero: React.FC<HeroProps> = ({
     return () => clearInterval(interval);
   }, [targetEventTimestamp]);
 
+  const bgImg = backgroundImage || '/images/hero-bg.png';
+
+  const getPromoBadgeText = () => {
+    if (!event) return 'MEGAWORLD FUN RUN 2026';
+    if (event.earlyBirdDeadline && event.earlyBirdDiscountPercent !== undefined) {
+      return `EARLY BIRDS ${event.earlyBirdDiscountPercent}% OFF – REGISTER BY ${event.earlyBirdDeadline.toUpperCase()}`;
+    }
+    return '2 WEEKS ONLY – EARLY BIRDS 20% OFF';
+  };
+
   return (
     <section className="relative overflow-hidden min-h-[85vh] flex items-center justify-center pt-24 pb-20 bg-black select-none">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/images/hero-bg.png"
+          src={bgImg}
           alt="Runner in motion"
           className="w-full h-full object-cover grayscale brightness-150 contrast-125"
         />
@@ -66,7 +104,7 @@ export const Hero: React.FC<HeroProps> = ({
           className="inline-flex items-center justify-center rounded-full bg-[#FF4400] px-5 py-1.5 mb-8"
         >
           <span className="font-mono text-xs font-normal tracking-widest text-white uppercase">
-            MEGAWORLD FUN RUN 2026
+            {getPromoBadgeText()}
           </span>
         </motion.div>
 
@@ -77,8 +115,12 @@ export const Hero: React.FC<HeroProps> = ({
           transition={{ duration: 0.6, delay: 0.1 }}
           className="font-sans text-5xl sm:text-6xl md:text-[80px] font-bold leading-[1.1] tracking-tight text-white mb-6"
         >
-          Every Mile Has a <span className="font-serif italic text-[#FF4400] normal-case font-bold tracking-normal">Story</span><br />
-          Write Yours
+          {event ? renderDynamicHeading(event.title) : (
+            <>
+              Every Mile Has a <span className="font-serif italic text-[#FF4400] normal-case font-bold tracking-normal">Story</span><br />
+              Write Yours
+            </>
+          )}
         </motion.h1>
 
         {/* Subtitle */}
@@ -88,7 +130,10 @@ export const Hero: React.FC<HeroProps> = ({
           transition={{ duration: 0.6, delay: 0.2 }}
           className="max-w-2xl text-sm sm:text-base text-zinc-300 font-normal leading-relaxed mb-10"
         >
-          Registration closes when the clock hits zero. Secure your slot, track your pace, and write your next chapter in the Runnicle archive.
+          {event 
+            ? `Registration is now open for ${event.title} in ${event.location}! Secure your slot, track your pace, and write your next chapter in the Runnicle archive.`
+            : 'Registration closes when the clock hits zero. Secure your slot, track your pace, and write your next chapter in the Runnicle archive.'
+          }
         </motion.p>
 
         {/* Countdown Timer */}

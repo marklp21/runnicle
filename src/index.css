@@ -2,9 +2,9 @@
 
 @theme {
   --font-sans: "Geist", system-ui, -apple-system, sans-serif;
-  --font-display: "Apple Garamond", "EB Garamond", serif;
+  --font-display: "Geist", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", monospace;
-  --font-serif: "Apple Garamond", "EB Garamond", serif;
+  --font-serif: "EB Garamond", serif;
   
   --color-brand: #FF4400;
   --color-brand-hover: #E63D00;

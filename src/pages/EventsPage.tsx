@@ -29,20 +29,20 @@ export const EventsPage: React.FC<EventsPageProps> = ({
       : pastEvents;
 
   return (
-    <div className="bg-[#F9F9F9] min-h-screen w-full py-10">
+    <div className="bg-white min-h-screen w-full py-10">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         
         {/* Back navigation */}
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-xs font-mono font-bold text-zinc-500 hover:text-[#FF4400] transition-colors cursor-pointer mb-10 group uppercase tracking-wider"
+          className="inline-flex items-center gap-2 text-sm font-sans font-bold text-zinc-500 hover:text-[#FF4400] transition-colors cursor-pointer mb-10 group uppercase tracking-wider"
         >
-          <span className="text-sm transition-transform group-hover:-translate-x-0.5">←</span> BACK TO HOME
+          <span className="text-base transition-transform group-hover:-translate-x-0.5">←</span> BACK TO HOME
         </button>
 
         {/* Header section */}
         <div className="mb-10 text-center">
-          <h1 className="font-sans text-4xl font-semibold tracking-tight text-zinc-900 sm:text-5xl">
+          <h1 className="font-sans text-4xl font-bold tracking-[-3px] text-zinc-900 sm:text-5xl">
             Race <span className="font-serif italic text-[#FF4400] font-bold">Calendar</span>
           </h1>
           <p className="mt-3 text-black text-sm font-normal">
@@ -117,7 +117,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                         {event.distances.map((dist) => (
                           <span
                             key={dist}
-                            className={`rounded-[3px] border px-2.5 py-0.5 text-[9px] font-mono font-bold tracking-widest uppercase ${
+                            className={`rounded-[3px] border px-2.5 py-0.5 text-[11px] font-sans font-bold tracking-wider uppercase ${
                               isPast
                                 ? 'border-zinc-200 text-zinc-400 bg-transparent'
                                 : 'border-[#FF4400]/30 text-[#FF4400] bg-transparent'
@@ -128,7 +128,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                         ))}
                       </div>
                       <span
-                        className={`rounded-[3px] px-2 py-0.5 text-[9px] font-mono font-black tracking-widest uppercase ${
+                        className={`rounded-[3px] px-2.5 py-0.5 text-[11px] font-sans font-bold tracking-wider uppercase ${
                           event.badge === 'CLOSING SOON'
                             ? 'bg-[#FEF9C3] text-[#854D0E]'
                             : event.badge === 'OPEN'
@@ -159,16 +159,16 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                     </p>
 
                     {/* Date & Location */}
-                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 text-[11px] font-mono font-bold text-zinc-500">
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 text-xs font-sans font-bold text-zinc-500">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="h-3.5 w-3.5 text-zinc-400 flex-shrink-0" />
-                        <span className={isPast ? 'text-zinc-400 font-semibold' : 'text-zinc-500'}>
+                        <span className={isPast ? 'text-zinc-400 font-bold' : 'text-zinc-500'}>
                           {event.date}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <MapPin className="h-3.5 w-3.5 text-zinc-400 flex-shrink-0" />
-                        <span className={isPast ? 'text-zinc-400 font-semibold' : 'text-zinc-500'}>
+                        <span className={isPast ? 'text-zinc-400 font-bold' : 'text-zinc-500'}>
                           {event.location}
                         </span>
                       </div>
@@ -177,12 +177,12 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                     {/* Registration Deadline */}
                     <div className="mt-4">
                       <p
-                        className={`text-[10px] font-mono font-bold uppercase tracking-wider ${
+                        className={`text-[11px] font-sans font-bold uppercase tracking-wider ${
                           isPast ? 'text-zinc-400' : 'text-zinc-500'
                         }`}
                       >
                         REGISTRATION DEADLINE:{' '}
-                        <span className={isPast ? 'text-zinc-500 font-extrabold' : 'text-zinc-900 font-extrabold'}>
+                        <span className={isPast ? 'text-zinc-500 font-black' : 'text-zinc-950 font-black'}>
                           {event.deadline}
                         </span>
                       </p>
@@ -194,7 +194,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                     <button
                       disabled={isPast}
                       onClick={() => onRegisterClick(event)}
-                      className={`flex-1 py-2.5 text-center text-[10px] font-mono font-black uppercase tracking-widest transition-all duration-200 rounded-[4px] border ${
+                      className={`flex-1 py-2.5 text-center text-[10px] font-sans font-bold uppercase tracking-wider transition-all duration-200 rounded-[4px] border ${
                         isPast
                           ? 'bg-[#E5E7EB] border-[#E5E7EB] text-zinc-400 cursor-not-allowed'
                           : 'bg-[#FF4400] border-[#FF4400] text-white hover:bg-[#E63D00] hover:border-[#E63D00] cursor-pointer active:scale-98'
@@ -204,7 +204,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                     </button>
                     <button
                       onClick={() => onLearnMoreClick(event)}
-                      className={`flex-1 py-2.5 text-center text-[10px] font-mono font-black uppercase tracking-widest transition-all duration-200 border rounded-[4px] ${
+                      className={`flex-1 py-2.5 text-center text-[10px] font-sans font-bold uppercase tracking-wider transition-all duration-200 border rounded-[4px] ${
                         isPast
                           ? 'bg-white border-zinc-200 text-zinc-400 hover:bg-zinc-50 hover:text-zinc-500 cursor-pointer active:scale-98'
                           : 'bg-white border-[#FF4400] text-[#FF4400] hover:bg-orange-50/40 cursor-pointer active:scale-98'

@@ -1,120 +1,68 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export const Newsletter: React.FC = () => {
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    
-    if (!email) {
-      setStatus('error');
-      setMessage('Please enter your email address.');
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setStatus('error');
-      setMessage('Please enter a valid email address.');
-      return;
-    }
-
+    if (!email.trim()) return;
     setStatus('loading');
-
-    
     setTimeout(() => {
       setStatus('success');
-      setMessage(`Welcome to the tribe! We've sent a starter kit to ${email}.`);
       setEmail('');
-    }, 1200);
+      setTimeout(() => setStatus('idle'), 3000);
+    }, 1000);
   };
 
   return (
-    <section className="py-16 bg-zinc-50 text-zinc-800 border-y border-zinc-200">
+    <section className="bg-[#0B0B0B] py-16 sm:py-20 select-none">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 max-w-6xl mx-auto">
           
-          {}
-          <div className="max-w-xl">
-            <h2 className="font-display text-3xl font-black tracking-tight text-zinc-900 sm:text-4xl">
-              Never Miss a Start Gun
+          {/* Left Column: Heading and Subtitle */}
+          <div className="text-left max-w-md">
+            <h2 className="font-sans text-3xl sm:text-[38px] font-semibold tracking-tight text-white leading-none">
+              Never Miss an <span className="font-serif italic text-[#FF4400] font-bold tracking-normal text-[1.15em] inline-block">Event</span>
             </h2>
-            <p className="mt-3 text-sm text-zinc-500 font-medium leading-relaxed">
-              Get early access to registrations, exclusive training plans, and gear drops straight to your inbox.
+            <p className="mt-4 text-xs sm:text-sm text-white font-normal leading-relaxed opacity-90">
+              Receive news, updates, and announcements on<br className="hidden sm:inline" /> upcoming events straight to your inbox.
             </p>
           </div>
 
-          {}
-          <div className="w-full lg:max-w-md">
-            <AnimatePresence mode="wait">
-              {status === 'success' ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 text-emerald-800"
-                >
-                  <CheckCircle2 className="h-5 w-5 mt-0.5 flex-shrink-0 text-emerald-600" />
-                  <div>
-                    <span className="text-sm font-bold text-emerald-900 block">Successfully Subscribed!</span>
-                    <span className="text-xs text-emerald-700 mt-1 block">{message}</span>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.form
-                  onSubmit={handleSubmit}
-                  initial={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="space-y-3"
-                  noValidate
-                >
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="relative flex-1">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          if (status === 'error') setStatus('idle');
-                        }}
-                        disabled={status === 'loading'}
-                        placeholder="runner@example.com"
-                        className="w-full rounded-full border border-zinc-200 bg-white px-5 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-orange-500 focus:outline-none shadow-sm transition-all duration-200"
-                      />
-                    </div>
-                    
-                    <button
-                      type="submit"
-                      disabled={status === 'loading'}
-                      className="rounded-full bg-black px-8 py-3.5 text-xs font-black tracking-widest text-white hover:bg-zinc-900 active:scale-[0.98] transition-all duration-200 cursor-pointer uppercase flex-shrink-0 disabled:opacity-50"
-                    >
-                      {status === 'loading' ? 'Joining...' : 'Join Tribe'}
-                    </button>
-                  </div>
-
-                  {status === 'error' && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center gap-2 text-xs font-bold text-red-500"
-                    >
-                      <AlertCircle className="h-4 w-4 text-red-500" />
-                      <span>{message}</span>
-                    </motion.div>
-                  )}
-                </motion.form>
+          {/* Right Column: Input and Button */}
+          <form 
+            onSubmit={handleSubmit}
+            className="flex flex-col sm:flex-row gap-3 w-full sm:max-w-md lg:max-w-[480px]"
+          >
+            <div className="relative flex-1">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="runner@example.com"
+                className="w-full bg-transparent rounded-[6px] border border-zinc-700 px-4 py-3.5 text-xs text-white placeholder-zinc-500 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] focus:outline-none transition-colors font-sans"
+              />
+              {status === 'success' && (
+                <span className="absolute -bottom-5 left-1 text-[10px] text-emerald-500 font-bold font-sans">
+                  Subscribed successfully!
+                </span>
               )}
-            </AnimatePresence>
-          </div>
-          
+            </div>
+            <button
+              type="submit"
+              disabled={status === 'loading'}
+              className="rounded-[6px] bg-[#FF4400] hover:bg-[#E63D00] text-white px-8 py-3.5 text-xs font-bold tracking-wider transition-all duration-150 active:scale-[0.98] cursor-pointer whitespace-nowrap select-none font-sans disabled:opacity-50"
+            >
+              {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
+            </button>
+          </form>
+
         </div>
       </div>
     </section>
   );
 };
+
 export default Newsletter;

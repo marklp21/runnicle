@@ -67,8 +67,8 @@ export const ContactPage: React.FC = () => {
         <span className="inline-block rounded-full border border-[#FF4400] px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-[#FF4400] uppercase bg-transparent">
           CONTACT US
         </span>
-        <h1 className="mt-6 font-sans text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl">
-          Get In <span className="font-serif italic text-[#FF4400] font-black">Touch</span>
+        <h1 className="mt-6 font-sans text-4xl font-bold tracking-[-3px] text-zinc-900 sm:text-5xl">
+          Get In <span className="font-serif italic text-[#FF4400] font-bold">Touch</span>
         </h1>
         <p className="mt-4 text-black text-sm sm:text-base leading-relaxed">
           Have any questions for us? Drop us a line.

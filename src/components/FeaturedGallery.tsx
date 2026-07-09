@@ -10,8 +10,8 @@ export const FeaturedGallery: React.FC = () => {
   return (
     <section className="py-16 bg-[#FF4400] text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-4xl font-bold tracking-tight mb-2 text-white">
-          Featured <span className="font-serif italic text-white font-semibold">Gallery</span>
+        <h2 className="font-sans text-4xl font-bold tracking-tight mb-2 text-white">
+          Featured <span className="font-serif italic text-white font-bold">Gallery</span>
         </h2>
         <p className="font-sans text-sm font-normal text-white/90 mb-10">
           Highlights and stories from our runners on the road
@@ -26,6 +26,7 @@ export const FeaturedGallery: React.FC = () => {
                 className="w-full h-full object-cover"
                 loading="lazy"
               />
+              <div className="absolute inset-0 z-10 pointer-events-auto" />
             </div>
           ))}
         </div>

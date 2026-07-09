@@ -3,7 +3,7 @@ import { Mail, Phone, Send } from 'lucide-react';
 
 export const GetInTouch: React.FC = () => {
   return (
-    <section className="py-20 bg-[#F9FAFB]">
+    <section className="py-20 bg-white">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8">

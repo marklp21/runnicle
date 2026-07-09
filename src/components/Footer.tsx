@@ -7,7 +7,7 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
   return (
-    <footer className="bg-[#FF4400] text-white pt-16 pb-8">
+    <footer className="relative bg-[#FF4400] text-white pt-16 pb-8 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
@@ -27,7 +27,7 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
               NAVIGATION
             </h4>
             <ul className="space-y-3 text-xs font-normal text-white/80">
-              {['Dashboard', 'Events', 'Gallery', 'Merch', 'Contact'].map((item) => (
+              {['Dashboard', 'Events', 'Gallery', 'Contact'].map((item) => (
                 <li key={item}>
                   <button
                     onClick={() => onPlatformClick(item)}
@@ -48,17 +48,17 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
             <div className="flex gap-4">
               <a
                 href="#"
-                className="flex items-center justify-center text-white/80 hover:text-white transition-colors duration-200 cursor-pointer"
+                className="flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity duration-200 cursor-pointer"
                 aria-label="Instagram"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
+                <img src="/social-instagram.png" alt="Instagram" className="h-5 w-5 object-contain" />
               </a>
               <a
                 href="#"
-                className="flex items-center justify-center text-white/80 hover:text-white transition-colors duration-200 cursor-pointer"
+                className="flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity duration-200 cursor-pointer"
                 aria-label="Facebook"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
+                <img src="/social-facebook.png" alt="Facebook" className="h-5 w-5 object-contain" />
               </a>
               <a
                 href="#"
@@ -72,14 +72,28 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
 
         </div>
 
+        {/* Mobile only logo */}
+        <div className="flex justify-center md:hidden mb-8">
+          <img src="/logo-running-white.png" alt="Runnicle Running Logo" className="h-24 w-auto" />
+        </div>
+
         {/* Bottom copyright section */}
         <div className="border-t border-white/10 pt-8 mt-8 flex items-center justify-between">
-          <p className="text-xs text-white/85">
-            &copy; Runnicle. All rights reserved.
-          </p>
+          <div className="flex items-center gap-2 text-xs text-white/85">
+            <span>&copy;</span>
+            <img src="/logo-white.png" alt="RUNNICLE" className="h-3 w-auto inline-block" />
+            <span>All rights reserved.</span>
+          </div>
         </div>
 
       </div>
+
+      {/* Desktop only absolutely positioned logo in lower right */}
+      <img 
+        src="/logo-running-white.png" 
+        alt="Runnicle Running Logo" 
+        className="absolute bottom-6 right-8 md:right-16 h-36 w-auto hidden md:block pointer-events-none" 
+      />
     </footer>
   );
 };
