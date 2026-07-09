@@ -28,6 +28,22 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { type EventItem } from '../data/mockData';
 
+const parseImages = (imgStr?: string): string[] => {
+  if (!imgStr) return [];
+  if (imgStr.startsWith('[')) {
+    try {
+      return JSON.parse(imgStr);
+    } catch (e) {
+      // fallback
+    }
+  }
+  if (imgStr.includes('|')) {
+    return imgStr.split('|');
+  }
+  return [imgStr];
+};
+
+
 // Preset image lists for beautiful cards
 const coverPresets = [
   {
@@ -124,8 +140,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Custom single file upload states
-  const [routeMapPhoto, setRouteMapPhoto] = useState<string>('');
-  const [kitPhoto, setKitPhoto] = useState<string>('');
+  const [routeMapPhotos, setRouteMapPhotos] = useState<string[]>([]);
+  const [kitPhotos, setKitPhotos] = useState<string[]>([]);
 
   // Create Event Form state
   const [newEvent, setNewEvent] = useState({
@@ -309,8 +325,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             iconType: newEvent.iconType,
             image: galleryPhotos[0],
             galleryImages: galleryPhotos,
-            routeMapImage: routeMapPhoto || undefined,
-            kitImage: kitPhoto || undefined,
+            routeMapImage: routeMapPhotos.length > 0 ? JSON.stringify(routeMapPhotos) : undefined,
+            kitImage: kitPhotos.length > 0 ? JSON.stringify(kitPhotos) : undefined,
             // New specs fields
             inclusions: newEvent.inclusions ? newEvent.inclusions.split(',').map(i => i.trim()) : ['Singlet', 'Race Bib'],
             jerseyFee: Number(newEvent.jerseyFee) || 250,
@@ -356,8 +372,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         iconType: newEvent.iconType,
         image: galleryPhotos[0],
         galleryImages: galleryPhotos,
-        routeMapImage: routeMapPhoto || undefined,
-        kitImage: kitPhoto || undefined,
+        routeMapImage: routeMapPhotos.length > 0 ? JSON.stringify(routeMapPhotos) : undefined,
+        kitImage: kitPhotos.length > 0 ? JSON.stringify(kitPhotos) : undefined,
         // New specs fields
         inclusions: newEvent.inclusions ? newEvent.inclusions.split(',').map(i => i.trim()) : ['Singlet', 'Race Bib'],
         jerseyFee: Number(newEvent.jerseyFee) || 250,
@@ -395,8 +411,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     });
     setGalleryPhotos([]);
     setDistanceRoutes({});
-    setRouteMapPhoto('');
-    setKitPhoto('');
+    setRouteMapPhotos([]);
+      setKitPhotos([]);
     setFormStep(1);
 
     // Navigate to respective lists
@@ -1995,8 +2011,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   });
                   setGalleryPhotos([]);
                   setDistanceRoutes({});
-                  setRouteMapPhoto('');
-                  setKitPhoto('');
+                  setRouteMapPhotos([]);
+      setKitPhotos([]);
                   setFormStep(1);
                   onNavigate('admin-create-event');
                 }}
@@ -2095,8 +2111,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                             initialRoutes[d] = evt.details.routes?.[d] || evt.details.route || '';
                           });
                           setDistanceRoutes(initialRoutes);
-                          setRouteMapPhoto(evt.routeMapImage || '');
-                          setKitPhoto(evt.kitImage || '');
+                          setRouteMapPhotos(parseImages(evt.routeMapImage));
+    setKitPhotos(parseImages(evt.kitImage));
                           setFormStep(1);
                         }}
                         className="flex-1 rounded-[7px] border border-zinc-200 bg-zinc-50 py-2 text-center text-xs font-bold text-zinc-700 hover:bg-zinc-100 transition-all cursor-pointer shadow-sm active:scale-[0.98]"
@@ -2476,8 +2492,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       type="button"
                       onClick={() => {
                         setDistanceRoutes({});
-                        setRouteMapPhoto('');
-                        setKitPhoto('');
+                        setRouteMapPhotos([]);
+      setKitPhotos([]);
                         setFormStep(1);
                         if (editingEvent) {
                           setEditingEvent(null);
@@ -2588,101 +2604,139 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     )}
                   </div>
 
-                  {/* Route Map & Race Kit uploads */}
+                  {/* Route Map & Race Kit uploads (Max 3 photos each) */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
-                    {/* Route Map Photo */}
+                    {/* Route Map Image Upload (Max 3 photos) */}
                     <div className="space-y-3">
                       <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 flex items-center gap-1.5">
                         <ImageIcon className="h-4 w-4 text-zinc-500" />
                         <span>Upload Route Map Image <span className="text-zinc-500">(Optional)</span></span>
                       </label>
                       
-                      {routeMapPhoto ? (
-                        <div className="relative h-44 rounded-2xl border border-zinc-200 overflow-hidden group shadow-sm bg-zinc-100">
-                          <img src={routeMapPhoto} alt="Route Map Preview" className="h-full w-full object-cover" />
-                          <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                            <button
-                              type="button"
-                              onClick={() => setRouteMapPhoto('')}
-                              className="rounded-[7px] bg-red-655 hover:bg-red-700 text-white font-mono text-[9px] font-black uppercase tracking-wider px-3.5 py-2 cursor-pointer transition-colors shadow-md shadow-red-900/10"
-                            >
-                              Remove Photo
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="border-2 border-dashed border-zinc-200 hover:border-brand rounded-2xl p-6 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group h-44 flex flex-col justify-center items-center animate-fade-in">
+                      {routeMapPhotos.length < 3 ? (
+                        <div className="border border-dashed border-zinc-200 hover:border-brand rounded-2xl p-4 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group h-32 flex flex-col justify-center items-center">
                           <input
                             type="file"
+                            multiple
                             accept="image/*"
                             onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
+                              const files = Array.from(e.target.files || []);
+                              if (routeMapPhotos.length + files.length > 3) {
+                                setUploaderError("You can upload a maximum of 3 Route Map photos.");
+                                setTimeout(() => setUploaderError(null), 4000);
+                                return;
+                              }
+                              setUploaderError(null);
+                              files.forEach((file) => {
                                 const reader = new FileReader();
                                 reader.onloadend = () => {
                                   if (typeof reader.result === 'string') {
-                                    setRouteMapPhoto(reader.result);
+                                    setRouteMapPhotos(prev => [...prev, reader.result as string]);
                                   }
                                 };
                                 reader.readAsDataURL(file);
-                              }
+                              });
                             }}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           />
-                          <ImageIcon className="h-6 w-6 text-zinc-500 group-hover:text-brand mb-1.5 transition-colors animate-fade-in" />
+                          <ImageIcon className="h-5 w-5 text-zinc-400 group-hover:text-brand mb-1 transition-colors" />
                           <span className="text-xs font-bold text-zinc-700 block">Browse Route Map Photo</span>
-                          <span className="text-[10px] text-zinc-500 block mt-0.5 font-mono">PNG, JPG, or WEBP (Max 1)</span>
+                          <span className="text-[10px] text-zinc-500 block mt-0.5 font-sans">PNG, JPG, or WEBP (Max 3)</span>
+                        </div>
+                      ) : (
+                        <div className="border border-zinc-150 rounded-2xl p-4 text-center bg-zinc-50/50 h-32 flex flex-col justify-center items-center">
+                          <Check className="h-5 w-5 text-green-500 mb-1" />
+                          <span className="text-xs font-bold text-zinc-650 block">Maximum 3 photos reached</span>
+                        </div>
+                      )}
+
+                      {/* Thumbnails list */}
+                      {routeMapPhotos.length > 0 && (
+                        <div className="flex flex-wrap gap-2.5 mt-2">
+                          {routeMapPhotos.map((photo, idx) => (
+                            <div key={idx} className="relative h-14 w-14 rounded-xl border border-zinc-200 overflow-hidden group shadow-sm bg-zinc-50">
+                              <img src={photo} alt="" className="h-full w-full object-cover" />
+                              <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                <button
+                                  type="button"
+                                  onClick={() => setRouteMapPhotos(prev => prev.filter((_, i) => i !== idx))}
+                                  className="p-1 bg-red-500 rounded-full hover:bg-red-650 transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
 
-                    {/* Race Kit / Singlet Preview */}
+                    {/* Race Kit / Singlet Preview (Max 3 photos) */}
                     <div className="space-y-3">
                       <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 flex items-center gap-1.5">
                         <ImageIcon className="h-4 w-4 text-zinc-500" />
                         <span>Upload Race Kit / Singlet Preview <span className="text-zinc-500">(Optional)</span></span>
                       </label>
                       
-                      {kitPhoto ? (
-                        <div className="relative h-44 rounded-2xl border border-zinc-200 overflow-hidden group shadow-sm bg-zinc-100">
-                          <img src={kitPhoto} alt="Race Kit Preview" className="h-full w-full object-cover" />
-                          <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                            <button
-                              type="button"
-                              onClick={() => setKitPhoto('')}
-                              className="rounded-[7px] bg-red-655 hover:bg-red-700 text-white font-mono text-[9px] font-black uppercase tracking-wider px-3.5 py-2 cursor-pointer transition-colors shadow-md shadow-red-900/10"
-                            >
-                              Remove Photo
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="border-2 border-dashed border-zinc-200 hover:border-brand rounded-2xl p-6 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group h-44 flex flex-col justify-center items-center animate-fade-in">
+                      {kitPhotos.length < 3 ? (
+                        <div className="border border-dashed border-zinc-200 hover:border-brand rounded-2xl p-4 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group h-32 flex flex-col justify-center items-center">
                           <input
                             type="file"
+                            multiple
                             accept="image/*"
                             onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
+                              const files = Array.from(e.target.files || []);
+                              if (kitPhotos.length + files.length > 3) {
+                                setUploaderError("You can upload a maximum of 3 Race Kit photos.");
+                                setTimeout(() => setUploaderError(null), 4000);
+                                return;
+                              }
+                              setUploaderError(null);
+                              files.forEach((file) => {
                                 const reader = new FileReader();
                                 reader.onloadend = () => {
                                   if (typeof reader.result === 'string') {
-                                    setKitPhoto(reader.result);
+                                    setKitPhotos(prev => [...prev, reader.result as string]);
                                   }
                                 };
                                 reader.readAsDataURL(file);
-                              }
+                              });
                             }}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           />
-                          <ImageIcon className="h-6 w-6 text-zinc-500 group-hover:text-brand mb-1.5 transition-colors animate-fade-in" />
+                          <ImageIcon className="h-5 w-5 text-zinc-400 group-hover:text-brand mb-1 transition-colors" />
                           <span className="text-xs font-bold text-zinc-700 block">Browse Race Kit Photo</span>
-                          <span className="text-[10px] text-zinc-500 block mt-0.5 font-mono">PNG, JPG, or WEBP (Max 1)</span>
+                          <span className="text-[10px] text-zinc-500 block mt-0.5 font-sans">PNG, JPG, or WEBP (Max 3)</span>
+                        </div>
+                      ) : (
+                        <div className="border border-zinc-150 rounded-2xl p-4 text-center bg-zinc-50/50 h-32 flex flex-col justify-center items-center">
+                          <Check className="h-5 w-5 text-green-500 mb-1" />
+                          <span className="text-xs font-bold text-zinc-650 block">Maximum 3 photos reached</span>
+                        </div>
+                      )}
+
+                      {/* Thumbnails list */}
+                      {kitPhotos.length > 0 && (
+                        <div className="flex flex-wrap gap-2.5 mt-2">
+                          {kitPhotos.map((photo, idx) => (
+                            <div key={idx} className="relative h-14 w-14 rounded-xl border border-zinc-200 overflow-hidden group shadow-sm bg-zinc-50">
+                              <img src={photo} alt="" className="h-full w-full object-cover" />
+                              <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                <button
+                                  type="button"
+                                  onClick={() => setKitPhotos(prev => prev.filter((_, i) => i !== idx))}
+                                  className="p-1 bg-red-500 rounded-full hover:bg-red-650 transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
                   </div>
-
+                  
                   {/* Step 2 Actions */}
                   <div className="flex gap-4 pt-6 font-sans">
                     <button

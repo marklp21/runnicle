@@ -2,6 +2,22 @@ import React from 'react';
 import { Calendar, MapPin, Clock, Award, ArrowLeft, ShieldAlert } from 'lucide-react';
 import { type EventItem } from '../data/mockData';
 
+const parseImages = (imgStr?: string): string[] => {
+  if (!imgStr) return [];
+  if (imgStr.startsWith('[')) {
+    try {
+      return JSON.parse(imgStr);
+    } catch (e) {
+      // fallback
+    }
+  }
+  if (imgStr.includes('|')) {
+    return imgStr.split('|');
+  }
+  return [imgStr];
+};
+
+
 interface EventDetailsPageProps {
   event: EventItem;
   onBack: () => void;
@@ -13,6 +29,14 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
   onBack,
   onRegisterClick,
 }) => {
+  const kitPhotos = parseImages(event.kitImage);
+  const routeMapPhotos = parseImages(event.routeMapImage);
+  const [activeKitIdx, setActiveKitIdx] = React.useState(0);
+  const [activeRouteIdx, setActiveRouteIdx] = React.useState(0);
+  
+  const activeKitPhoto = kitPhotos[activeKitIdx] || kitPhotos[0] || 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=600&q=80';
+  const activeRoutePhoto = routeMapPhotos[activeRouteIdx] || routeMapPhotos[0] || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=600&q=80';
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       
@@ -152,7 +176,7 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
               </div>
               <div className="relative aspect-video rounded-lg overflow-hidden border border-zinc-200 bg-zinc-50">
                 <img 
-                  src={event.kitImage || 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=600&q=80'} 
+                  src={activeKitPhoto} 
                   alt="Official Race Kit" 
                   className="h-full w-full object-cover hover:scale-105 transition-transform duration-500"
                 />
@@ -160,6 +184,24 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
                   Includes Finisher Tee & Medal
                 </div>
               </div>
+
+              {/* Race Kit Thumbnail Selection */}
+              {kitPhotos.length > 1 && (
+                <div className="flex gap-2.5 pt-1">
+                  {kitPhotos.map((photo, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActiveKitIdx(idx)}
+                      className={`relative h-12 w-12 rounded-lg border overflow-hidden transition-all duration-200 cursor-pointer ${
+                        (activeKitIdx === idx || (idx === 0 && activeKitIdx >= kitPhotos.length)) ? 'border-[#FF4400] ring-2 ring-[#FF4400]/20' : 'border-zinc-200 hover:border-zinc-350'
+                      }`}
+                    >
+                      <img src={photo} alt="" className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
               <p className="text-[11px] text-zinc-500 leading-relaxed font-semibold">
                 Your registered slot includes the official Runnicle dry-fit singlet, an RFID-equipped timing bib, sponsor vouchers, and a custom die-cast finisher medal upon crossing the finish line.
               </p>
@@ -173,7 +215,7 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
               </div>
               <div className="relative aspect-video rounded-lg overflow-hidden border border-zinc-200 bg-zinc-50">
                 <img 
-                  src={event.routeMapImage || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=600&q=80'} 
+                  src={activeRoutePhoto} 
                   alt="Event Route Map" 
                   className="h-full w-full object-cover hover:scale-105 transition-transform duration-500"
                 />
@@ -181,6 +223,24 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
                   Certified Course Map
                 </div>
               </div>
+
+              {/* Route Map Thumbnail Selection */}
+              {routeMapPhotos.length > 1 && (
+                <div className="flex gap-2.5 pt-1">
+                  {routeMapPhotos.map((photo, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActiveRouteIdx(idx)}
+                      className={`relative h-12 w-12 rounded-lg border overflow-hidden transition-all duration-200 cursor-pointer ${
+                        (activeRouteIdx === idx || (idx === 0 && activeRouteIdx >= routeMapPhotos.length)) ? 'border-[#FF4400] ring-2 ring-[#FF4400]/20' : 'border-zinc-200 hover:border-zinc-350'
+                      }`}
+                    >
+                      <img src={photo} alt="" className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
               <p className="text-[11px] text-zinc-500 leading-relaxed font-semibold">
                 The certified loop features hydration and nutrition points every 2.5 kilometers, timing mats at key check junctions, and emergency medical personnel stationed along the route.
               </p>

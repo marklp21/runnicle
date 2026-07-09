@@ -92,12 +92,12 @@ export const EventsPage: React.FC<EventsPageProps> = ({
             return (
               <div
                 key={event.id}
-                className={`rounded-[8px] border border-zinc-200 bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col md:flex-row transition-all duration-300 ${
+                className={`rounded-[8px] border border-zinc-200 bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col md:flex-row md:h-[280px] transition-all duration-300 ${
                   isPast ? 'bg-[#FDFDFD]' : 'hover:border-zinc-300'
                 }`}
               >
                 {/* Left Column: Image */}
-                <div className="md:w-[40%] aspect-video md:aspect-auto min-h-[220px] md:min-h-full relative bg-zinc-100 overflow-hidden">
+                <div className="md:w-[40%] aspect-video md:aspect-auto min-h-[220px] md:h-full relative bg-zinc-100 overflow-hidden">
                   <img
                     src={event.image}
                     alt={event.title}
@@ -109,7 +109,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                 </div>
 
                 {/* Right Column: Content */}
-                <div className="md:w-[60%] p-6 flex flex-col justify-between space-y-4">
+                <div className="md:w-[60%] p-6 flex flex-col justify-between h-full space-y-3">
                   <div>
                     {/* Tags & Badge Row */}
                     <div className="flex items-center justify-between">
