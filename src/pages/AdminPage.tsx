@@ -20,7 +20,6 @@ import {
   Edit2,
   LayoutDashboard,
   Calendar,
-  PlusCircle,
   ClipboardList,
   Settings,
   ArrowLeft
@@ -416,11 +415,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     setFormStep(1);
 
     // Navigate to respective lists
-    if (editingEvent) {
-      onNavigate('admin-events');
-    } else {
-      onNavigate('admin-registrations');
-    }
+    onNavigate('admin-events');
   };
 
   const resetNewRegForm = () => {
@@ -745,25 +740,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               <button
                 onClick={() => onNavigate('admin-events')}
                 className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${
-                  view === 'events'
+                  view === 'events' || view === 'create-event'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
                 }`}
               >
                 <Calendar className="h-4.5 w-4.5" />
                 <span>Events</span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('admin-create-event')}
-                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${
-                  view === 'create-event'
-                    ? 'bg-orange-50 text-[#FF4400]'
-                    : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
-                }`}
-              >
-                <PlusCircle className="h-4.5 w-4.5" />
-                <span>New Event</span>
               </button>
 
               <button
@@ -883,26 +866,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   setIsMobileMenuOpen(false);
                 }}
                 className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${
-                  view === 'events'
+                  view === 'events' || view === 'create-event'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-655 hover:bg-zinc-50'
                 }`}
               >
                 Events
-              </button>
-
-              <button
-                onClick={() => {
-                  onNavigate('admin-create-event');
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${
-                  view === 'create-event'
-                    ? 'bg-orange-50 text-[#FF4400]'
-                    : 'text-zinc-655 hover:bg-zinc-50'
-                }`}
-              >
-                New Event
               </button>
 
               <button
@@ -2171,140 +2140,161 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
             <form onSubmit={handleCreateEventSubmit} className="space-y-6">
               {formStep === 1 && (
-                <div className="space-y-6 animate-fade-in">
-                  {/* Event Name & Status */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Race Event Title <span className="text-brand">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={newEvent.title}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
-                        placeholder="e.g. Bacolod Sunset Coast Half Marathon"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none shadow-sm"
-                      />
+                <div className="space-y-8 animate-fade-in font-sans">
+                  {/* Card 1: Basic Specifications */}
+                  <div className="bg-white rounded-xl border border-zinc-200/80 p-6 shadow-sm space-y-6">
+                    <div className="border-b border-zinc-150 pb-3.5">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-zinc-800 flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-brand"></span>
+                        Basic Details
+                      </h3>
+                      <p className="text-[11px] text-zinc-400 font-medium mt-0.5">Define name, date, location, and registration status.</p>
                     </div>
-                    <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Badge / Registration Status
-                      </label>
-                      <div className="relative">
-                      <select
-                        value={newEvent.badge}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, badge: e.target.value as any }))}
-                        className="w-full rounded-lg border border-zinc-200 bg-white pl-4 pr-10 py-3.5 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-bold animate-fade-in shadow-sm appearance-none"
-                      >
-                        <option value="OPEN" className="bg-white">OPEN (REGISTERING)</option>
-                        <option value="CLOSING SOON" className="bg-white">CLOSING SOON</option>
-                        <option value="SOLD OUT" className="bg-white">SOLD OUT</option>
-                        <option value="PAST EVENT" className="bg-white">PAST EVENT</option>
-                      </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                    </svg>
-                  </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Race Event Title <span className="text-brand">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={newEvent.title}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="e.g. Bacolod Sunset Coast Half Marathon"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-350 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Badge / Registration Status
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={newEvent.badge}
+                            onChange={(e) => setNewEvent(prev => ({ ...prev, badge: e.target.value as any }))}
+                            className="w-full rounded-lg border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none cursor-pointer font-bold transition-all shadow-sm appearance-none"
+                          >
+                            <option value="OPEN">OPEN (REGISTERING)</option>
+                            <option value="CLOSING SOON">CLOSING SOON</option>
+                            <option value="SOLD OUT">SOLD OUT</option>
+                            <option value="PAST EVENT">PAST EVENT</option>
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Race Date <span className="text-brand">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={newEvent.date}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, date: e.target.value }))}
+                          placeholder="Oct 24, 2026"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-350 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Gunstart Time
+                        </label>
+                        <input
+                          type="text"
+                          value={newEvent.time}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, time: e.target.value }))}
+                          placeholder="05:00 AM"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-350 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none text-center transition-all shadow-sm font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Deadline Date
+                        </label>
+                        <input
+                          type="text"
+                          value={newEvent.deadline}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, deadline: e.target.value }))}
+                          placeholder="Oct 15, 2026"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-350 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Location <span className="text-brand">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={newEvent.location}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, location: e.target.value }))}
+                          placeholder="Bacolod City"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-350 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Date, Time, Deadline, Location */}
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
-                    <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Race Date <span className="text-brand">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={newEvent.date}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, date: e.target.value }))}
-                        placeholder="Oct 24, 2026"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none shadow-sm"
-                      />
+                  {/* Card 2: Fees & Inclusions */}
+                  <div className="bg-white rounded-xl border border-zinc-200/80 p-6 shadow-sm space-y-6">
+                    <div className="border-b border-zinc-150 pb-3.5">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-zinc-800 flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-brand"></span>
+                        Fees & Inclusions
+                      </h3>
+                      <p className="text-[11px] text-zinc-400 font-medium mt-0.5">Specify basic entry charges, optional add-ons, and items included in the kit.</p>
                     </div>
-                    <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Gunstart Time
-                      </label>
-                      <input
-                        type="text"
-                        value={newEvent.time}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, time: e.target.value }))}
-                        placeholder="05:00 AM"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none text-center shadow-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Deadline Date
-                      </label>
-                      <input
-                        type="text"
-                        value={newEvent.deadline}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, deadline: e.target.value }))}
-                        placeholder="Oct 15, 2026"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none shadow-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Location <span className="text-brand">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={newEvent.location}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, location: e.target.value }))}
-                        placeholder="Bacolod City"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none shadow-sm"
-                      />
-                    </div>
-                  </div>
 
-                  {/* Fee & Limit */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Base Entry Fee (PHP)
-                      </label>
-                      <input
-                        type="text"
-                        value={newEvent.fee}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, fee: e.target.value }))}
-                        placeholder="₱1,200.00"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none shadow-sm"
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Base Entry Fee (PHP) <span className="text-brand">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={newEvent.fee}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, fee: e.target.value }))}
+                          placeholder="₱1,200.00"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Runner Limit (Slots)
+                        </label>
+                        <input
+                          type="number"
+                          value={newEvent.slotsLimit}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, slotsLimit: parseInt(e.target.value) || 500 }))}
+                          placeholder="500"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Jersey / Kit Add-on Fee (PHP)
+                        </label>
+                        <input
+                          type="number"
+                          value={newEvent.jerseyFee}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, jerseyFee: parseInt(e.target.value) || 0 }))}
+                          placeholder="250"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                        />
+                      </div>
                     </div>
+
                     <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Runner Limit
-                      </label>
-                      <input
-                        type="number"
-                        value={newEvent.slotsLimit}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, slotsLimit: parseInt(e.target.value) || 0 }))}
-                        placeholder="500"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none text-center shadow-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Jersey / Kit Add-on Fee (PHP)
-                      </label>
-                      <input
-                        type="number"
-                        value={newEvent.jerseyFee}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, jerseyFee: parseInt(e.target.value) || 0 }))}
-                        placeholder="250"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none animate-fade-in"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
+                      <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
                         Race Inclusions (Comma-separated)
                       </label>
                       <input
@@ -2312,178 +2302,207 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         value={newEvent.inclusions}
                         onChange={(e) => setNewEvent(prev => ({ ...prev, inclusions: e.target.value }))}
                         placeholder="e.g. Dry-Fit Singlet, Race Bib, Finisher Medal"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 focus:border-brand focus:outline-none shadow-sm"
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
                       />
                     </div>
                   </div>
 
-                  {/* Early Bird Promotion Settings */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 bg-zinc-50/50 border border-zinc-200/80 rounded-xl p-5">
+                  {/* Card 3: Early Bird Promotion */}
+                  <div className="bg-white rounded-xl border border-zinc-200/80 p-6 shadow-sm space-y-6">
+                    <div className="border-b border-zinc-150 pb-3.5">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-zinc-800 flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-brand"></span>
+                        Early Bird Promotion
+                      </h3>
+                      <p className="text-[11px] text-zinc-400 font-medium mt-0.5">Optionally configure discounts for early registrations.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Early Bird Promotion Deadline Date
+                        </label>
+                        <input
+                          type="text"
+                          value={newEvent.earlyBirdDeadline}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, earlyBirdDeadline: e.target.value }))}
+                          placeholder="e.g. Oct 5, 2026"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                        />
+                        <span className="text-[10px] text-zinc-450 font-medium mt-2 block">Leave empty to disable early bird discount.</span>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Early Bird Discount Percentage (%)
+                        </label>
+                        <input
+                          type="number"
+                          value={newEvent.earlyBirdDiscountPercent}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, earlyBirdDiscountPercent: parseInt(e.target.value) || 0 }))}
+                          placeholder="20"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 4: Distance & Course Configuration */}
+                  <div className="bg-white rounded-xl border border-zinc-200/80 p-6 shadow-sm space-y-6">
+                    <div className="border-b border-zinc-150 pb-3.5">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-zinc-800 flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-brand"></span>
+                        Distance & Course Configuration
+                      </h3>
+                      <p className="text-[11px] text-zinc-400 font-medium mt-0.5">Select active distance classes and configure pricing and maps for each.</p>
+                    </div>
+
                     <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Early Bird Promotion Deadline Date
+                      <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                        Distance Categories <span className="text-brand">*</span>
                       </label>
-                      <input
-                        type="text"
-                        value={newEvent.earlyBirdDeadline}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, earlyBirdDeadline: e.target.value }))}
-                        placeholder="e.g. Oct 5, 2026"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none"
-                      />
-                      <span className="text-[10px] text-zinc-500 font-medium mt-1 block">Leave empty to disable early bird discount.</span>
+                      <div className="flex flex-wrap gap-2.5 bg-zinc-50 rounded-xl border border-zinc-200 p-4">
+                        {['3K', '5K', '10K', '16K', '21K', '32K', '42K'].map(dist => {
+                          const isChecked = newEvent.distances.includes(dist);
+                          return (
+                            <label 
+                              key={dist} 
+                              className={`flex items-center gap-2 cursor-pointer border px-4.5 py-2.5 rounded-lg select-none transition-all ${
+                                isChecked ? 'border-brand text-brand font-black bg-brand/[0.03] shadow-sm' : 'border-zinc-200 hover:border-zinc-350 text-zinc-700 bg-white hover:bg-zinc-50'
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => handleDistanceCheckboxChange(dist)}
+                                className="sr-only"
+                              />
+                              <span className="text-xs font-bold">{dist}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
                     </div>
+
+                    {/* Pricing per Distance Category */}
                     <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Early Bird Discount Percentage (%)
+                      <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                        Pricing per Distance Category (PHP) <span className="text-brand">*</span>
                       </label>
-                      <input
-                        type="number"
-                        value={newEvent.earlyBirdDiscountPercent}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, earlyBirdDiscountPercent: parseInt(e.target.value) || 0 }))}
-                        placeholder="20"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Distances Category checklist */}
-                  <div>
-                    <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                      Distance Categories <span className="text-brand">*</span>
-                    </label>
-                    <div className="flex flex-wrap gap-4 bg-zinc-50 rounded-xl border border-zinc-200 p-4">
-                      {['3K', '5K', '10K', '16K', '21K', '32K', '42K'].map(dist => {
-                        const isChecked = newEvent.distances.includes(dist);
-                        return (
-                          <label 
-                            key={dist} 
-                            className={`flex items-center gap-2 cursor-pointer border px-5 py-3.5 rounded-lg select-none transition-all ${
-                              isChecked ? 'border-brand text-brand font-extrabold shadow-sm bg-brand/[0.04]' : 'border-zinc-200 hover:border-zinc-350 text-zinc-700 bg-white'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => handleDistanceCheckboxChange(dist)}
-                              className="sr-only"
-                            />
-                            <span className="text-sm font-sans font-bold">{dist}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Pricing per Distance Category */}
-                  <div>
-                    <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                      Pricing per Distance Category (PHP) <span className="text-brand">*</span>
-                    </label>
-                    {newEvent.distances.length === 0 ? (
-                      <div className="text-xs font-mono bg-zinc-50 text-zinc-500 border border-zinc-200 rounded-xl p-4 text-center font-sans">
-                        Select at least one distance category above to configure pricing.
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-zinc-50 border border-zinc-200 rounded-xl p-4 animate-fade-in font-sans">
-                        {newEvent.distances.map((dist) => (
-                          <div key={dist} className="space-y-1.5 font-sans">
-                            <span className="text-xs font-bold text-zinc-700 block">{dist} Fee</span>
-                            <input
-                              type="number"
-                              required
-                              value={newEvent.distanceFees[dist] || ''}
-                              onChange={(e) => {
-                                const val = parseInt(e.target.value) || 0;
-                                setNewEvent(prev => ({
-                                  ...prev,
-                                  distanceFees: {
-                                    ...prev.distanceFees,
-                                    [dist]: val
-                                  }
-                                }));
-                              }}
-                              placeholder="e.g. 500"
-                              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-brand focus:outline-none"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Route Maps / Path descriptions per category */}
-                  <div>
-                    <label className="block text-[11px] font-bold text-zinc-700 uppercase tracking-widest mb-2.5 font-mono">
-                      Route Maps / Path descriptions per category <span className="text-brand">*</span>
-                    </label>
-                    {newEvent.distances.length === 0 ? (
-                      <div className="text-xs font-mono bg-zinc-50 text-zinc-500 border border-zinc-200 rounded-xl p-4 text-center">
-                        Please select at least one distance category above to specify routes.
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-50 rounded-xl border border-zinc-200 p-4">
-                        {newEvent.distances.map((dist) => (
-                          <div key={dist} className="space-y-1.5 animate-fade-in">
-                            <div className="flex justify-between items-center">
-                              <span className="bg-brand text-white font-mono font-black text-[11px] px-2.5 py-1 rounded uppercase tracking-wider">{dist} category</span>
+                      {newEvent.distances.length === 0 ? (
+                        <div className="text-xs font-medium bg-zinc-50 text-zinc-400 border border-zinc-200 rounded-xl p-4 text-center">
+                          Select at least one distance category above to configure pricing.
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-zinc-50 border border-zinc-200 rounded-xl p-4 animate-fade-in">
+                          {newEvent.distances.map((dist) => (
+                            <div key={dist} className="space-y-1.5">
+                              <span className="text-xs font-bold text-zinc-650 block">{dist} Fee</span>
+                              <input
+                                type="number"
+                                required
+                                value={newEvent.distanceFees[dist] || ''}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value) || 0;
+                                  setNewEvent(prev => ({
+                                    ...prev,
+                                    distanceFees: {
+                                      ...prev.distanceFees,
+                                      [dist]: val
+                                    }
+                                  }));
+                                }}
+                                placeholder="e.g. 500"
+                                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                              />
                             </div>
-                            <input
-                              type="text"
-                              required
-                              value={distanceRoutes[dist] || ''}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setDistanceRoutes(prev => ({ ...prev, [dist]: val }));
-                              }}
-                              placeholder={`e.g. ${dist} race course loop description`}
-                              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none"
-                            />
-                          </div>
-                        ))}
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Route Maps / Path descriptions per category */}
+                    <div>
+                      <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                        Route Maps / Path descriptions per category <span className="text-brand">*</span>
+                      </label>
+                      {newEvent.distances.length === 0 ? (
+                        <div className="text-xs font-medium bg-zinc-50 text-zinc-400 border border-zinc-200 rounded-xl p-4 text-center">
+                          Please select at least one distance category above to specify routes.
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-50 rounded-xl border border-zinc-200 p-4">
+                          {newEvent.distances.map((dist) => (
+                            <div key={dist} className="space-y-1.5 animate-fade-in">
+                              <div className="flex justify-between items-center">
+                                <span className="bg-brand/10 text-brand font-mono font-bold text-[9px] px-2 py-0.5 rounded uppercase tracking-wider">{dist} category</span>
+                              </div>
+                              <input
+                                type="text"
+                                required
+                                value={distanceRoutes[dist] || ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setDistanceRoutes(prev => ({ ...prev, [dist]: val }));
+                                }}
+                                placeholder={`e.g. ${dist} race course loop description`}
+                                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card 5: Aesthetic & Additional Features */}
+                  <div className="bg-white rounded-xl border border-zinc-200/80 p-6 shadow-sm space-y-6">
+                    <div className="border-b border-zinc-150 pb-3.5">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-zinc-800 flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-brand"></span>
+                        Aesthetics & Perks
+                      </h3>
+                      <p className="text-[11px] text-zinc-400 font-medium mt-0.5">Describe secondary event features, athlete highlights, and other details.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Athlete Perks (Comma-separated)
+                        </label>
+                        <input
+                          type="text"
+                          value={newEvent.perks}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, perks: e.target.value }))}
+                          placeholder="e.g. RFID Timing Chip, Finisher Medal, Sub-assembly Singlet"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                        />
                       </div>
-                    )}
-                  </div>
-
-                  {/* Perks & Highlights */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Athlete Perks (Comma-separated)
-                      </label>
-                      <input
-                        type="text"
-                        value={newEvent.perks}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, perks: e.target.value }))}
-                        placeholder="e.g. RFID Timing Chip, Finisher Medal, Sub-assembly Singlet"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none shadow-sm"
-                      />
+                      <div>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                          Race Highlights (Comma-separated)
+                        </label>
+                        <input
+                          type="text"
+                          value={newEvent.highlights}
+                          onChange={(e) => setNewEvent(prev => ({ ...prev, highlights: e.target.value }))}
+                          placeholder="e.g. AIMS Certified course, Sub-15 Timing Hubs, Post-race hydration booths"
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                        Race Highlights (Comma-separated)
-                      </label>
-                      <input
-                        type="text"
-                        value={newEvent.highlights}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, highlights: e.target.value }))}
-                        placeholder="e.g. AIMS Certified course, Sub-15 Timing Hubs, Post-race hydration booths"
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none shadow-sm"
-                      />
-                    </div>
-                  </div>
 
-                  {/* Description */}
-                  <div>
-                    <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                      Race Description
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={newEvent.description}
-                      onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
-                      placeholder="Provide registration notes, details about the hydration hubs, medical stands, and finishing criteria..."
-                      className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none shadow-sm"
-                    ></textarea>
+                    <div>
+                      <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                        Race Description
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={newEvent.description}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
+                        placeholder="Provide registration notes, details about the hydration hubs, medical stands, and finishing criteria..."
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
+                      ></textarea>
+                    </div>
                   </div>
 
                   {/* Step 1 Actions */}
@@ -2495,12 +2514,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         setRouteMapPhotos([]);
       setKitPhotos([]);
                         setFormStep(1);
-                        if (editingEvent) {
-                          setEditingEvent(null);
-                          onNavigate('admin-events');
-                        } else {
-                          onNavigate('admin-registrations');
-                        }
+                        setEditingEvent(null);
+                        onNavigate('admin-events');
                       }}
                       className="flex-1 rounded-[7px] border border-zinc-200 bg-white py-3.5 text-center text-sm font-sans font-bold text-zinc-700 hover:bg-zinc-50 transition-colors uppercase tracking-widest cursor-pointer shadow-sm"
                     >
