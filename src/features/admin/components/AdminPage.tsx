@@ -25,7 +25,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { type EventItem } from '../data/mockData';
+import { type EventItem } from '@/types';
 
 const parseImages = (imgStr?: string): string[] => {
   if (!imgStr) return [];

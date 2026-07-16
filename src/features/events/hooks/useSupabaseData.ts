@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { type EventItem } from '../types';
-import { supabaseService } from '../services/supabaseService';
-import { mockEvents } from '../data/mockData';
+import { type EventItem } from '@/types';
+import { supabaseService } from '@/services/supabaseService';
+import { mockEvents } from '@/data/mockData';
 
 export function useSupabaseData(setIsRegistrationConfirmed?: (confirmed: boolean) => void) {
   const [events, setEvents] = useState<EventItem[]>(() => {

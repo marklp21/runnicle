@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle2, ArrowRight, Printer } from 'lucide-react';
-import { type CartItem } from './CartPage';
+import { type CartItem } from '@/features/store';
 
 interface OrderConfirmationPageProps {
   orderInfo: {

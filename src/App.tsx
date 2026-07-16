@@ -17,25 +17,19 @@ import Modal from './components/Modal';
 import FeaturedGallery from './components/FeaturedGallery';
 import FAQ from './components/FAQ';
 
-import EventDetailsPage from './pages/EventDetailsPage';
+import { EventsPage, EventDetailsPage, EventResultsPage, useSupabaseData } from '@/features/events';
+import { StorePage, CartPage, useCart } from '@/features/store';
+import { AdminPage } from '@/features/admin';
 import RegistrationPage from './pages/RegistrationPage';
 import CoachBookingPage from './pages/CoachBookingPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
-
-import EventsPage from './pages/EventsPage';
-import EventResultsPage from './pages/EventResultsPage';
-import StorePage from './pages/StorePage';
-import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import GalleryPage from './pages/GalleryPage';
 import NewsPage from './pages/NewsPage';
 import ArticleDetailsPage from './pages/ArticleDetailsPage';
 import ContactPage from './pages/ContactPage';
-import AdminPage from './pages/AdminPage';
 import Newsletter from './components/Newsletter';
-import { useCart } from './hooks/useCart';
-import { useSupabaseData } from './hooks/useSupabaseData';
 import {
   type EventItem,
   type Product,
