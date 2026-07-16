@@ -17,14 +17,10 @@ import Modal from './components/Modal';
 import FeaturedGallery from './components/FeaturedGallery';
 import FAQ from './components/FAQ';
 
-import { EventsPage, EventDetailsPage, EventResultsPage, useSupabaseData } from '@/features/events';
-import { StorePage, CartPage, useCart } from '@/features/store';
+import { EventsPage, EventDetailsPage, EventResultsPage, RegistrationPage, useSupabaseData } from '@/features/events';
+import { StorePage, CartPage, CheckoutPage, OrderConfirmationPage, ProductDetailsPage, useCart } from '@/features/store';
 import { AdminPage } from '@/features/admin';
-import RegistrationPage from './pages/RegistrationPage';
 import CoachBookingPage from './pages/CoachBookingPage';
-import ProductDetailsPage from './pages/ProductDetailsPage';
-import CheckoutPage from './pages/CheckoutPage';
-import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import GalleryPage from './pages/GalleryPage';
 import NewsPage from './pages/NewsPage';
 import ArticleDetailsPage from './pages/ArticleDetailsPage';

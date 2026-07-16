@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { type EventItem } from '../data/mockData';
+import { type EventItem } from '@/types';
 
 interface RegistrationPageProps {
   event: EventItem | null;
