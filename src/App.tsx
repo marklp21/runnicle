@@ -25,7 +25,7 @@ import ProductDetailsPage from './pages/ProductDetailsPage';
 import EventsPage from './pages/EventsPage';
 import EventResultsPage from './pages/EventResultsPage';
 import StorePage from './pages/StorePage';
-import CartPage, { type CartItem } from './pages/CartPage';
+import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import GalleryPage from './pages/GalleryPage';
@@ -34,15 +34,18 @@ import ArticleDetailsPage from './pages/ArticleDetailsPage';
 import ContactPage from './pages/ContactPage';
 import AdminPage from './pages/AdminPage';
 import Newsletter from './components/Newsletter';
-
+import { useCart } from './hooks/useCart';
+import { useSupabaseData } from './hooks/useSupabaseData';
 import {
-  mockEvents,
-  mockProducts,
-  mockArticles,
   type EventItem,
   type Product,
   type Article,
   type CommunityPost
+} from './types';
+
+import {
+  mockProducts,
+  mockArticles
 } from './data/mockData';
 
 import { mockCommunityPosts } from './data/mockData';
@@ -149,54 +152,14 @@ export const App: React.FC = () => {
   };
 
 
-  const [events, setEvents] = useState<EventItem[]>(() => {
-    const stored = localStorage.getItem('runnicle_events');
-    const hasReset = localStorage.getItem('runnicle_events_redesign_v3');
-    if (!hasReset) {
-      localStorage.setItem('runnicle_events_redesign_v3', 'true');
-      localStorage.setItem('runnicle_events', JSON.stringify(mockEvents));
-      return mockEvents;
-    }
-    return stored ? JSON.parse(stored) : mockEvents;
-  });
-
-
-  const handleAddEvent = (newEvent: EventItem) => {
-    const updated = [newEvent, ...events];
-    setEvents(updated);
-    localStorage.setItem('runnicle_events', JSON.stringify(updated));
-  };
-
-
-  const handleUpdateEvents = (newEvents: EventItem[]) => {
-    setEvents(newEvents);
-    localStorage.setItem('runnicle_events', JSON.stringify(newEvents));
-  };
-
-
-  const [registrations, setRegistrations] = useState<any[]>(() => {
-    const stored = localStorage.getItem('runnicle_registrations');
-    if (stored) return JSON.parse(stored);
-    return [];
-  });
-
-  const handleUpdateRegistrations = (newRegs: any[]) => {
-    setRegistrations(newRegs);
-    localStorage.setItem('runnicle_registrations', JSON.stringify(newRegs));
-  };
-
-  const handleRegisterComplete = (newRegistration: any) => {
-    const record = {
-      id: `reg-${Date.now()}`,
-      registrationDate: new Date().toISOString(),
-      status: 'Pending',
-      ...newRegistration
-    };
-    const updated = [record, ...registrations];
-    setRegistrations(updated);
-    localStorage.setItem('runnicle_registrations', JSON.stringify(updated));
-    setIsRegistrationConfirmed(true);
-  };
+  const {
+    events,
+    registrations,
+    handleAddEvent,
+    handleUpdateEvents,
+    handleUpdateRegistrations,
+    handleRegisterComplete
+  } = useSupabaseData(setIsRegistrationConfirmed);
 
 
   React.useEffect(() => {
@@ -280,10 +243,13 @@ export const App: React.FC = () => {
   }, [page, isRegistrationConfirmed]);
 
 
-  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    const stored = localStorage.getItem('runnicle_cart_items');
-    return stored ? JSON.parse(stored) : [];
-  });
+  const {
+    cartItems,
+    setCartItems,
+    handleAddToCart,
+    handleUpdateCartQuantity,
+    handleRemoveCartItem
+  } = useCart();
 
 
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(() => {
@@ -321,9 +287,7 @@ export const App: React.FC = () => {
     return null;
   });
 
-  React.useEffect(() => {
-    localStorage.setItem('runnicle_cart_items', JSON.stringify(cartItems));
-  }, [cartItems]);
+
 
   React.useEffect(() => {
     if (selectedEvent) {
@@ -519,44 +483,7 @@ export const App: React.FC = () => {
   };
 
 
-  const handleAddToCart = (product: Product, size?: string, color?: string) => {
-    const itemSize = size || product.sizes[0] || 'Standard';
-    const itemColor = color || product.colors[0] || 'Default';
 
-    setCartItems((prev) => {
-      const existIdx = prev.findIndex(
-        (item) => item.product.id === product.id && item.size === itemSize && item.color === itemColor
-      );
-
-      if (existIdx > -1) {
-        const copy = [...prev];
-        copy[existIdx].quantity += 1;
-        return copy;
-      } else {
-        return [...prev, { product, quantity: 1, size: itemSize, color: itemColor }];
-      }
-    });
-  };
-
-
-  const handleUpdateCartQuantity = (idx: number, delta: number) => {
-    setCartItems((prev) => {
-      const copy = [...prev];
-      const newQty = copy[idx].quantity + delta;
-
-      if (newQty <= 0) {
-        copy.splice(idx, 1);
-      } else {
-        copy[idx].quantity = newQty;
-      }
-      return copy;
-    });
-  };
-
-
-  const handleRemoveCartItem = (idx: number) => {
-    setCartItems((prev) => prev.filter((_, i) => i !== idx));
-  };
 
 
   const handleAddComment = (postId: string) => {
@@ -993,8 +920,8 @@ export const App: React.FC = () => {
                                 setGeneratedPlan(null);
                               }}
                               className={`rounded-full border py-2.5 text-center text-[10px] font-black tracking-wider uppercase transition-all cursor-pointer ${planDistance === (dist === 'Half' ? 'Half Marathon' : dist === 'Full' ? 'Full Marathon' : dist)
-                                  ? 'bg-black text-white border-black shadow-sm'
-                                  : 'border-zinc-200 text-zinc-600 bg-white hover:border-black hover:text-black'
+                                ? 'bg-black text-white border-black shadow-sm'
+                                : 'border-zinc-200 text-zinc-600 bg-white hover:border-black hover:text-black'
                                 }`}
                             >
                               {dist}
@@ -1016,8 +943,8 @@ export const App: React.FC = () => {
                                 setGeneratedPlan(null);
                               }}
                               className={`rounded-full border py-2.5 text-center text-[10px] font-black tracking-wider uppercase transition-all cursor-pointer ${planLevel === lvl
-                                  ? 'bg-black text-white border-black shadow-sm'
-                                  : 'border-zinc-200 text-zinc-600 bg-white hover:border-black hover:text-black'
+                                ? 'bg-black text-white border-black shadow-sm'
+                                : 'border-zinc-200 text-zinc-600 bg-white hover:border-black hover:text-black'
                                 }`}
                             >
                               {lvl}

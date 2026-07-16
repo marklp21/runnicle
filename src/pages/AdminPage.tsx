@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  Lock, 
-  Search, 
-  Download, 
-  Trash2, 
-  Check, 
-  X, 
-  AlertCircle, 
-  Filter, 
-  DollarSign, 
-  Users, 
+import {
+  Lock,
+  Search,
+  Download,
+  Trash2,
+  Check,
+  X,
+  AlertCircle,
+  Filter,
+  DollarSign,
+  Users,
   Sparkles,
   Image as ImageIcon,
   Eye,
@@ -79,11 +79,43 @@ interface AdminPageProps {
   onNavigate: (page: string) => void;
   onLoginSuccess: () => void;
   onSelectReg?: (id: string | null) => void;
-  
+
   // Settings view properties
   heroSettings?: { promotedEventId: string; heroBackgroundImage: string };
   onUpdateHeroSettings?: (settings: { promotedEventId: string; heroBackgroundImage: string }) => void;
 }
+
+export const compressImage = (base64Str: string, maxWidth = 800, maxHeight = 800, quality = 0.7): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = base64Str;
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      } else {
+        resolve(base64Str);
+      }
+    };
+    img.onerror = () => {
+      resolve(base64Str);
+    };
+  });
+};
 
 export const sha256 = async (text: string): Promise<string> => {
   const msgBuffer = new TextEncoder().encode(text);
@@ -159,7 +191,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     highlights: 'Certified race course, Fully loaded hydrations, Post-race concert',
     image: coverPresets[0].url,
     iconType: 'compass' as 'compass' | 'mountain' | 'drop',
-    
+
     // New specs fields
     inclusions: 'Singlet, Race Bib',
     jerseyFee: 250,
@@ -384,7 +416,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       onAddEvent(formattedEvent);
       showToast(`Successfully created event: "${newEvent.title}"`);
     }
-    
+
     // Reset Form
     setNewEvent({
       title: '',
@@ -411,7 +443,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     setGalleryPhotos([]);
     setDistanceRoutes({});
     setRouteMapPhotos([]);
-      setKitPhotos([]);
+    setKitPhotos([]);
     setFormStep(1);
 
     // Navigate to respective lists
@@ -516,9 +548,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const filteredRegistrations = registrations.filter(reg => {
     const fullName = `${reg.firstName || ''} ${reg.lastName || ''}`.toLowerCase();
     const query = searchQuery.toLowerCase();
-    
-    const matchesSearch = 
-      fullName.includes(query) || 
+
+    const matchesSearch =
+      fullName.includes(query) ||
       (reg.email || '').toLowerCase().includes(query) ||
       (reg.registeredBib || '').toLowerCase().includes(query) ||
       (reg.eventTitle || '').toLowerCase().includes(query);
@@ -532,7 +564,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
   // Calculate stats based on filtered list
   const totalRegistrations = filteredRegistrations.length;
-  
+
   const totalRevenue = filteredRegistrations.reduce((acc, curr) => {
     if (curr.status === 'Cancelled') return acc;
     // Calculate basic revenue, parse fee out of the event or assume standard 1250 if not present
@@ -553,7 +585,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
     // CSV Headers
     const headers = [
-      'ID', 'Bib #', 'First Name', 'Last Name', 'Email', 'Phone', 'Gender', 
+      'ID', 'Bib #', 'First Name', 'Last Name', 'Email', 'Phone', 'Gender',
       'Event', 'Distance', 'T-Shirt Size', 'Payment Method', 'Reference #', 'Status', 'Date Registered'
     ];
 
@@ -600,7 +632,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         <div className="max-w-md w-full bg-white rounded-xl border border-zinc-200 p-8 shadow-xl relative overflow-hidden">
           {/* Accent decoration */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#FF4400]" />
-          
+
           <div className="text-center mb-6">
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-[#FF4400]/10 text-[#FF4400] mb-4">
               <Lock className="h-5 w-5" />
@@ -697,7 +729,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
   return (
     <div className="min-h-screen bg-white text-zinc-800 select-none flex flex-col lg:flex-row">
-      
+
       {/* Desktop Sidebar (visible on lg screens and up) */}
       <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-zinc-200 h-screen sticky top-0 flex-shrink-0 z-40 select-none shadow-sm">
         <div className="p-6 border-b border-zinc-150 flex items-center gap-3">
@@ -715,11 +747,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             <>
               <button
                 onClick={() => onNavigate('admin-dashboard')}
-                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${
-                  view === 'dashboard'
+                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'dashboard'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
-                }`}
+                  }`}
               >
                 <LayoutDashboard className="h-4.5 w-4.5" />
                 <span>Dashboard</span>
@@ -727,11 +758,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
               <button
                 onClick={() => onNavigate('admin-registrations')}
-                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${
-                  view === 'registrations'
+                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'registrations'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
-                }`}
+                  }`}
               >
                 <Users className="h-4.5 w-4.5" />
                 <span>Registrations</span>
@@ -739,11 +769,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
               <button
                 onClick={() => onNavigate('admin-events')}
-                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${
-                  view === 'events' || view === 'create-event'
+                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'events' || view === 'create-event'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
-                }`}
+                  }`}
               >
                 <Calendar className="h-4.5 w-4.5" />
                 <span>Events</span>
@@ -755,11 +784,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   resetNewRegForm();
                   onNavigate('admin-forms');
                 }}
-                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${
-                  view === 'forms'
+                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'forms'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
-                }`}
+                  }`}
               >
                 <ClipboardList className="h-4.5 w-4.5" />
                 <span>Forms</span>
@@ -767,18 +795,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
               <button
                 onClick={() => onNavigate('admin-settings')}
-                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${
-                  view === 'settings'
+                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'settings'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
-                }`}
+                  }`}
               >
                 <Settings className="h-4.5 w-4.5" />
                 <span>Settings</span>
               </button>
             </>
           ) : (
-            <button 
+            <button
               onClick={() => onNavigate('admin-registrations')}
               className="w-full font-sans text-xs font-bold tracking-wider uppercase text-zinc-500 hover:text-[#FF4400] transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer animate-fade-in"
             >
@@ -837,25 +864,23 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   onNavigate('admin-dashboard');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${
-                  view === 'dashboard'
+                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${view === 'dashboard'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-650 hover:bg-zinc-50'
-                }`}
+                  }`}
               >
                 Dashboard
               </button>
-              
+
               <button
                 onClick={() => {
                   onNavigate('admin-registrations');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${
-                  view === 'registrations'
+                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${view === 'registrations'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-655 hover:bg-zinc-50'
-                }`}
+                  }`}
               >
                 Registrations
               </button>
@@ -865,11 +890,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   onNavigate('admin-events');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${
-                  view === 'events' || view === 'create-event'
+                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${view === 'events' || view === 'create-event'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-655 hover:bg-zinc-50'
-                }`}
+                  }`}
               >
                 Events
               </button>
@@ -881,11 +905,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   onNavigate('admin-forms');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${
-                  view === 'forms'
+                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${view === 'forms'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-655 hover:bg-zinc-50'
-                }`}
+                  }`}
               >
                 Forms
               </button>
@@ -895,11 +918,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   onNavigate('admin-settings');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${
-                  view === 'settings'
+                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${view === 'settings'
                     ? 'bg-orange-50 text-[#FF4400]'
                     : 'text-zinc-655 hover:bg-zinc-50'
-                }`}
+                  }`}
               >
                 Settings
               </button>
@@ -938,7 +960,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         {/* Content Tabs */}
         {view === 'dashboard' && (
           <div className="space-y-6">
-            
+
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               <div className="bg-white p-6 rounded-xl border border-zinc-200/85 shadow-sm">
@@ -983,7 +1005,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
+
               {/* Left Side: Upcoming Events slots analysis (2 columns wide) */}
               <div className="lg:col-span-2 bg-white rounded-xl border border-zinc-200/85 p-6 shadow-sm space-y-6">
                 <div className="flex justify-between items-center border-b border-zinc-150 pb-4">
@@ -1007,7 +1029,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   {events.map((evt) => {
                     const runnersForEvt = registrations.filter(r => r.eventTitle === evt.title && r.status === 'Verified').length;
                     const fillPercentage = Math.min(100, Math.round((runnersForEvt / (evt.details.slotsLeft || 500)) * 100));
-                    
+
                     return (
                       <div key={evt.id} className="border border-zinc-200/60 rounded-lg p-4 space-y-3 font-sans text-xs bg-zinc-50">
                         <div className="flex justify-between items-start">
@@ -1019,11 +1041,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                               Date: {evt.date} | Limit: {evt.details.slotsLeft || 500} Slots
                             </span>
                           </div>
-                          <span className={`rounded-[4px] border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider font-mono ${
-                            evt.badge === 'OPEN'
+                          <span className={`rounded-[4px] border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider font-mono ${evt.badge === 'OPEN'
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               : 'bg-red-50 text-red-700 border-red-200'
-                          }`}>
+                            }`}>
                             {evt.badge || 'OPEN'}
                           </span>
                         </div>
@@ -1035,8 +1056,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                             <span>{fillPercentage}%</span>
                           </div>
                           <div className="w-full bg-zinc-200 h-1.5 rounded-full overflow-hidden">
-                            <div 
-                              className="bg-[#FF4400] h-full rounded-full transition-all duration-500" 
+                            <div
+                              className="bg-[#FF4400] h-full rounded-full transition-all duration-500"
                               style={{ width: `${fillPercentage}%` }}
                             />
                           </div>
@@ -1061,7 +1082,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
                   <div className="divide-y divide-zinc-100 font-sans text-xs">
                     {registrations.slice(0, 5).map((reg) => (
-                      <div 
+                      <div
                         key={reg.id}
                         onClick={() => {
                           if (onSelectReg) onSelectReg(reg.id);
@@ -1079,11 +1100,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </div>
                         <div className="text-right flex-shrink-0">
                           <span className="font-bold text-[#FF4400] block">{reg.distance}</span>
-                          <span className={`inline-block rounded-[4px] px-1.5 py-0.5 text-[9px] font-bold uppercase mt-1 font-mono ${
-                            reg.status === 'Verified' 
+                          <span className={`inline-block rounded-[4px] px-1.5 py-0.5 text-[9px] font-bold uppercase mt-1 font-mono ${reg.status === 'Verified'
                               ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                               : 'bg-amber-50 text-amber-700 border border-amber-100'
-                          }`}>
+                            }`}>
                             {reg.status || 'Pending'}
                           </span>
                         </div>
@@ -1155,61 +1175,61 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
                 {/* Event Title filter */}
                 <div className="relative">
-                <select
-                  value={selectedEventFilter}
-                  onChange={(e) => setSelectedEventFilter(e.target.value)}
-                  className="rounded-[7px] border border-zinc-200 bg-white pl-3.5 pr-8 py-2 text-xs text-zinc-600 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors appearance-none"
-                >
-                  <option value="">All events</option>
-                  {distinctEvents.map(evt => (
-                    <option key={evt} value={evt} className="bg-white">{evt}</option>
-                  ))}
-                </select>
+                  <select
+                    value={selectedEventFilter}
+                    onChange={(e) => setSelectedEventFilter(e.target.value)}
+                    className="rounded-[7px] border border-zinc-200 bg-white pl-3.5 pr-8 py-2 text-xs text-zinc-600 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors appearance-none"
+                  >
+                    <option value="">All events</option>
+                    {distinctEvents.map(evt => (
+                      <option key={evt} value={evt} className="bg-white">{evt}</option>
+                    ))}
+                  </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-400">
                     <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                     </svg>
                   </div>
-              </div>
+                </div>
 
                 {/* Payment filter */}
                 <div className="relative">
-                <select
-                  value={selectedPaymentFilter}
-                  onChange={(e) => setSelectedPaymentFilter(e.target.value)}
-                  className="rounded-[7px] border border-zinc-200 bg-white pl-3.5 pr-8 py-2 text-xs text-zinc-600 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors appearance-none"
-                >
-                  <option value="" className="bg-white">All payment methods</option>
-                  <option value="GCash" className="bg-white">GCash</option>
-                  <option value="Maya" className="bg-white">Maya</option>
-                  <option value="Bank" className="bg-white">Bank Deposit</option>
-                  <option value="Card" className="bg-white">Credit/Debit Card</option>
-                </select>
+                  <select
+                    value={selectedPaymentFilter}
+                    onChange={(e) => setSelectedPaymentFilter(e.target.value)}
+                    className="rounded-[7px] border border-zinc-200 bg-white pl-3.5 pr-8 py-2 text-xs text-zinc-600 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors appearance-none"
+                  >
+                    <option value="" className="bg-white">All payment methods</option>
+                    <option value="GCash" className="bg-white">GCash</option>
+                    <option value="Maya" className="bg-white">Maya</option>
+                    <option value="Bank" className="bg-white">Bank Deposit</option>
+                    <option value="Card" className="bg-white">Credit/Debit Card</option>
+                  </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-400">
                     <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                     </svg>
                   </div>
-              </div>
+                </div>
 
                 {/* Status filter */}
                 <div className="relative">
-                <select
-                  value={selectedStatusFilter}
-                  onChange={(e) => setSelectedStatusFilter(e.target.value)}
-                  className="rounded-[7px] border border-zinc-200 bg-white pl-3.5 pr-8 py-2 text-xs text-zinc-600 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors appearance-none"
-                >
-                  <option value="" className="bg-white">All statuses</option>
-                  <option value="Verified" className="bg-white">Verified</option>
-                  <option value="Pending" className="bg-white">Pending</option>
-                  <option value="Cancelled" className="bg-white">Cancelled</option>
-                </select>
+                  <select
+                    value={selectedStatusFilter}
+                    onChange={(e) => setSelectedStatusFilter(e.target.value)}
+                    className="rounded-[7px] border border-zinc-200 bg-white pl-3.5 pr-8 py-2 text-xs text-zinc-600 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors appearance-none"
+                  >
+                    <option value="" className="bg-white">All statuses</option>
+                    <option value="Verified" className="bg-white">Verified</option>
+                    <option value="Pending" className="bg-white">Pending</option>
+                    <option value="Cancelled" className="bg-white">Cancelled</option>
+                  </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-400">
                     <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                     </svg>
                   </div>
-              </div>
+                </div>
 
                 {/* Clear Filters */}
                 {(selectedEventFilter || selectedPaymentFilter || selectedStatusFilter || searchQuery) && (
@@ -1255,8 +1275,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       </tr>
                     ) : (
                       filteredRegistrations.map((reg) => (
-                        <tr 
-                          key={reg.id} 
+                        <tr
+                          key={reg.id}
                           onClick={() => {
                             if (onSelectReg) onSelectReg(reg.id);
                             onNavigate('admin-registration-details');
@@ -1304,13 +1324,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           </td>
                           {/* Status */}
                           <td className="px-5 py-4 text-center">
-                            <span className={`inline-block rounded-[4px] px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase border font-mono ${
-                              reg.status === 'Verified' 
+                            <span className={`inline-block rounded-[4px] px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase border font-mono ${reg.status === 'Verified'
                                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                 : reg.status === 'Cancelled'
-                                ? 'bg-red-50 text-red-700 border-red-200'
-                                : 'bg-amber-50 text-amber-700 border-amber-200'
-                            }`}>
+                                  ? 'bg-red-50 text-red-700 border-red-200'
+                                  : 'bg-amber-50 text-amber-700 border-amber-200'
+                              }`}>
                               {reg.status || 'Pending'}
                             </span>
                           </td>
@@ -1356,12 +1375,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
         {view === 'forms' && (() => {
           const selectedEvent = events.find(e => e.title === newReg.eventTitle) || events[0];
-          const formattedRaceDate = selectedEvent?.date 
-            ? new Date(selectedEvent.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) 
+          const formattedRaceDate = selectedEvent?.date
+            ? new Date(selectedEvent.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
             : '—';
-          
+
           const baseFee = selectedEvent?.distanceFees?.[newReg.distance] || 0;
-          
+
           let earlyBirdDiscount = 0;
           if (selectedEvent?.earlyBirdDeadline && selectedEvent?.earlyBirdDiscountPercent) {
             const today = new Date();
@@ -1375,30 +1394,30 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
           return (
             <div className="bg-white p-6 md:p-8 w-full animate-fade-in font-sans text-zinc-800">
-              
+
               <div className="mb-8">
                 <h1 className="font-sans text-3xl font-extrabold tracking-tight text-zinc-900">
                   Runner <span className="font-serif italic font-bold text-brand">Registration</span>
                 </h1>
                 <p className="mt-2 text-sm text-zinc-500 font-medium">
-                  {editingRegId 
-                    ? 'Update profile details to verify the slot in the administrative dashboard.' 
+                  {editingRegId
+                    ? 'Update profile details to verify the slot in the administrative dashboard.'
                     : 'Manually register a runner profile to verify slots and timing tags.'
                   }
                 </p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                
+
                 {/* Form Column */}
                 <form onSubmit={handleAddRegSubmit} className="lg:col-span-2 space-y-8 text-xs font-semibold text-zinc-650">
-                  
+
                   {/* Personal Data */}
                   <div className="space-y-5">
                     <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-900 pb-1">
                       PERSONAL DATA
                     </h3>
-                    
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
                         <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
@@ -1464,18 +1483,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </label>
                         <div className="relative">
                           <select
-                          value={newReg.gender}
-                          onChange={(e) => setNewReg(prev => ({ ...prev, gender: e.target.value }))}
-                          className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
-                        >
-                          <option value="Male" className="bg-white">Male</option>
-                          <option value="Female" className="bg-white">Female</option>
-                        </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                    </svg>
-                  </div>
+                            value={newReg.gender}
+                            onChange={(e) => setNewReg(prev => ({ ...prev, gender: e.target.value }))}
+                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                          >
+                            <option value="Male" className="bg-white">Male</option>
+                            <option value="Female" className="bg-white">Female</option>
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
                       <div>
@@ -1484,23 +1503,23 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </label>
                         <div className="relative">
                           <select
-                          value={newReg.size}
-                          onChange={(e) => setNewReg(prev => ({ ...prev, size: e.target.value }))}
-                          className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
-                        >
-                          <option value="Unisex - Extra Small (XS)" className="bg-white">Extra Small (XS)</option>
-                          <option value="Unisex - Small (S)" className="bg-white">Small (S)</option>
-                          <option value="Unisex - Medium (M)" className="bg-white">Medium (M)</option>
-                          <option value="Unisex - Large (L)" className="bg-white">Large (L)</option>
-                          <option value="Unisex - Extra Large (XL)" className="bg-white">Extra Large (XL)</option>
-                          <option value="Unisex - Double Extra Large (2XL)" className="bg-white">Double Extra Large (2XL)</option>
-                          <option value="Unisex - Triple Extra Large (3XL)" className="bg-white">Triple Extra Large (3XL)</option>
-                        </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                    </svg>
-                  </div>
+                            value={newReg.size}
+                            onChange={(e) => setNewReg(prev => ({ ...prev, size: e.target.value }))}
+                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                          >
+                            <option value="Unisex - Extra Small (XS)" className="bg-white">Extra Small (XS)</option>
+                            <option value="Unisex - Small (S)" className="bg-white">Small (S)</option>
+                            <option value="Unisex - Medium (M)" className="bg-white">Medium (M)</option>
+                            <option value="Unisex - Large (L)" className="bg-white">Large (L)</option>
+                            <option value="Unisex - Extra Large (XL)" className="bg-white">Extra Large (XL)</option>
+                            <option value="Unisex - Double Extra Large (2XL)" className="bg-white">Double Extra Large (2XL)</option>
+                            <option value="Unisex - Triple Extra Large (3XL)" className="bg-white">Triple Extra Large (3XL)</option>
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1519,19 +1538,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </label>
                         <div className="relative">
                           <select
-                          value={newReg.eventTitle}
-                          onChange={(e) => handleNewRegEventChange(e.target.value)}
-                          className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
-                        >
-                          {events.map(evt => (
-                            <option key={evt.id} value={evt.title} className="bg-white">{evt.title}</option>
-                          ))}
-                        </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                    </svg>
-                  </div>
+                            value={newReg.eventTitle}
+                            onChange={(e) => handleNewRegEventChange(e.target.value)}
+                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                          >
+                            {events.map(evt => (
+                              <option key={evt.id} value={evt.title} className="bg-white">{evt.title}</option>
+                            ))}
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
                       <div>
@@ -1540,19 +1559,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </label>
                         <div className="relative">
                           <select
-                          value={newReg.distance}
-                          onChange={(e) => setNewReg(prev => ({ ...prev, distance: e.target.value }))}
-                          className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
-                        >
-                          {((events.find(e => e.title === newReg.eventTitle))?.distances || ['3K', '5K', '10K']).map(dist => (
-                            <option key={dist} value={dist} className="bg-white">{dist}</option>
-                          ))}
-                        </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                    </svg>
-                  </div>
+                            value={newReg.distance}
+                            onChange={(e) => setNewReg(prev => ({ ...prev, distance: e.target.value }))}
+                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                          >
+                            {((events.find(e => e.title === newReg.eventTitle))?.distances || ['3K', '5K', '10K']).map(dist => (
+                              <option key={dist} value={dist} className="bg-white">{dist}</option>
+                            ))}
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1564,20 +1583,20 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </label>
                         <div className="relative">
                           <select
-                          value={newReg.paymentMethod}
-                          onChange={(e) => setNewReg(prev => ({ ...prev, paymentMethod: e.target.value }))}
-                          className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
-                        >
-                          <option value="GCash" className="bg-white">GCash</option>
-                          <option value="Maya" className="bg-white">Maya</option>
-                          <option value="Bank" className="bg-white">Bank Deposit</option>
-                          <option value="Card" className="bg-white">Credit/Debit Card</option>
-                        </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                    </svg>
-                  </div>
+                            value={newReg.paymentMethod}
+                            onChange={(e) => setNewReg(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                          >
+                            <option value="GCash" className="bg-white">GCash</option>
+                            <option value="Maya" className="bg-white">Maya</option>
+                            <option value="Bank" className="bg-white">Bank Deposit</option>
+                            <option value="Card" className="bg-white">Credit/Debit Card</option>
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
                       <div>
@@ -1602,19 +1621,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </label>
                         <div className="relative">
                           <select
-                          value={newReg.status}
-                          onChange={(e) => setNewReg(prev => ({ ...prev, status: e.target.value as any }))}
-                          className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
-                        >
-                          <option value="Verified" className="bg-white">Verified</option>
-                          <option value="Pending" className="bg-white">Pending</option>
-                          <option value="Cancelled" className="bg-white">Cancelled</option>
-                        </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                    </svg>
-                  </div>
+                            value={newReg.status}
+                            onChange={(e) => setNewReg(prev => ({ ...prev, status: e.target.value as any }))}
+                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                          >
+                            <option value="Verified" className="bg-white">Verified</option>
+                            <option value="Pending" className="bg-white">Pending</option>
+                            <option value="Cancelled" className="bg-white">Cancelled</option>
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
                       <div>
@@ -1777,7 +1796,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
         {view === 'settings' && (
           <div className="bg-white p-6 md:p-8 w-full animate-fade-in font-sans select-none">
-            
+
             <div className="mb-8">
               <h2 className="text-2xl font-black uppercase tracking-tight text-zinc-900">
                 Hero & Promotion Settings
@@ -1794,31 +1813,31 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   Select Promoted Event / Race
                 </label>
                 <div className="relative">
-                <select
-                  value={heroSettings?.promotedEventId || ''}
-                  onChange={(e) => {
-                    if (onUpdateHeroSettings && heroSettings) {
-                      onUpdateHeroSettings({
-                        ...heroSettings,
-                        promotedEventId: e.target.value
-                      });
-                    }
-                  }}
-                  className="w-full rounded-[7px] border border-zinc-200 bg-white pl-4 pr-10 py-3.5 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors animate-fade-in appearance-none"
-                >
-                  <option value="" className="bg-white">Automatic (Resolve Nearest Upcoming Event)</option>
-                  {events.map((evt) => (
-                    <option key={evt.id} value={evt.id} className="bg-white">
-                      {evt.title} ({evt.date})
-                    </option>
-                  ))}
-                </select>
+                  <select
+                    value={heroSettings?.promotedEventId || ''}
+                    onChange={(e) => {
+                      if (onUpdateHeroSettings && heroSettings) {
+                        onUpdateHeroSettings({
+                          ...heroSettings,
+                          promotedEventId: e.target.value
+                        });
+                      }
+                    }}
+                    className="w-full rounded-[7px] border border-zinc-200 bg-white pl-4 pr-10 py-3.5 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors animate-fade-in appearance-none"
+                  >
+                    <option value="" className="bg-white">Automatic (Resolve Nearest Upcoming Event)</option>
+                    {events.map((evt) => (
+                      <option key={evt.id} value={evt.id} className="bg-white">
+                        {evt.title} ({evt.date})
+                      </option>
+                    ))}
+                  </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                     </svg>
                   </div>
-              </div>
+                </div>
                 <p className="text-xs text-zinc-500 font-medium mt-1.5">
                   The selected event's name will replace the Hero text, and the countdown clock will target its registration deadline.
                 </p>
@@ -1828,12 +1847,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 font-sans">
                   Hero Section Background Image
                 </label>
-                
+
                 <div className="relative h-44 rounded-2xl border border-zinc-200 overflow-hidden shadow-sm bg-zinc-50 flex items-center justify-center">
-                  <img 
-                    src={heroSettings?.heroBackgroundImage || '/images/hero-bg.png'} 
-                    alt="Hero Background Preview" 
-                    className="h-full w-full object-cover opacity-80" 
+                  <img
+                    src={heroSettings?.heroBackgroundImage || '/images/hero-bg.png'}
+                    alt="Hero Background Preview"
+                    className="h-full w-full object-cover opacity-80"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent flex items-end p-4">
                     <span className="text-[10px] font-mono text-white/95 overflow-hidden text-ellipsis whitespace-nowrap max-w-full">
@@ -1912,11 +1931,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                               });
                             }
                           }}
-                          className={`rounded-lg border py-3 px-4 text-center text-xs font-bold transition-all cursor-pointer truncate ${
-                            isActive
+                          className={`rounded-lg border py-3 px-4 text-center text-xs font-bold transition-all cursor-pointer truncate ${isActive
                               ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-sm font-black font-sans'
                               : 'border-zinc-200 text-zinc-600 bg-white hover:border-brand hover:text-brand'
-                          }`}
+                            }`}
                         >
                           {preset.name}
                         </button>
@@ -1981,7 +1999,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   setGalleryPhotos([]);
                   setDistanceRoutes({});
                   setRouteMapPhotos([]);
-      setKitPhotos([]);
+                  setKitPhotos([]);
                   setFormStep(1);
                   onNavigate('admin-create-event');
                 }}
@@ -1994,18 +2012,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((evt) => {
                 const verifiedRunners = registrations.filter(r => r.eventTitle === evt.title && r.status === 'Verified').length;
-                
+
                 return (
                   <div key={evt.id} className="bg-white rounded-xl border border-zinc-200/85 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
                     <div>
                       {/* Image header */}
                       <div className="h-44 bg-zinc-100 overflow-hidden relative">
                         <img src={evt.image} alt={evt.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <span className={`absolute top-4 right-4 rounded-[4px] border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider font-mono ${
-                          evt.badge === 'OPEN'
+                        <span className={`absolute top-4 right-4 rounded-[4px] border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider font-mono ${evt.badge === 'OPEN'
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                             : 'bg-red-50 text-red-700 border-red-200'
-                        }`}>
+                          }`}>
                           {evt.badge || 'OPEN'}
                         </span>
                       </div>
@@ -2081,7 +2098,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           });
                           setDistanceRoutes(initialRoutes);
                           setRouteMapPhotos(parseImages(evt.routeMapImage));
-    setKitPhotos(parseImages(evt.kitImage));
+                          setKitPhotos(parseImages(evt.kitImage));
                           setFormStep(1);
                         }}
                         className="flex-1 rounded-[7px] border border-zinc-200 bg-zinc-50 py-2 text-center text-xs font-bold text-zinc-700 hover:bg-zinc-100 transition-all cursor-pointer shadow-sm active:scale-[0.98]"
@@ -2111,13 +2128,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
         {(view === 'create-event' || (view === 'events' && editingEvent)) && (
           <div className="bg-white p-6 md:p-8 w-full text-zinc-800">
-            
+
             <div className="mb-8">
               <h2 className="font-display text-2xl font-black text-zinc-900 uppercase tracking-tight">
                 {editingEvent ? "Edit Race Event Details" : "Race Event Upload Form"}
               </h2>
               <p className="mt-1 text-sm text-zinc-500 font-medium animate-fade-in">
-                {editingEvent 
+                {editingEvent
                   ? `Modify the fields below to update specifications for "${editingEvent.title}".`
                   : "Fill in the details below to launch a new competitive race category and activate it in the client system."
                 }
@@ -2131,8 +2148,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 <span className={formStep === 2 ? "text-brand font-black" : ""}>Step 2: Media & Gallery</span>
               </div>
               <div className="h-1 w-full bg-zinc-200 rounded-full overflow-hidden relative">
-                <div 
-                  className="h-full bg-brand transition-all duration-500 rounded-full" 
+                <div
+                  className="h-full bg-brand transition-all duration-500 rounded-full"
                   style={{ width: formStep === 1 ? '50%' : '100%' }}
                 />
               </div>
@@ -2182,7 +2199,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           </select>
                           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                             </svg>
                           </div>
                         </div>
@@ -2364,11 +2381,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         {['3K', '5K', '10K', '16K', '21K', '32K', '42K'].map(dist => {
                           const isChecked = newEvent.distances.includes(dist);
                           return (
-                            <label 
-                              key={dist} 
-                              className={`flex items-center gap-2 cursor-pointer border px-4.5 py-2.5 rounded-lg select-none transition-all ${
-                                isChecked ? 'border-brand text-brand font-black bg-brand/[0.03] shadow-sm' : 'border-zinc-200 hover:border-zinc-350 text-zinc-700 bg-white hover:bg-zinc-50'
-                              }`}
+                            <label
+                              key={dist}
+                              className={`flex items-center gap-2 cursor-pointer border px-4.5 py-2.5 rounded-lg select-none transition-all ${isChecked ? 'border-brand text-brand font-black bg-brand/[0.03] shadow-sm' : 'border-zinc-200 hover:border-zinc-350 text-zinc-700 bg-white hover:bg-zinc-50'
+                                }`}
                             >
                               <input
                                 type="checkbox"
@@ -2512,7 +2528,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       onClick={() => {
                         setDistanceRoutes({});
                         setRouteMapPhotos([]);
-      setKitPhotos([]);
+                        setKitPhotos([]);
                         setFormStep(1);
                         setEditingEvent(null);
                         onNavigate('admin-events');
@@ -2553,7 +2569,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         <span>{uploaderError}</span>
                       </div>
                     )}
-                    
+
                     {/* Upload Zone */}
                     <div className="border border-dashed border-zinc-200 hover:border-brand rounded-2xl p-6 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group">
                       <input
@@ -2570,12 +2586,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                             return;
                           }
                           setUploaderError(null);
-                          
+
                           files.forEach((file) => {
                             const reader = new FileReader();
-                            reader.onloadend = () => {
+                            reader.onloadend = async () => {
                               if (typeof reader.result === 'string') {
-                                setGalleryPhotos(prev => [...prev, reader.result as string]);
+                                const compressed = await compressImage(reader.result);
+                                setGalleryPhotos(prev => [...prev, compressed]);
                               }
                             };
                             reader.readAsDataURL(file);
@@ -2609,10 +2626,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                               </button>
                             </div>
                             {idx === 0 && (
-                                <div className="absolute bottom-0 left-0 right-0 bg-brand text-white text-[8px] font-black tracking-widest text-center py-0.5 uppercase">
-                                  Cover
-                                </div>
-                              )}
+                              <div className="absolute bottom-0 left-0 right-0 bg-brand text-white text-[8px] font-black tracking-widest text-center py-0.5 uppercase">
+                                Cover
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -2627,7 +2644,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         <ImageIcon className="h-4 w-4 text-zinc-500" />
                         <span>Upload Route Map Image <span className="text-zinc-500">(Optional)</span></span>
                       </label>
-                      
+
                       {routeMapPhotos.length < 3 ? (
                         <div className="border border-dashed border-zinc-200 hover:border-brand rounded-2xl p-4 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group h-32 flex flex-col justify-center items-center">
                           <input
@@ -2644,9 +2661,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                               setUploaderError(null);
                               files.forEach((file) => {
                                 const reader = new FileReader();
-                                reader.onloadend = () => {
+                                reader.onloadend = async () => {
                                   if (typeof reader.result === 'string') {
-                                    setRouteMapPhotos(prev => [...prev, reader.result as string]);
+                                    const compressed = await compressImage(reader.result);
+                                    setRouteMapPhotos(prev => [...prev, compressed]);
                                   }
                                 };
                                 reader.readAsDataURL(file);
@@ -2692,7 +2710,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         <ImageIcon className="h-4 w-4 text-zinc-500" />
                         <span>Upload Race Kit / Singlet Preview <span className="text-zinc-500">(Optional)</span></span>
                       </label>
-                      
+
                       {kitPhotos.length < 3 ? (
                         <div className="border border-dashed border-zinc-200 hover:border-brand rounded-2xl p-4 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] group h-32 flex flex-col justify-center items-center">
                           <input
@@ -2709,9 +2727,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                               setUploaderError(null);
                               files.forEach((file) => {
                                 const reader = new FileReader();
-                                reader.onloadend = () => {
+                                reader.onloadend = async () => {
                                   if (typeof reader.result === 'string') {
-                                    setKitPhotos(prev => [...prev, reader.result as string]);
+                                    const compressed = await compressImage(reader.result);
+                                    setKitPhotos(prev => [...prev, compressed]);
                                   }
                                 };
                                 reader.readAsDataURL(file);
@@ -2751,7 +2770,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Step 2 Actions */}
                   <div className="flex gap-4 pt-6 font-sans">
                     <button
@@ -2779,7 +2798,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           if (!selectedReg) return null;
           return (
             <div className="space-y-6">
-              <style dangerouslySetInnerHTML={{__html: `
+              <style dangerouslySetInnerHTML={{
+                __html: `
                 @media print {
                   body * {
                     visibility: hidden !important;
@@ -2814,16 +2834,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               `}} />
 
               <div className="flex flex-col lg:flex-row gap-8 items-start">
-                
+
                 {/* Left Column: Timing Pass card */}
                 <div className="w-full lg:w-96 flex-shrink-0 space-y-4">
-                  <div 
+                  <div
                     id="printable-pass-card"
                     className="bg-white rounded-3xl border border-zinc-200 shadow-sm p-6 relative overflow-hidden print:bg-white print:border-zinc-200 print:text-zinc-955"
                   >
                     {/* Decorative brand accent */}
                     <div className="absolute top-0 left-0 right-0 h-4 bg-brand" />
-                    
+
                     <div className="text-center pt-2 pb-6 border-b border-dashed border-zinc-250 print:border-zinc-200 print-border-dark">
                       <span className="font-mono text-[9px] font-black text-brand tracking-widest uppercase">
                         RUNNICLE OFFICIAL TIMING PASS
@@ -2872,10 +2892,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     <div className="pt-6 flex flex-col items-center">
                       <div className="flex items-center justify-center gap-[1.5px] h-10 bg-white px-3 select-none rounded-[4px] border border-zinc-150">
                         {[1, 3, 2, 1, 4, 1, 2, 3, 1, 4, 2, 1, 3, 1, 2, 1, 4, 2, 1, 3, 1, 4, 1, 2, 1, 3, 2].map((w, idx) => (
-                          <div 
-                            key={idx} 
-                            className="bg-black h-full" 
-                            style={{ width: `${w}px` }} 
+                          <div
+                            key={idx}
+                            className="bg-black h-full"
+                            style={{ width: `${w}px` }}
                           />
                         ))}
                       </div>
@@ -2896,7 +2916,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
                 {/* Right Column: Detailed Profiles */}
                 <div className="flex-1 w-full space-y-6">
-                  
+
                   {/* Personal Information */}
                   <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm p-6 space-y-4">
                     <h3 className="font-mono text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-150 pb-2">
@@ -2963,8 +2983,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       <div>
                         <span className="text-zinc-500 font-bold uppercase text-[9px] block">Registration Date</span>
                         <span className="text-zinc-650 font-semibold mt-1 block">
-                          {selectedReg.registrationDate 
-                            ? new Date(selectedReg.registrationDate).toLocaleString() 
+                          {selectedReg.registrationDate
+                            ? new Date(selectedReg.registrationDate).toLocaleString()
                             : '—'}
                         </span>
                       </div>
