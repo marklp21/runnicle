@@ -22,7 +22,9 @@ import {
   Calendar,
   ClipboardList,
   Settings,
-  ArrowLeft
+  ArrowLeft,
+  Mail,
+  Copy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { type EventItem } from '@/types';
@@ -202,6 +204,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   });
   const [successToast, setSuccessToast] = useState('');
   const [errorToast, setErrorToast] = useState('');
+  const [simulatedEmailReg, setSimulatedEmailReg] = useState<any | null>(null);
 
   // Admin-side manual registration states
   const [newReg, setNewReg] = useState({
@@ -266,14 +269,27 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
   // Manage registrations state actions
   const handleVerifyStatus = (id: string, newStatus: 'Verified' | 'Pending' | 'Cancelled') => {
+    let verifiedReg: any = null;
     const updated = registrations.map(reg => {
       if (reg.id === id) {
-        return { ...reg, status: newStatus };
+        let bib = reg.registeredBib;
+        if (newStatus === 'Verified' && (!bib || bib.trim() === '' || bib === 'Pending' || bib === 'UNASSIGNED')) {
+          bib = getNextBibNumber(reg.distance, reg.eventTitle, registrations);
+        }
+        const updatedReg = { ...reg, status: newStatus, registeredBib: bib };
+        if (newStatus === 'Verified') {
+          verifiedReg = updatedReg;
+        }
+        return updatedReg;
       }
       return reg;
     });
     onUpdateRegistrations(updated);
     showToast(`Registration status updated to ${newStatus}`);
+
+    if (verifiedReg) {
+      setSimulatedEmailReg(verifiedReg);
+    }
   };
 
   const handleDeleteRegistration = (id: string) => {
@@ -3047,7 +3063,33 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     <h3 className="font-mono text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-150 pb-2">
                       Registration Management
                     </h3>
-                    <div className="flex flex-wrap gap-3 font-sans">
+                    
+                    {/* Public Pass URL (Dynamic Origin) */}
+                    <div className="pt-1">
+                      <span className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest block mb-1.5">
+                        Runner Pass URL
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          readOnly
+                          value={`${window.location.origin}/registration-pass?id=${selectedReg.id}`}
+                          className="flex-1 text-xs font-mono bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-zinc-600 focus:outline-none select-all"
+                        />
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/registration-pass?id=${selectedReg.id}`);
+                            showToast('Copied pass link to clipboard!');
+                          }}
+                          className="p-2 text-zinc-500 hover:text-brand hover:border-brand border border-zinc-200 rounded-lg bg-white hover:bg-zinc-50 transition-colors cursor-pointer"
+                          title="Copy Link"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 font-sans pt-2">
                       {selectedReg.status !== 'Verified' && (
                         <button
                           onClick={() => {
@@ -3058,6 +3100,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         >
                           <Check className="h-4 w-4" />
                           Verify Payment
+                        </button>
+                      )}
+                      {selectedReg.status === 'Verified' && (
+                        <button
+                          onClick={() => {
+                            setSimulatedEmailReg(selectedReg);
+                          }}
+                          className="rounded-[7px] border border-zinc-200 hover:bg-zinc-50 px-4 py-2.5 text-xs font-bold text-zinc-700 transition-colors cursor-pointer flex items-center gap-2 shadow-sm active:scale-[0.98]"
+                        >
+                          <Mail className="h-4 w-4" />
+                          View/Resend Email
                         </button>
                       )}
                       {selectedReg.status !== 'Cancelled' && (
@@ -3120,6 +3173,107 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         })()}
 
       </main>
+
+      {/* Simulated Confirmation Email Modal */}
+      {simulatedEmailReg && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 font-sans">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden animate-fade-in text-zinc-100">
+            {/* Header / Top bar */}
+            <div className="bg-zinc-950 p-4 border-b border-zinc-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-red-500" />
+                <span className="w-3 h-3 rounded-full bg-yellow-500" />
+                <span className="w-3 h-3 rounded-full bg-green-500" />
+                <span className="text-xs text-zinc-400 font-bold ml-2 font-mono uppercase tracking-wider">
+                  Runnicle Mail Simulator
+                </span>
+              </div>
+              <button
+                onClick={() => setSimulatedEmailReg(null)}
+                className="text-xs text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded-lg transition-colors cursor-pointer uppercase font-bold"
+              >
+                Close Window
+              </button>
+            </div>
+
+            {/* Email Metadata */}
+            <div className="p-5 border-b border-zinc-800 bg-zinc-950/40 space-y-2">
+              <div className="flex text-xs">
+                <span className="w-16 font-extrabold text-zinc-500 uppercase tracking-wider">From:</span>
+                <span className="text-zinc-300">no-reply@runnicle.ph</span>
+              </div>
+              <div className="flex text-xs">
+                <span className="w-16 font-extrabold text-zinc-500 uppercase tracking-wider">To:</span>
+                <span className="text-zinc-300 font-bold">{simulatedEmailReg.email}</span>
+              </div>
+              <div className="flex text-xs">
+                <span className="w-16 font-extrabold text-zinc-500 uppercase tracking-wider">Subject:</span>
+                <span className="text-brand font-bold">Race Registration Confirmed! — {simulatedEmailReg.eventTitle}</span>
+              </div>
+              <div className="flex text-[10px] text-zinc-500 pt-1">
+                <span className="w-16 font-extrabold uppercase tracking-wider">Sent:</span>
+                <span>Just now (Simulated Email Dispatch)</span>
+              </div>
+            </div>
+
+            {/* Email Content Body */}
+            <div className="p-6 bg-zinc-900 text-sm text-zinc-350 space-y-4 max-h-[350px] overflow-y-auto leading-relaxed">
+              <p>Hi <strong>{simulatedEmailReg.firstName} {simulatedEmailReg.lastName}</strong>,</p>
+              <p>
+                Great news! Your registration payment for the <strong>{simulatedEmailReg.eventTitle}</strong> fun run has been successfully verified by our admin team.
+              </p>
+              <p>
+                Your registration is now officially <strong>Confirmed</strong>, and your sequential runner bib number has been assigned:
+              </p>
+              <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-center max-w-xs mx-auto space-y-1">
+                <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-wider block">Your Assigned Bib</span>
+                <span className="text-3xl font-black text-[#FF4400] tracking-wider font-mono">#{simulatedEmailReg.registeredBib}</span>
+              </div>
+              <p>
+                You can view, save, and print your official race pass by clicking the link below:
+              </p>
+              <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 text-center">
+                <a
+                  href={`${window.location.origin}/registration-pass?id=${simulatedEmailReg.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold text-[#FF4400] hover:underline font-mono break-all inline-block hover:scale-[1.01] transition-transform"
+                >
+                  {window.location.origin}/registration-pass?id={simulatedEmailReg.id}
+                </a>
+              </div>
+              <p className="text-xs text-zinc-500 leading-normal border-t border-zinc-800/80 pt-4.5">
+                Please present the race pass ticket (printed or saved on your mobile device) when claiming your race kit. If you have any questions, feel free to contact us.
+              </p>
+              <p className="text-xs text-zinc-500">
+                Best regards,<br />
+                <strong>Runnicle Organizing Team</strong>
+              </p>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="bg-zinc-950 p-4 border-t border-zinc-800 flex items-center justify-between">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/registration-pass?id=${simulatedEmailReg.id}`);
+                  showToast('Copied pass link to clipboard!');
+                }}
+                className="rounded-[6px] border border-zinc-800 text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-850 px-4 py-2.5 text-xs font-bold transition-all active:scale-[0.98] flex items-center gap-2 cursor-pointer"
+              >
+                <Copy className="h-3.5 w-3.5" /> Copy Pass Link
+              </button>
+              <a
+                href={`${window.location.origin}/registration-pass?id=${simulatedEmailReg.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-[6px] bg-[#FF4400] hover:bg-[#E63D00] text-white px-5 py-2.5 text-xs font-bold transition-all active:scale-[0.98] flex items-center gap-2 cursor-pointer shadow-md shadow-brand/10 text-center"
+              >
+                Open Pass Page
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

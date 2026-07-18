@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Clock } from 'lucide-react';
 import { type EventItem } from '@/types';
 import { getNextBibNumber } from '@/utils/bibHelper';
 
@@ -75,7 +75,6 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   const [paymentProof, setPaymentProof] = useState<string>('');
   const [paymentProofName, setPaymentProofName] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [registeredBib, setRegisteredBib] = useState('718');
 
   // Dynamic Pricing & Inclusions Resolvers
   const getDynamicPricing = (distance: string) => {
@@ -162,7 +161,6 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   const handlePayAndComplete = () => {
     if (validateStep2()) {
       const nextBib = getNextBibNumber(formData.distance, eventTitle || '', registrations);
-      setRegisteredBib(nextBib);
 
       if (onRegisterComplete) {
         onRegisterComplete({
@@ -187,10 +185,6 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
       setStep(3);
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   return (
@@ -838,22 +832,25 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
           )}
         </>
       ) : (
-        /* Confirmed screen (Step 3) */
+        /* Pending screen (Step 3) */
         <div className="max-w-xl mx-auto text-center space-y-6 pt-4 animate-fade-in">
           
           <div>
-            <h1 className="font-sans text-4xl sm:text-5xl font-extrabold tracking-tight text-zinc-950">
-              Registration <span className="font-serif italic font-bold text-brand">Confirmed!</span>
+            <div className="mx-auto w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center text-amber-500 mb-4 select-none animate-pulse">
+              <Clock className="h-8 w-8" />
+            </div>
+            <h1 className="font-sans text-4xl sm:text-5xl font-extrabold tracking-tight text-zinc-955">
+              Registration <span className="font-serif italic font-bold text-amber-600">Pending!</span>
             </h1>
             <p className="mt-4 text-sm text-zinc-550 font-semibold max-w-md mx-auto leading-relaxed">
-              You have officially registered. Your racing details have been sent to <span className="text-zinc-950 font-bold">{formData.email || 'markl@gmail.com'}</span>.
+              We'll be confirming your registration within the week. Once our admin team verifies your payment, your official race pass and bib number will be sent to <span className="text-zinc-955 font-bold">{formData.email || 'johnpol@gmail.com'}</span>.
             </p>
-            <p className="mt-3 text-brand text-[10.5px] font-black uppercase tracking-wider font-sans px-4">
-              SAVE OR PRINT THIS PASS. YOU MUST PRESENT THIS TO CLAIM YOUR RACE KIT.
+            <p className="mt-3 text-amber-600 text-[10.5px] font-black uppercase tracking-wider font-sans px-4">
+              Your payment is under review. We will notify you once confirmed.
             </p>
           </div>
 
-          {/* Timing Pass Ticket Card */}
+          {/* Timing Pass Ticket Card (Watermarked as PENDING) */}
           <div 
             id="print-pass-card-container"
             className="bg-white rounded-2xl border border-zinc-200 shadow-md p-6 max-w-md w-full mx-auto relative overflow-hidden text-left font-sans"
@@ -914,20 +911,20 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
               </div>
             </div>
 
-            {/* Ticket Present Banner */}
-            <div className="border border-brand rounded-md p-3.5 bg-orange-50/50 text-center mb-5 select-none">
-              <span className="text-[9px] font-black text-brand uppercase tracking-wider block">
-                PRESENT THIS TICKET TO CLAIM YOUR RACE KIT
+            {/* Ticket Present Banner (Modified for Pending status) */}
+            <div className="border border-amber-300 rounded-md p-3.5 bg-amber-50/50 text-center mb-5 select-none">
+              <span className="text-[9px] font-black text-amber-600 uppercase tracking-wider block">
+                PENDING PAYMENT VERIFICATION
               </span>
             </div>
 
-            {/* Runner Bib Box */}
-            <div className="border border-zinc-200 rounded-md p-5 bg-zinc-50/50 text-center relative">
-              <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
+            {/* Runner Bib Box (Shows Pending) */}
+            <div className="border border-amber-100 rounded-md p-5 bg-amber-50/10 text-center relative border-dashed">
+              <span className="text-[9px] font-extrabold text-amber-500 uppercase tracking-widest block">
                 OFFICIAL RUNNER BIB
               </span>
-              <span className="font-sans text-5xl font-black text-zinc-955 tracking-tight mt-1.5 block">
-                #{registeredBib}
+              <span className="font-sans text-base font-bold text-amber-600 mt-1.5 block uppercase tracking-wider">
+                Assigning on confirmation
               </span>
             </div>
 
@@ -938,16 +935,10 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
           </div>
 
           {/* Bottom Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-sm mx-auto pt-4">
-            <button
-              onClick={handlePrint}
-              className="w-full sm:w-1/2 rounded-[6px] border border-brand text-brand bg-white hover:bg-brand/5 py-3.5 text-center text-xs font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-[0.99]"
-            >
-              PRINT PASS
-            </button>
+          <div className="flex justify-center items-center max-w-xs mx-auto pt-4">
             <button
               onClick={onBack}
-              className="w-full sm:w-1/2 rounded-[6px] bg-brand hover:bg-brand-hover text-white py-3.5 text-center text-xs font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-[0.99] shadow-sm shadow-brand/10"
+              className="w-full rounded-[6px] bg-brand hover:bg-brand-hover text-white py-3.5 text-center text-xs font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-[0.99] shadow-sm shadow-brand/10"
             >
               RETURN HOME
             </button>

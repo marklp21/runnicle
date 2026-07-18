@@ -17,7 +17,7 @@ import Modal from './components/Modal';
 import FeaturedGallery from './components/FeaturedGallery';
 import FAQ from './components/FAQ';
 
-import { EventsPage, EventDetailsPage, EventResultsPage, RegistrationPage, useSupabaseData } from '@/features/events';
+import { EventsPage, EventDetailsPage, EventResultsPage, RegistrationPage, RegistrationPassPage, useSupabaseData } from '@/features/events';
 import { StorePage, CartPage, CheckoutPage, OrderConfirmationPage, ProductDetailsPage, useCart } from '@/features/store';
 import { AdminPage } from '@/features/admin';
 import CoachBookingPage from './pages/CoachBookingPage';
@@ -56,6 +56,7 @@ const getPathFromPage = (pageName: string): string => {
     case 'checkout': return '/checkout';
     case 'order-confirmation': return '/order-confirmation';
     case 'contact': return '/contact';
+    case 'registration-pass': return '/registration-pass';
     case 'admin-login': return '/admin_page';
     case 'admin-dashboard': return '/admin_dashboard';
     case 'admin-registrations': return '/admin_registrations';
@@ -69,6 +70,7 @@ const getPathFromPage = (pageName: string): string => {
 };
 
 const getPageFromPath = (path: string): string => {
+  if (path.startsWith('/registration-pass')) return 'registration-pass';
   switch (path) {
     case '/': return 'home';
     case '/events': return 'events';
@@ -165,7 +167,8 @@ export const App: React.FC = () => {
 
     const targetPath = getPathFromPage(page);
     if (currentPath !== targetPath) {
-      window.history.pushState(null, '', targetPath);
+      const search = page === 'registration-pass' ? window.location.search : '';
+      window.history.pushState(null, '', targetPath + search);
     }
 
     let scrollTimer: any;
@@ -760,6 +763,15 @@ export const App: React.FC = () => {
 
               {page === 'contact' && (
                 <ContactPage />
+              )}
+
+              {page === 'registration-pass' && (
+                <RegistrationPassPage
+                  registrationId={new URLSearchParams(window.location.search).get('id')}
+                  registrations={registrations}
+                  allEvents={events}
+                  onGoHome={() => setPage('home')}
+                />
               )}
 
               {page === 'coaching' && (
