@@ -173,8 +173,11 @@ export function useSupabaseData(setIsRegistrationConfirmed?: (confirmed: boolean
         localStorage.setItem('runnicle_registrations', JSON.stringify(updatedList));
         return updatedList;
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error during handleRegisterComplete:", err);
+      const errMsg = err?.message || JSON.stringify(err);
+      localStorage.setItem('runnicle_last_db_error', errMsg);
+      window.alert("Database Error: Failed to save registration to database.\nDetails: " + errMsg);
     }
   };
 

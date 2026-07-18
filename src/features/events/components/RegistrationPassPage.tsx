@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, XCircle, CheckCircle, Printer, ShieldAlert } from 'lucide-react';
 import { type EventItem } from '@/types';
+import { supabaseService } from '@/services/supabaseService';
 
 interface RegistrationPassPageProps {
   registrationId: string | null;
@@ -15,7 +16,45 @@ export const RegistrationPassPage: React.FC<RegistrationPassPageProps> = ({
   allEvents,
   onGoHome
 }) => {
-  const registration = registrations.find(r => r.id === registrationId);
+  const [localReg, setLocalReg] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const foundReg = registrations.find(r => r.id === registrationId);
+
+  useEffect(() => {
+    if (!registrationId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const loadSingleReg = async () => {
+      setIsLoading(true);
+      try {
+        const fetched = await supabaseService.fetchRegistrationById(registrationId, allEvents);
+        if (fetched) {
+          setLocalReg(fetched);
+        } else if (foundReg) {
+          setLocalReg(foundReg);
+        } else {
+          setLocalReg(null);
+        }
+      } catch (err) {
+        console.error("Failed to load registration directly from database:", err);
+        if (foundReg) {
+          setLocalReg(foundReg);
+        } else {
+          setLoadError("Could not retrieve registration data from the database.");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSingleReg();
+  }, [registrationId, allEvents, foundReg]);
+
+  const registration = localReg || foundReg;
 
   // Find matching event
   const matchedEvent = registration
@@ -30,6 +69,39 @@ export const RegistrationPassPage: React.FC<RegistrationPassPageProps> = ({
   };
 
   const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="max-w-md mx-auto text-center py-16 px-4 bg-white rounded-3xl border border-zinc-200 shadow-sm space-y-4">
+          <div className="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-zinc-550 font-medium text-sm font-sans">
+            Fetching latest pass details from database...
+          </p>
+        </div>
+      );
+    }
+
+    if (loadError) {
+      return (
+        <div className="max-w-md mx-auto text-center py-12 px-4 bg-white rounded-3xl border border-zinc-200 shadow-sm space-y-6">
+          <div className="mx-auto w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-500">
+            <ShieldAlert className="h-8 w-8" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-extrabold text-zinc-900">Database Connection Error</h2>
+            <p className="text-sm text-zinc-500 leading-relaxed font-sans">
+              {loadError}
+            </p>
+          </div>
+          <button
+            onClick={onGoHome}
+            className="w-full rounded-[6px] bg-brand hover:bg-brand-hover text-white py-3.5 text-xs font-bold uppercase tracking-wider transition-all active:scale-[0.99] cursor-pointer"
+          >
+            Go to Home
+          </button>
+        </div>
+      );
+    }
+
     if (!registrationId) {
       return (
         <div className="max-w-md mx-auto text-center py-12 px-4 bg-white rounded-3xl border border-zinc-200 shadow-sm space-y-6">

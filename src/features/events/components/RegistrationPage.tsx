@@ -34,6 +34,44 @@ const getBaseDistanceFee = (distance: string): { fee: number; inclusions: string
 
 const SINGLET_SIZES = ['None', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
 
+const compressImage = (base64Str: string, maxWidth = 600, maxHeight = 600, quality = 0.6): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = base64Str;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressed);
+      } else {
+        resolve(base64Str);
+      }
+    };
+    img.onerror = () => {
+      resolve(base64Str);
+    };
+  });
+};
+
 export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   event,
   allEvents,
@@ -764,9 +802,15 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                               if (file) {
                                 setPaymentProofName(file.name);
                                 const reader = new FileReader();
-                                reader.onloadend = () => {
+                                reader.onloadend = async () => {
                                   if (typeof reader.result === 'string') {
-                                    setPaymentProof(reader.result);
+                                    try {
+                                      const compressed = await compressImage(reader.result);
+                                      setPaymentProof(compressed);
+                                    } catch (err) {
+                                      console.error("Failed to compress payment proof:", err);
+                                      setPaymentProof(reader.result);
+                                    }
                                     if (errors.paymentProof) {
                                       setErrors(prev => ({ ...prev, paymentProof: '' }));
                                     }

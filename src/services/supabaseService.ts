@@ -108,7 +108,8 @@ export function dbRegistrationToFrontend(dbReg: DbRegistration): any {
     referenceNumber: dbReg.reference_number || extra.referenceNumber || '0912',
     emergencyContact: dbReg.emergency_contact || extra.emergencyContact || extra.emergencyName || 'Maria Dela Cruz',
     emergencyPhone: dbReg.emergency_phone || extra.emergencyPhone || '09187654321',
-    totalAmount: dbReg.total_amount || extra.totalAmount || 500
+    totalAmount: dbReg.total_amount || extra.totalAmount || 500,
+    paymentProof: dbReg.payment_proof || extra.paymentProof || null
   };
 }
 
@@ -135,7 +136,8 @@ export function frontendRegistrationToDb(reg: any, eventsList: EventItem[]): any
     referenceNumber: reg.referenceNumber,
     emergencyContact: reg.emergencyContact || reg.emergencyName,
     emergencyPhone: reg.emergencyPhone,
-    totalAmount: reg.totalAmount
+    totalAmount: reg.totalAmount,
+    paymentProof: reg.paymentProof
   };
 
   const ticketCode = JSON.stringify(extraFields);
@@ -162,7 +164,8 @@ export function frontendRegistrationToDb(reg: any, eventsList: EventItem[]): any
     reference_number: reg.referenceNumber,
     emergency_contact: reg.emergencyContact || reg.emergencyName,
     emergency_phone: reg.emergencyPhone,
-    total_amount: reg.totalAmount
+    total_amount: reg.totalAmount,
+    payment_proof: reg.paymentProof || null
   };
 }
 
@@ -203,6 +206,22 @@ export const supabaseService = {
       mapped.eventTitle = event ? event.title : 'MegaWorld Fun Run';
       return mapped;
     });
+  },
+
+  async fetchRegistrationById(id: string, eventsList: EventItem[]): Promise<any | null> {
+    const { data, error } = await supabase
+      .from('registrations')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return null;
+
+    const mapped = dbRegistrationToFrontend(data);
+    const event = eventsList.find(e => e.id === mapped.eventId);
+    mapped.eventTitle = event ? event.title : 'MegaWorld Fun Run';
+    return mapped;
   },
 
   async insertEvent(event: EventItem): Promise<EventItem> {
