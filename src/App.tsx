@@ -669,6 +669,7 @@ export const App: React.FC = () => {
                 <RegistrationPage
                   event={selectedEvent}
                   allEvents={events}
+                  registrations={registrations}
                   onRegisterComplete={handleRegisterComplete}
                   onBack={() => {
                     if (isRegistrationConfirmed) {

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { type EventItem } from '@/types';
+import { getNextBibNumber } from '@/utils/bibHelper';
 
 const parseImages = (imgStr?: string): string[] => {
   if (!imgStr) return [];
@@ -477,7 +478,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       return;
     }
 
-    const bib = newReg.registeredBib.trim() || Math.floor(100 + Math.random() * 900).toString();
+    const bib = newReg.registeredBib.trim() || getNextBibNumber(newReg.distance, newReg.eventTitle, registrations);
 
     if (editingRegId) {
       const updated = registrations.map(reg => {

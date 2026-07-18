@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { type EventItem } from '@/types';
+import { getNextBibNumber } from '@/utils/bibHelper';
 
 interface RegistrationPageProps {
   event: EventItem | null;
@@ -8,6 +9,7 @@ interface RegistrationPageProps {
   defaultTitle?: string;
   onBack: () => void;
   onRegisterComplete?: (registration: any) => void;
+  registrations?: any[];
 }
 
 const getBaseDistanceFee = (distance: string): { fee: number; inclusions: string[] } => {
@@ -38,6 +40,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   defaultTitle = 'MegaWorld Fun Run',
   onBack,
   onRegisterComplete,
+  registrations = []
 }) => {
   const selectedEventItem = useMemo(() => {
     if (event) {
@@ -158,8 +161,8 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
 
   const handlePayAndComplete = () => {
     if (validateStep2()) {
-      const randomBib = Math.floor(100 + Math.random() * 900).toString();
-      setRegisteredBib(randomBib);
+      const nextBib = getNextBibNumber(formData.distance, eventTitle || '', registrations);
+      setRegisteredBib(nextBib);
 
       if (onRegisterComplete) {
         onRegisterComplete({
@@ -177,7 +180,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
           paymentMethod: paymentMethod,
           referenceNumber: referenceNumber,
           paymentProof: paymentProof,
-          registeredBib: randomBib,
+          registeredBib: nextBib,
           totalAmount: totalFee,
         });
       }
