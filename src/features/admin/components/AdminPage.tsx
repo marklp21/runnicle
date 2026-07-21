@@ -29,6 +29,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { type EventItem } from '@/types';
 import { getNextBibNumber } from '@/utils/bibHelper';
+import { supabase } from '@/lib/supabase';
+import { frontendRegistrationToDb } from '@/services/supabaseService';
 
 const parseImages = (imgStr?: string): string[] => {
   if (!imgStr) return [];
@@ -205,6 +207,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [successToast, setSuccessToast] = useState('');
   const [errorToast, setErrorToast] = useState('');
   const [simulatedEmailReg, setSimulatedEmailReg] = useState<any | null>(null);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // Admin-side manual registration states
   const [newReg, setNewReg] = useState({
@@ -268,7 +271,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   };
 
   // Manage registrations state actions
-  const handleVerifyStatus = (id: string, newStatus: 'Verified' | 'Pending' | 'Cancelled') => {
+  const handleVerifyStatus = async (id: string, newStatus: 'Verified' | 'Pending' | 'Cancelled') => {
     let verifiedReg: any = null;
     const updated = registrations.map(reg => {
       if (reg.id === id) {
@@ -289,6 +292,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
     if (verifiedReg) {
       setSimulatedEmailReg(verifiedReg);
+      
+      // Automatically trigger the real Edge Function to send confirmation email
+      try {
+        const dbRecord = frontendRegistrationToDb(verifiedReg, events);
+        dbRecord.id = verifiedReg.id;
+        
+        console.log("Triggering confirmation email Edge Function for verified registration...");
+        const { error } = await supabase.functions.invoke('send-confirmation-email', {
+          body: dbRecord
+        });
+        if (error) throw error;
+        showToast(`Real confirmation email sent to ${verifiedReg.email}!`);
+      } catch (err: any) {
+        console.error('Failed to trigger confirmation email Edge Function:', err);
+        showErrorToast(`Could not send real email automatically: ${err.message || err}`);
+      }
     }
   };
 
@@ -3252,24 +3271,54 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </div>
 
             {/* Bottom Actions */}
-            <div className="bg-zinc-950 p-4 border-t border-zinc-800 flex items-center justify-between">
+            <div className="bg-zinc-950 p-4 border-t border-zinc-800 flex flex-wrap gap-2 items-center justify-between">
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}/registration-pass?id=${simulatedEmailReg.id}`);
                   showToast('Copied pass link to clipboard!');
                 }}
-                className="rounded-[6px] border border-zinc-800 text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-850 px-4 py-2.5 text-xs font-bold transition-all active:scale-[0.98] flex items-center gap-2 cursor-pointer"
+                className="rounded-[6px] border border-zinc-800 text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-850 px-3 py-2.5 text-xs font-bold transition-all active:scale-[0.98] flex items-center gap-2 cursor-pointer"
               >
-                <Copy className="h-3.5 w-3.5" /> Copy Pass Link
+                <Copy className="h-3.5 w-3.5" /> Copy Link
               </button>
-              <a
-                href={`${window.location.origin}/registration-pass?id=${simulatedEmailReg.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-[6px] bg-[#FF4400] hover:bg-[#E63D00] text-white px-5 py-2.5 text-xs font-bold transition-all active:scale-[0.98] flex items-center gap-2 cursor-pointer shadow-md shadow-brand/10 text-center"
-              >
-                Open Pass Page
-              </a>
+              
+              <div className="flex gap-2">
+                <button
+                  disabled={isSendingEmail}
+                  onClick={async () => {
+                    try {
+                      setIsSendingEmail(true);
+                      const dbRecord = frontendRegistrationToDb(simulatedEmailReg, events);
+                      dbRecord.id = simulatedEmailReg.id;
+
+                      console.log("Resending confirmation email via Edge Function...");
+                      const { error } = await supabase.functions.invoke('send-confirmation-email', {
+                        body: dbRecord
+                      });
+                      if (error) throw error;
+                      showToast('Confirmation email sent successfully via Resend!');
+                    } catch (err: any) {
+                      console.error('Failed to send confirmation email:', err);
+                      showErrorToast(`Failed to send email: ${err.message || err}`);
+                    } finally {
+                      setIsSendingEmail(false);
+                    }
+                  }}
+                  className={`rounded-[6px] border border-emerald-600/30 text-emerald-400 hover:text-white bg-emerald-950/20 hover:bg-emerald-600 px-3 py-2.5 text-xs font-bold transition-all active:scale-[0.98] flex items-center gap-2 cursor-pointer ${isSendingEmail ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Mail className="h-3.5 w-3.5" />
+                  {isSendingEmail ? 'Sending...' : 'Send Real Email'}
+                </button>
+
+                <a
+                  href={`${window.location.origin}/registration-pass?id=${simulatedEmailReg.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-[6px] bg-[#FF4400] hover:bg-[#E63D00] text-white px-4 py-2.5 text-xs font-bold transition-all active:scale-[0.98] flex items-center gap-2 cursor-pointer shadow-md shadow-brand/10 text-center"
+                >
+                  Open Pass
+                </a>
+              </div>
             </div>
           </div>
         </div>
