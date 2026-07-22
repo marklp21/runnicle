@@ -19,7 +19,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
   ];
 
   return (
-    <section className="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 select-none font-sans slashed-zero [font-variant-numeric:slashed-zero]">
+    <section className="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 select-none font-sans slashed-zero [font-variant-numeric:slashed-zero] overflow-x-hidden max-w-full">
       
       {/* Orange Glow positioned higher (top-[155px]) for rich, non-faint top visibility */}
       <div 
@@ -54,21 +54,21 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative max-w-2xl mx-auto bg-white rounded-2xl border border-zinc-300 p-6 sm:p-8 text-left overflow-hidden shadow-xs z-10"
+          className="relative max-w-2xl mx-auto bg-white rounded-2xl border border-zinc-300 p-4 sm:p-8 text-left overflow-x-auto shadow-xs z-10"
         >
           {/* Table Header */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 pb-2 text-xs sm:text-sm font-sans font-semibold text-zinc-900">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 pb-2 text-[11px] sm:text-sm font-sans font-semibold text-zinc-900 min-w-[280px]">
             <div>Distance</div>
             <div className="text-center">Ticket Only</div>
             <div className="text-center">Ticket & Singlet</div>
           </div>
 
           {/* Table Rows */}
-          <div>
+          <div className="min-w-[280px]">
             {referenceRows.map((row) => (
               <div
                 key={row.label}
-                className="grid grid-cols-3 gap-2 sm:gap-4 py-4 sm:py-4.5 items-center"
+                className="grid grid-cols-3 gap-1.5 sm:gap-4 py-3 sm:py-4.5 items-center"
               >
                 {/* Distance Column */}
                 <span className="font-sans font-bold text-xs sm:text-sm text-[#FF4400] tracking-wide text-left">
@@ -76,21 +76,21 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
                 </span>
 
                 {/* Ticket Only Column */}
-                <div className="flex items-center justify-center gap-2 sm:gap-3">
-                  <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through font-medium slashed-zero">
+                <div className="flex items-center justify-center gap-1 sm:gap-3">
+                  <span className="font-mono text-[11px] sm:text-sm text-zinc-500 line-through font-medium slashed-zero whitespace-nowrap">
                     {row.origTicket}
                   </span>
-                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#FFF3EB] px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-mono tracking-wider slashed-zero">
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#FFF3EB] px-2.5 sm:px-4 py-0.5 sm:py-1 text-[11px] sm:text-sm font-bold font-mono tracking-wider slashed-zero whitespace-nowrap">
                     {row.earlyTicket}
                   </span>
                 </div>
 
                 {/* Ticket & Singlet Column */}
-                <div className="flex items-center justify-center gap-2 sm:gap-3">
-                  <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through font-medium slashed-zero">
+                <div className="flex items-center justify-center gap-1 sm:gap-3">
+                  <span className="font-mono text-[11px] sm:text-sm text-zinc-500 line-through font-medium slashed-zero whitespace-nowrap">
                     {row.origSinglet}
                   </span>
-                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#FFF3EB] px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-mono tracking-wider slashed-zero">
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#FFF3EB] px-2.5 sm:px-4 py-0.5 sm:py-1 text-[11px] sm:text-sm font-bold font-mono tracking-wider slashed-zero whitespace-nowrap">
                     {row.earlySinglet}
                   </span>
                 </div>

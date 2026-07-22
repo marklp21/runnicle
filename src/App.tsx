@@ -535,7 +535,7 @@ export const App: React.FC = () => {
   const cartTotalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white text-zinc-800 antialiased selection:bg-orange-500 selection:text-white">
+    <div className="flex flex-col min-h-screen bg-white text-zinc-800 antialiased selection:bg-orange-500 selection:text-white overflow-x-hidden max-w-full relative">
 
       { }
       {!page.startsWith('admin-') && (
@@ -616,7 +616,6 @@ export const App: React.FC = () => {
                     targetEventTimestamp={promotedEvent ? new Date(promotedEvent.deadline).getTime() : new Date().getTime()}
                   />
 
-                  {/* Early Bird Pricing Table */}
                   <EarlyBirdPricing
                     event={promotedEvent}
                     onRegisterClick={(dist, singletSize) => {
