@@ -25,7 +25,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
   const displayEvents = sortedEvents.slice(0, 3);
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-[#F5F5F5]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
