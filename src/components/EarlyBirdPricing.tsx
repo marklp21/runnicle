@@ -21,12 +21,12 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
   return (
     <section className="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 select-none font-sans slashed-zero [font-variant-numeric:slashed-zero]">
       
-      {/* Orange Radial Glow moved up for mobile viewports (top-[105px]) without altering desktop (sm:top-[160px]) */}
+      {/* Orange Radial Glow smaller for mobile viewports (top-[135px], h-[380px], w-[84vw]) without altering desktop (sm:top-[160px], sm:h-[620px]) */}
       <div 
-        className="absolute top-[105px] sm:top-[160px] left-1/2 -translate-x-1/2 w-[92vw] sm:w-full sm:max-w-2xl h-[520px] sm:h-[620px] pointer-events-none z-0"
+        className="absolute top-[135px] sm:top-[160px] left-1/2 -translate-x-1/2 w-[84vw] sm:w-full sm:max-w-2xl h-[380px] sm:h-[620px] pointer-events-none z-0"
         style={{
           background: 'radial-gradient(ellipse 78% 100% at 50% 50%, rgba(255, 68, 0, 0.65) 0%, rgba(255, 68, 0, 0.30) 45%, rgba(255, 68, 0, 0.05) 75%, rgba(255, 68, 0, 0) 95%)',
-          filter: 'blur(34px)'
+          filter: 'blur(28px)'
         }}
       />
 
