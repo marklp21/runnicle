@@ -112,12 +112,12 @@ export const FAQ: React.FC = () => {
   return (
     <section className="relative py-20 bg-white overflow-hidden">
       
-      {/* 1:1 Orange Radial Spotlight Glow matching user reference screenshot */}
+      {/* 1:1 Orange Radial Glow focused at the bottom of FAQ section matching reference screenshot */}
       <div 
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[900px] max-w-[95vw] h-[480px] pointer-events-none z-0"
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1200px] max-w-[100vw] h-[380px] pointer-events-none z-0"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.42) 0%, rgba(255, 68, 0, 0.20) 45%, rgba(255, 68, 0, 0.04) 75%, rgba(255, 68, 0, 0) 90%)',
-          filter: 'blur(55px)'
+          background: 'radial-gradient(ellipse 80% 100% at 50% 100%, rgba(255, 68, 0, 0.48) 0%, rgba(255, 68, 0, 0.22) 45%, rgba(255, 68, 0, 0.05) 75%, rgba(255, 68, 0, 0) 100%)',
+          filter: 'blur(50px)'
         }}
       />
 
