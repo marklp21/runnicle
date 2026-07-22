@@ -563,7 +563,7 @@ export const App: React.FC = () => {
       )}
 
       { }
-      <main className="flex-1 overflow-x-clip">
+      <main className="flex-1 overflow-x-clip pt-20">
         {isAdminView && page !== 'admin-login' ? (
           <AdminPage
             key="admin-portal"
