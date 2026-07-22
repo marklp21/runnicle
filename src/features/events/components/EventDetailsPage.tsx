@@ -2,6 +2,21 @@ import React from 'react';
 import { Calendar, MapPin, Clock, ShieldAlert } from 'lucide-react';
 import { type EventItem } from '@/types';
 
+const parseImages = (imgStr?: string): string[] => {
+  if (!imgStr) return [];
+  if (imgStr.startsWith('[')) {
+    try {
+      return JSON.parse(imgStr);
+    } catch {
+      // fallback
+    }
+  }
+  if (imgStr.includes('|')) {
+    return imgStr.split('|');
+  }
+  return [imgStr];
+};
+
 interface EventDetailsPageProps {
   event: EventItem;
   onBack: () => void;
@@ -13,6 +28,14 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
   onBack,
   onRegisterClick,
 }) => {
+  const kitPhotos = parseImages(event.kitImage);
+  const routeMapPhotos = parseImages(event.routeMapImage);
+  const [activeKitIdx, setActiveKitIdx] = React.useState(0);
+  const [activeRouteIdx, setActiveRouteIdx] = React.useState(0);
+
+  const activeKitPhoto = kitPhotos[activeKitIdx] || kitPhotos[0] || 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=800&q=80';
+  const activeRoutePhoto = routeMapPhotos[activeRouteIdx] || routeMapPhotos[0] || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80';
+
   const defaultSchedule = [
     '04:30 AM - Warm-up & Assembly',
     '05:00 AM - 10K Gun Start',
@@ -101,6 +124,101 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
               <p className="text-zinc-500 text-xs leading-relaxed font-medium">
                 Join hundreds of athletes on this iconic course designed for both competitive elites chasing personal bests and recreational runners celebrating community fitness. Our event is certified by regional athletic associations and guarantees premium timing chips and support.
               </p>
+            </div>
+
+            {/* Official Race Kit & Route Map Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Official Race Kit Card */}
+              <div className="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-xs space-y-4">
+                <div className="flex justify-between items-center border-b border-zinc-200/80 pb-3">
+                  <h3 className="font-sans text-xs font-bold text-zinc-900 uppercase tracking-wider">
+                    OFFICIAL RACE KIT
+                  </h3>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                    SINGLET &amp; PERKS
+                  </span>
+                </div>
+                
+                <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-zinc-200/60 shadow-inner flex items-center justify-center">
+                  <img
+                    src={activeKitPhoto}
+                    alt="Official Race Kit"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-xs rounded px-2.5 py-1 text-[10px] font-bold uppercase text-white tracking-wider border border-white/10">
+                    INCLUDES FINISHER TEE &amp; MEDAL
+                  </div>
+                </div>
+
+                {kitPhotos.length > 1 && (
+                  <div className="flex gap-2 pt-1">
+                    {kitPhotos.map((photo, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setActiveKitIdx(idx)}
+                        className={`relative h-11 w-11 rounded-lg border overflow-hidden transition-all duration-200 cursor-pointer ${
+                          activeKitIdx === idx ? 'border-[#FF4400] ring-2 ring-[#FF4400]/20' : 'border-zinc-200 hover:border-zinc-350'
+                        }`}
+                      >
+                        <img src={photo} alt="" className="h-full w-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                  Your registered slot includes the official Runnicle dry-fit singlet, an official race bib, sponsor vouchers, and a custom die-cast finisher medal upon crossing the finish line.
+                </p>
+              </div>
+
+              {/* Route & Venue Map Card */}
+              <div className="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-xs space-y-4">
+                <div className="flex justify-between items-center border-b border-zinc-200/80 pb-3">
+                  <h3 className="font-sans text-xs font-bold text-zinc-900 uppercase tracking-wider">
+                    ROUTE &amp; VENUE MAP
+                  </h3>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                    {event.location ? event.location.toUpperCase() : 'BACOLOD CITY'}
+                  </span>
+                </div>
+                
+                <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-zinc-200/60 shadow-inner flex items-center justify-center">
+                  <img
+                    src={activeRoutePhoto}
+                    alt="Route & Venue Map"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-xs rounded px-2.5 py-1 text-[10px] font-bold uppercase text-white tracking-wider border border-white/10">
+                    CERTIFIED COURSE MAP
+                  </div>
+                </div>
+
+                {routeMapPhotos.length > 1 && (
+                  <div className="flex gap-2 pt-1">
+                    {routeMapPhotos.map((photo, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setActiveRouteIdx(idx)}
+                        className={`relative h-11 w-11 rounded-lg border overflow-hidden transition-all duration-200 cursor-pointer ${
+                          activeRouteIdx === idx ? 'border-[#FF4400] ring-2 ring-[#FF4400]/20' : 'border-zinc-200 hover:border-zinc-350'
+                        }`}
+                      >
+                        <img src={photo} alt="" className="h-full w-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                  The certified loop features hydration and nutrition points every 2.5 kilometers, timing mats at key check junctions, and emergency medical personnel stationed along the route.
+                </p>
+              </div>
+
             </div>
 
             {/* Schedule & Inclusions Sub-cards */}
@@ -220,4 +338,5 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
 };
 
 export default EventDetailsPage;
+
 
