@@ -8,9 +8,7 @@ interface EarlyBirdPricingProps {
 }
 
 export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => {
-  if (!event) return null;
-
-  const discountPercent = event.earlyBirdDiscountPercent ?? 20;
+  const discountPercent = event?.earlyBirdDiscountPercent ?? 20;
 
   // Fixed 1:1 reference rows matching target screenshot exactly
   const referenceRows = [
