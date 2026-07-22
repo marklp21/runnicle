@@ -112,11 +112,11 @@ export const FAQ: React.FC = () => {
   return (
     <section className="relative py-20 bg-white overflow-hidden">
       
-      {/* 1:1 Orange Radial Glow positioned lower down at the bottom of FAQ section */}
+      {/* Orange Radial Glow with higher opacity for rich visibility */}
       <div 
         className="absolute bottom-[-70px] left-1/2 -translate-x-1/2 w-[1200px] max-w-[100vw] h-[360px] pointer-events-none z-0"
         style={{
-          background: 'radial-gradient(ellipse 85% 90% at 50% 100%, rgba(255, 68, 0, 0.45) 0%, rgba(255, 68, 0, 0.20) 45%, rgba(255, 68, 0, 0.04) 75%, rgba(255, 68, 0, 0) 100%)',
+          background: 'radial-gradient(ellipse 85% 90% at 50% 100%, rgba(255, 68, 0, 0.65) 0%, rgba(255, 68, 0, 0.32) 45%, rgba(255, 68, 0, 0.08) 75%, rgba(255, 68, 0, 0) 100%)',
           filter: 'blur(55px)'
         }}
       />
