@@ -21,8 +21,18 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
   ];
 
   return (
-    <section className="relative bg-white py-16 sm:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden select-none font-sans slashed-zero [font-variant-numeric:slashed-zero]">
-      <div className="max-w-4xl mx-auto text-center">
+    <section className="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden select-none font-sans slashed-zero [font-variant-numeric:slashed-zero]">
+      
+      {/* 1:1 Orange Radial Glow Effect behind and below the card */}
+      <div 
+        className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/3 w-[780px] max-w-[95vw] h-[450px] pointer-events-none z-0 opacity-90"
+        style={{
+          background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.32) 0%, rgba(255, 68, 0, 0.15) 45%, rgba(255, 68, 0, 0) 75%)',
+          filter: 'blur(55px)'
+        }}
+      />
+
+      <div className="relative z-10 max-w-4xl mx-auto text-center">
 
         {/* Section Header */}
         <motion.div
@@ -46,7 +56,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative max-w-2xl mx-auto bg-white rounded-2xl border border-zinc-300 p-6 sm:p-8 text-left overflow-hidden shadow-xs"
+          className="relative max-w-2xl mx-auto bg-white/95 backdrop-blur-xs rounded-2xl border border-zinc-300 p-6 sm:p-8 text-left overflow-hidden shadow-xs z-10"
         >
           {/* Table Header */}
           <div className="grid grid-cols-3 gap-2 sm:gap-4 pb-2 text-xs sm:text-sm font-sans font-semibold text-zinc-900">
