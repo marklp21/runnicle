@@ -21,12 +21,12 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
   return (
     <section className="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 select-none font-sans slashed-zero [font-variant-numeric:slashed-zero]">
       
-      {/* 1:1 Highly Visible Vibrant Orange Radial Glow matching reference design */}
+      {/* 1:1 Rich Orange Radial Glow extending above top card border and bleeding below */}
       <div 
-        className="absolute top-[240px] left-1/2 -translate-x-1/2 w-[780px] max-w-[92vw] h-[550px] pointer-events-none z-0"
+        className="absolute top-[160px] left-1/2 -translate-x-1/2 w-[820px] max-w-[94vw] h-[640px] pointer-events-none z-0"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.68) 0%, rgba(255, 68, 0, 0.35) 45%, rgba(255, 68, 0, 0.08) 75%, rgba(255, 68, 0, 0) 95%)',
-          filter: 'blur(55px)'
+          background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.65) 0%, rgba(255, 68, 0, 0.32) 45%, rgba(255, 68, 0, 0.08) 75%, rgba(255, 68, 0, 0) 95%)',
+          filter: 'blur(52px)'
         }}
       />
 
