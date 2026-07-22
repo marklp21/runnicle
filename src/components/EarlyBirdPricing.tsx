@@ -32,14 +32,11 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
           transition={{ duration: 0.5 }}
           className="mb-8 sm:mb-10"
         >
-          <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-zinc-900 mb-2">
+          <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-black mb-2">
             {discountPercent}% Off Early Bird <span className="font-serif italic text-[#FF4400] font-bold">Active</span>
           </h2>
-          <p className="text-xs text-zinc-500 font-normal tracking-wide max-w-lg mx-auto">
-            {event.earlyBirdDeadline 
-              ? `What is included: Lock in your Early Bird rate before ${event.earlyBirdDeadline}.`
-              : 'What is included: Lock in your Early Bird rate before slots fill up.'
-            }
+          <p className="text-xs sm:text-sm text-zinc-800 font-normal max-w-lg mx-auto">
+            Timer is ticking. Lock in your Early Bird slot before rates go up.
           </p>
         </motion.div>
 
