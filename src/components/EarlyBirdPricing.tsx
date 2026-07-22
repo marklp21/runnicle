@@ -63,30 +63,21 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
             {referenceRows.map((row) => (
               <div
                 key={row.label}
-                className="grid grid-cols-3 gap-2 sm:gap-4 py-4 sm:py-4.5 items-center hover:bg-zinc-200/30 transition-colors"
+                className="grid grid-cols-3 gap-2 sm:gap-4 py-4 sm:py-4.5 items-center"
               >
                 {/* Distance Column */}
-                <button
-                  type="button"
-                  onClick={() => onRegisterClick && onRegisterClick(row.distKey)}
-                  className="font-sans font-bold text-xs sm:text-sm text-[#FF4400] tracking-wide text-left hover:underline cursor-pointer"
-                >
+                <span className="font-sans font-bold text-xs sm:text-sm text-[#FF4400] tracking-wide text-left">
                   {row.label}
-                </button>
+                </span>
 
                 {/* Ticket Only Column */}
                 <div className="flex items-center justify-center gap-2 sm:gap-3">
                   <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through">
                     {row.origTicket}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => onRegisterClick && onRegisterClick(row.distKey, 'None')}
-                    className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#F5F5F5] px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-mono tracking-wider hover:bg-[#FF4400] hover:text-white transition-all cursor-pointer active:scale-95"
-                    title={`Register for ${row.label} Ticket Only`}
-                  >
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#F5F5F5] px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-mono tracking-wider">
                     {row.earlyTicket}
-                  </button>
+                  </span>
                 </div>
 
                 {/* Ticket & Singlet Column */}
@@ -94,14 +85,9 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
                   <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through">
                     {row.origSinglet}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => onRegisterClick && onRegisterClick(row.distKey, 'M')}
-                    className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#F5F5F5] px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-mono tracking-wider hover:bg-[#FF4400] hover:text-white transition-all cursor-pointer active:scale-95"
-                    title={`Register for ${row.label} Ticket & Singlet`}
-                  >
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#F5F5F5] px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-mono tracking-wider">
                     {row.earlySinglet}
-                  </button>
+                  </span>
                 </div>
               </div>
             ))}
