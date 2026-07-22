@@ -110,8 +110,18 @@ export const FAQ: React.FC = () => {
   };
 
   return (
-    <section className="py-20 bg-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="relative py-20 bg-white overflow-hidden">
+      
+      {/* 1:1 Orange Radial Spotlight Glow matching user reference screenshot */}
+      <div 
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[900px] max-w-[95vw] h-[480px] pointer-events-none z-0"
+        style={{
+          background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.42) 0%, rgba(255, 68, 0, 0.20) 45%, rgba(255, 68, 0, 0.04) 75%, rgba(255, 68, 0, 0) 90%)',
+          filter: 'blur(55px)'
+        }}
+      />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <div className="text-center mb-16">
@@ -127,7 +137,6 @@ export const FAQ: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto">
           {FAQ_ITEMS.map((item, index) => renderCard(item, index))}
         </div>
-
 
       </div>
     </section>
