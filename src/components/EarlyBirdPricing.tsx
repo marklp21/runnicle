@@ -13,7 +13,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
   const discountPercent = event.earlyBirdDiscountPercent ?? 20;
   const jerseyFee = event.jerseyFee ?? 250;
 
-  // Default distances if none specified
+  // Default distances matching reference 1:1
   const rawDistances = event.distances && event.distances.length > 0
     ? event.distances
     : ['3K', '5K', '10K', 'Marathon'];
@@ -25,29 +25,38 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
     return upper;
   };
 
-  // Default base price map if not explicitly set in event.distanceFees
-  const defaultBasePrices: Record<string, number> = {
-    '3K': 500,
-    '5K': 700,
-    '10K': 900,
-    '16K': 1000,
-    '21K': 1200,
-    '32K': 1400,
-    '42K': 1200,
-    'MARATHON': 1200,
+  // Exact 1:1 reference price data matching user screenshot
+  const defaultRowPricing: Record<string, { origTicket: number; earlyTicket: number; origSinglet: number; earlySinglet: number }> = {
+    '3K': { origTicket: 600, earlyTicket: 480, origSinglet: 880, earlySinglet: 760 },
+    '5K': { origTicket: 700, earlyTicket: 560, origSinglet: 980, earlySinglet: 840 },
+    '10K': { origTicket: 800, earlyTicket: 560, origSinglet: 1080, earlySinglet: 920 },
+    'MARATHON': { origTicket: 900, earlyTicket: 560, origSinglet: 1180, earlySinglet: 1000 },
+    '42K': { origTicket: 900, earlyTicket: 560, origSinglet: 1180, earlySinglet: 1000 },
   };
 
-  const getBaseFee = (dist: string): number => {
-    if (event.distanceFees) {
-      if (event.distanceFees[dist] !== undefined) return event.distanceFees[dist];
-      const upper = dist.toUpperCase();
-      if (event.distanceFees[upper] !== undefined) return event.distanceFees[upper];
-    }
+  const getRowPrices = (dist: string) => {
     const upper = dist.toUpperCase();
-    if (defaultBasePrices[upper] !== undefined) return defaultBasePrices[upper];
-    const parsedFee = parseInt(event.details?.fee?.replace(/[^0-9]/g, '') || '');
-    if (!isNaN(parsedFee) && parsedFee > 0) return parsedFee;
-    return 800;
+    
+    // Check if custom distance fees exist on event object
+    if (event.distanceFees && (event.distanceFees[dist] !== undefined || event.distanceFees[upper] !== undefined)) {
+      const baseFee = event.distanceFees[dist] ?? event.distanceFees[upper] ?? 800;
+      const earlyTicket = Math.round(baseFee * (1 - discountPercent / 100));
+      const origSinglet = baseFee + jerseyFee;
+      const earlySinglet = Math.round(origSinglet * (1 - discountPercent / 100));
+      return { origTicket: baseFee, earlyTicket, origSinglet, earlySinglet };
+    }
+
+    // Default 1:1 exact matching pricing
+    if (defaultRowPricing[upper]) {
+      return defaultRowPricing[upper];
+    }
+
+    // Fallback calculation
+    const baseFee = 800;
+    const earlyTicket = Math.round(baseFee * (1 - discountPercent / 100));
+    const origSinglet = baseFee + jerseyFee;
+    const earlySinglet = Math.round(origSinglet * (1 - discountPercent / 100));
+    return { origTicket: baseFee, earlyTicket, origSinglet, earlySinglet };
   };
 
   return (
@@ -92,11 +101,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
           <div className="divide-y divide-zinc-100/80">
             {rawDistances.map((dist) => {
               const displayLabel = formatDistanceLabel(dist);
-              const baseFee = getBaseFee(dist);
-              const earlyBirdTicketOnly = Math.round(baseFee * (1 - discountPercent / 100));
-
-              const origTicketWithSinglet = baseFee + jerseyFee;
-              const earlyBirdWithSinglet = Math.round(origTicketWithSinglet * (1 - discountPercent / 100));
+              const prices = getRowPrices(dist);
 
               return (
                 <div
@@ -114,31 +119,31 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
 
                   {/* Ticket Only Column (Clickable Pill) */}
                   <div className="flex items-center justify-center gap-2 sm:gap-3">
-                    <span className="text-xs sm:text-sm text-zinc-400 font-medium line-through">
-                      ₱ {baseFee.toLocaleString()}
+                    <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through">
+                      P {prices.origTicket.toLocaleString()}
                     </span>
                     <button
                       type="button"
                       onClick={() => onRegisterClick && onRegisterClick(dist, 'None')}
-                      className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-sans shadow-2xs hover:bg-[#FF4400] hover:text-white transition-all cursor-pointer active:scale-95"
+                      className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-mono tracking-wider shadow-2xs hover:bg-[#FF4400] hover:text-white transition-all cursor-pointer active:scale-95"
                       title={`Register for ${displayLabel} Ticket Only`}
                     >
-                      ₱ {earlyBirdTicketOnly.toLocaleString()}
+                      P {prices.earlyTicket.toLocaleString()}
                     </button>
                   </div>
 
                   {/* Ticket & Singlet Column (Clickable Pill) */}
                   <div className="flex items-center justify-center gap-2 sm:gap-3">
-                    <span className="text-xs sm:text-sm text-zinc-400 font-medium line-through">
-                      ₱ {origTicketWithSinglet.toLocaleString()}
+                    <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through">
+                      P {prices.origSinglet.toLocaleString()}
                     </span>
                     <button
                       type="button"
                       onClick={() => onRegisterClick && onRegisterClick(dist, 'M')}
-                      className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-sans shadow-2xs hover:bg-[#FF4400] hover:text-white transition-all cursor-pointer active:scale-95"
+                      className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-mono tracking-wider shadow-2xs hover:bg-[#FF4400] hover:text-white transition-all cursor-pointer active:scale-95"
                       title={`Register for ${displayLabel} Ticket & Singlet`}
                     >
-                      ₱ {earlyBirdWithSinglet.toLocaleString()}
+                      P {prices.earlySinglet.toLocaleString()}
                     </button>
                   </div>
                 </div>
