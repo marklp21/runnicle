@@ -23,11 +23,11 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
   return (
     <section className="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 select-none font-sans slashed-zero [font-variant-numeric:slashed-zero]">
       
-      {/* 1:1 Orange Glow matching reference design image 1 */}
+      {/* Orange Glow positioned higher (top-[155px]) for rich, non-faint top visibility */}
       <div 
-        className="absolute top-[260px] left-1/2 -translate-x-1/2 w-[660px] max-w-[90vw] h-[450px] pointer-events-none z-0"
+        className="absolute top-[155px] left-1/2 -translate-x-1/2 w-[720px] max-w-[92vw] h-[600px] pointer-events-none z-0"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.48) 0%, rgba(255, 68, 0, 0.22) 45%, rgba(255, 68, 0, 0.04) 75%, rgba(255, 68, 0, 0) 90%)',
+          background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.55) 0%, rgba(255, 68, 0, 0.28) 45%, rgba(255, 68, 0, 0.06) 75%, rgba(255, 68, 0, 0) 90%)',
           filter: 'blur(50px)'
         }}
       />
