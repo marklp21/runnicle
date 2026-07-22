@@ -78,9 +78,6 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ onBack }) => {
             <h2 className="font-sans text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
               Coming <span className="font-serif italic text-[#FF4400] font-bold">Soon</span>
             </h2>
-            <p className="mt-3 text-zinc-600 text-sm font-normal leading-relaxed">
-              We are currently editing and uploading photos & highlight reels for this section. Stay tuned for updates!
-            </p>
           </div>
         ) : (
           /* Gallery Content */
