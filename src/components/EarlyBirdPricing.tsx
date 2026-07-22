@@ -54,7 +54,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative max-w-2xl mx-auto bg-white/95 backdrop-blur-xs rounded-2xl border border-zinc-300 p-6 sm:p-8 text-left overflow-hidden shadow-xs z-10"
+          className="relative max-w-2xl mx-auto bg-white rounded-2xl border border-zinc-300 p-6 sm:p-8 text-left overflow-hidden shadow-xs z-10"
         >
           {/* Table Header */}
           <div className="grid grid-cols-3 gap-2 sm:gap-4 pb-2 text-xs sm:text-sm font-sans font-semibold text-zinc-900">
