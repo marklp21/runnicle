@@ -21,14 +21,14 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
   ];
 
   return (
-    <section className="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden select-none font-sans slashed-zero [font-variant-numeric:slashed-zero]">
+    <section className="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 select-none font-sans slashed-zero [font-variant-numeric:slashed-zero]">
       
-      {/* 1:1 Orange Radial Glow Effect behind and below the card */}
+      {/* Expanded, highly visible Orange Radial Glow bleeding into Race Calendar section */}
       <div 
-        className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/3 w-[780px] max-w-[95vw] h-[450px] pointer-events-none z-0 opacity-90"
+        className="absolute bottom-[-140px] left-1/2 -translate-x-1/2 w-[1050px] max-w-[100vw] h-[620px] pointer-events-none z-0"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.32) 0%, rgba(255, 68, 0, 0.15) 45%, rgba(255, 68, 0, 0) 75%)',
-          filter: 'blur(55px)'
+          background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.48) 0%, rgba(255, 68, 0, 0.24) 42%, rgba(255, 68, 0, 0.08) 68%, rgba(255, 68, 0, 0) 85%)',
+          filter: 'blur(75px)'
         }}
       />
 
