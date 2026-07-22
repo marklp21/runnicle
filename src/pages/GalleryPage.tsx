@@ -64,7 +64,7 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ onBack }) => {
                   className={`rounded-full px-5 py-2.5 text-xs font-sans font-bold uppercase transition-all cursor-pointer border ${
                     activeCategory === cat.id
                       ? 'bg-[#FF4400] text-white border-[#FF4400]'
-                      : 'border-zinc-300 text-zinc-500 hover:text-zinc-800 bg-[#F5F5F5]'
+                      : 'border-zinc-300 text-zinc-500 hover:text-zinc-800 bg-white'
                   }`}
                 >
                   {cat.label} ({count})

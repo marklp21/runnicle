@@ -21,7 +21,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
   ];
 
   return (
-    <section className="relative bg-[#F5F5F5] py-16 sm:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden select-none font-sans">
+    <section className="relative bg-white py-16 sm:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden select-none font-sans">
       <div className="max-w-4xl mx-auto text-center">
 
         {/* Section Header */}
@@ -49,7 +49,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative max-w-2xl mx-auto bg-[#F5F5F5] rounded-2xl border border-zinc-200/90 p-6 sm:p-8 text-left overflow-hidden"
+          className="relative max-w-2xl mx-auto bg-white rounded-2xl border border-zinc-200/90 p-6 sm:p-8 text-left overflow-hidden"
         >
           {/* Table Header */}
           <div className="grid grid-cols-3 gap-2 sm:gap-4 pb-4 border-b border-zinc-200/80 text-xs sm:text-sm font-sans font-semibold text-zinc-900">
@@ -75,7 +75,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
                   <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through">
                     {row.origTicket}
                   </span>
-                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#F5F5F5] px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-mono tracking-wider">
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-mono tracking-wider">
                     {row.earlyTicket}
                   </span>
                 </div>
@@ -85,7 +85,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
                   <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through">
                     {row.origSinglet}
                   </span>
-                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#F5F5F5] px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-mono tracking-wider">
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-mono tracking-wider">
                     {row.earlySinglet}
                   </span>
                 </div>
