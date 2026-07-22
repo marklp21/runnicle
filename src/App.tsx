@@ -35,10 +35,10 @@ import {
 
 import {
   mockProducts,
-  mockArticles
+  mockArticles,
+  mockEvents,
+  mockCommunityPosts
 } from './data/mockData';
-
-import { mockCommunityPosts } from './data/mockData';
 
 const getPathFromPage = (pageName: string): string => {
   switch (pageName) {
@@ -650,9 +650,9 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {page === 'event-details' && selectedEvent && (
+              {page === 'event-details' && (
                 <EventDetailsPage
-                  event={selectedEvent}
+                  event={selectedEvent || events[0] || mockEvents[0]}
                   onBack={() => setPage('events')}
                   onRegisterClick={(ev) => {
                     setSelectedEvent(ev);
@@ -661,9 +661,9 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {page === 'event-results' && selectedEvent && (
+              {page === 'event-results' && (
                 <EventResultsPage
-                  event={selectedEvent}
+                  event={selectedEvent || events[0] || mockEvents[0]}
                   onBack={() => setPage('events')}
                 />
               )}
@@ -699,11 +699,11 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {page === 'product-details' && selectedProduct && (
+              {page === 'product-details' && (
                 <ProductDetailsPage
-                  product={selectedProduct}
+                  product={selectedProduct || mockProducts[0]}
                   onBack={() => setPage('store')}
-                  onAddToCart={() => handleAddToCart(selectedProduct)}
+                  onAddToCart={() => handleAddToCart(selectedProduct || mockProducts[0])}
                 />
               )}
 
@@ -729,9 +729,9 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {page === 'order-confirmation' && confirmedOrder && (
+              {page === 'order-confirmation' && (
                 <OrderConfirmationPage
-                  orderInfo={confirmedOrder}
+                  orderInfo={confirmedOrder || { id: 'ORD-0000', items: [], total: 0, date: new Date().toLocaleDateString(), customer: { name: 'Valued Customer', email: '' } }}
                   onContinueShopping={() => setPage('store')}
                 />
               )}
@@ -750,9 +750,9 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {page === 'article-details' && selectedArticle && (
+              {page === 'article-details' && (
                 <ArticleDetailsPage
-                  article={selectedArticle}
+                  article={selectedArticle || mockArticles[0]}
                   onBack={() => setPage('news')}
                   onNavigateToArticle={(art) => {
                     setSelectedArticle(art);
