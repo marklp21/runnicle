@@ -737,7 +737,7 @@ export const App: React.FC = () => {
               )}
 
               {page === 'gallery' && (
-                <GalleryPage />
+                <GalleryPage onBack={() => setPage('home')} />
               )}
 
               {page === 'news' && (

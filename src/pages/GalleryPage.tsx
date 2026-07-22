@@ -2,12 +2,22 @@ import React, { useState } from 'react';
 import { Image, Video, X, Maximize2, Play } from 'lucide-react';
 import { type GalleryItem, mockGalleryItems } from '../data/mockData';
 
-export const GalleryPage: React.FC = () => {
+interface GalleryPageProps {
+  onBack?: () => void;
+}
+
+export const GalleryPage: React.FC<GalleryPageProps> = ({ onBack }) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
   const [playingVideo, setPlayingVideo] = useState<GalleryItem | null>(null);
 
-  const categories = ['all', 'Race Day', 'Expo', 'Behind the Scenes', 'Community'];
+  const categories = [
+    { id: 'all', label: 'ALL' },
+    { id: 'Race Day', label: 'RACE DAY' },
+    { id: 'Expo', label: 'EXPO' },
+    { id: 'Behind the Scenes', label: 'BEHIND THE SCENES' },
+    { id: 'Community', label: 'COMMUNITY' }
+  ];
 
   const filteredItems = mockGalleryItems.filter((item) => {
     return activeCategory === 'all' || item.category === activeCategory;
@@ -18,33 +28,48 @@ export const GalleryPage: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen w-full py-10">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         
+        {/* Back navigation */}
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 text-sm font-sans font-bold text-zinc-500 hover:text-[#FF4400] transition-colors cursor-pointer mb-10 group uppercase tracking-wider"
+          >
+            <span className="text-base transition-transform group-hover:-translate-x-0.5">←</span> BACK TO HOME
+          </button>
+        )}
+
         {/* Header section */}
-        <div className="mb-10 text-center max-w-3xl mx-auto">
-          <h1 className="font-sans text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl">
-            Captured <span className="font-serif italic text-[#FF4400] font-bold">Moments</span>
+        <div className="mb-10 text-center">
+          <h1 className="font-sans text-4xl font-bold tracking-[-3px] text-zinc-900 sm:text-5xl">
+            Event <span className="font-serif italic text-[#FF4400] font-bold">Gallery</span>
           </h1>
-          <p className="mt-3 text-zinc-600 text-sm font-normal leading-relaxed">
+          <p className="mt-3 text-black text-sm font-normal">
             Relive the energy, speed, and focus from our previous Runnicle race weeks and community meets.
           </p>
         </div>
 
-        {/* Category Filters */}
-        <div className="flex justify-center gap-2.5 flex-wrap border-b border-zinc-200 pb-6 mb-10">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`rounded-full px-5 py-2.5 text-xs font-sans font-bold uppercase tracking-wider transition-all cursor-pointer border ${
-                activeCategory === cat
-                  ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-md shadow-[#FF4400]/20'
-                  : 'border-zinc-300 text-zinc-600 hover:text-zinc-900 hover:border-zinc-400 bg-[#F5F5F5]'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        {/* Tab Filters */}
+        <div className="flex flex-wrap justify-center gap-2.5 mb-10">
+          {categories.map((cat) => {
+            const count = cat.id === 'all'
+              ? mockGalleryItems.length
+              : mockGalleryItems.filter(item => item.category === cat.id).length;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`rounded-full px-5 py-2.5 text-xs font-sans font-bold uppercase transition-all cursor-pointer border ${
+                  activeCategory === cat.id
+                    ? 'bg-[#FF4400] text-white border-[#FF4400]'
+                    : 'border-zinc-300 text-zinc-500 hover:text-zinc-800 bg-[#F5F5F5]'
+                }`}
+              >
+                {cat.label} ({count})
+              </button>
+            );
+          })}
         </div>
 
         {/* Gallery Content */}
