@@ -51,26 +51,28 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ onBack }) => {
         </div>
 
         {/* Tab Filters */}
-        <div className="flex flex-wrap justify-center gap-2.5 mb-10">
-          {categories.map((cat) => {
-            const count = cat.id === 'all'
-              ? mockGalleryItems.length
-              : mockGalleryItems.filter(item => item.category === cat.id).length;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`rounded-full px-5 py-2.5 text-xs font-sans font-bold uppercase transition-all cursor-pointer border ${
-                  activeCategory === cat.id
-                    ? 'bg-[#FF4400] text-white border-[#FF4400]'
-                    : 'border-zinc-300 text-zinc-500 hover:text-zinc-800 bg-[#F5F5F5]'
-                }`}
-              >
-                {cat.label} ({count})
-              </button>
-            );
-          })}
-        </div>
+        {mockGalleryItems.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2.5 mb-10">
+            {categories.map((cat) => {
+              const count = cat.id === 'all'
+                ? mockGalleryItems.length
+                : mockGalleryItems.filter(item => item.category === cat.id).length;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`rounded-full px-5 py-2.5 text-xs font-sans font-bold uppercase transition-all cursor-pointer border ${
+                    activeCategory === cat.id
+                      ? 'bg-[#FF4400] text-white border-[#FF4400]'
+                      : 'border-zinc-300 text-zinc-500 hover:text-zinc-800 bg-[#F5F5F5]'
+                  }`}
+                >
+                  {cat.label} ({count})
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Empty State / Coming Soon */}
         {filteredItems.length === 0 ? (
