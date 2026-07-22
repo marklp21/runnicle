@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, Video, X, Maximize2, Play } from 'lucide-react';
+import { Image, Video, X, Maximize2, Play, Clock } from 'lucide-react';
 import { type GalleryItem, mockGalleryItems } from '../data/mockData';
 
 interface GalleryPageProps {
@@ -72,87 +72,105 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ onBack }) => {
           })}
         </div>
 
-        {/* Gallery Content */}
-        <div className="space-y-12">
-          {/* Photography Section */}
-          {photos.length > 0 && (
-            <div>
-              <h2 className="font-sans text-2xl sm:text-3xl font-bold text-zinc-900 mb-6 flex items-center gap-2.5 tracking-tight">
-                <Image className="h-6 w-6 text-[#FF4400]" />
-                Event <span className="font-serif italic text-[#FF4400] font-bold">Photography</span>
-              </h2>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-                {photos.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => setSelectedPhoto(item)}
-                    className="relative aspect-square rounded-xl overflow-hidden bg-zinc-50 border border-zinc-200 hover:border-[#FF4400] transition-all group cursor-pointer shadow-sm hover:shadow-md"
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="h-full w-full object-cover scale-100 group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4" />
-                    
-                    <div className="absolute inset-0 p-4 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-white">
-                      <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-white bg-[#FF4400] px-2.5 py-0.5 rounded-full self-start shadow-sm">
-                        {item.category}
-                      </span>
-                      <div className="flex justify-between items-end gap-3 mt-auto">
-                        <span className="text-xs font-sans font-bold truncate">{item.title}</span>
-                        <Maximize2 className="h-4 w-4 text-white flex-shrink-0" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        {/* Empty State / Coming Soon */}
+        {filteredItems.length === 0 ? (
+          <div className="py-16 sm:py-24 text-center max-w-lg mx-auto">
+            <div className="mx-auto w-16 h-16 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-[#FF4400] mb-6 shadow-sm">
+              <Clock className="h-8 w-8" />
             </div>
-          )}
-
-          {/* Videos Section */}
-          {videos.length > 0 && (
-            <div>
-              <h2 className="font-sans text-2xl sm:text-3xl font-bold text-zinc-900 mb-6 flex items-center gap-2.5 tracking-tight">
-                <Video className="h-6 w-6 text-[#FF4400]" />
-                Event Reels & <span className="font-serif italic text-[#FF4400] font-bold">Highlights</span>
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {videos.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => setPlayingVideo(item)}
-                    className="relative aspect-video rounded-xl overflow-hidden bg-zinc-50 border border-zinc-200 hover:border-[#FF4400] transition-all group cursor-pointer shadow-sm hover:shadow-md"
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="h-full w-full object-cover scale-100 group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-                      <div className="h-14 w-14 rounded-full bg-[#FF4400] text-white flex items-center justify-center shadow-lg shadow-[#FF4400]/30 group-hover:scale-110 transition-transform duration-300">
-                        <Play className="h-6 w-6 fill-white text-white translate-x-[2px]" />
-                      </div>
-                    </div>
-
-                    <div className="absolute bottom-4 left-4 right-4 z-10 text-white flex justify-between items-end">
-                      <div>
-                        <span className="text-[9px] font-sans font-bold uppercase tracking-widest text-white bg-[#FF4400] px-2.5 py-0.5 rounded-full mb-2 inline-block shadow-sm">
+            <span className="rounded-full bg-orange-50 px-4 py-1 text-[11px] font-extrabold tracking-widest text-[#FF4400] border border-orange-200 uppercase">
+              GALLERY UPDATES
+            </span>
+            <h2 className="mt-4 font-sans text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
+              Coming <span className="font-serif italic text-[#FF4400] font-bold">Soon</span>
+            </h2>
+            <p className="mt-3 text-zinc-600 text-sm font-normal leading-relaxed">
+              We are currently editing and uploading photos & highlight reels for this section. Stay tuned for updates!
+            </p>
+          </div>
+        ) : (
+          /* Gallery Content */
+          <div className="space-y-12">
+            {/* Photography Section */}
+            {photos.length > 0 && (
+              <div>
+                <h2 className="font-sans text-2xl sm:text-3xl font-bold text-zinc-900 mb-6 flex items-center gap-2.5 tracking-tight">
+                  <Image className="h-6 w-6 text-[#FF4400]" />
+                  Event <span className="font-serif italic text-[#FF4400] font-bold">Photography</span>
+                </h2>
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+                  {photos.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedPhoto(item)}
+                      className="relative aspect-square rounded-xl overflow-hidden bg-zinc-50 border border-zinc-200 hover:border-[#FF4400] transition-all group cursor-pointer shadow-sm hover:shadow-md"
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="h-full w-full object-cover scale-100 group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4" />
+                      
+                      <div className="absolute inset-0 p-4 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-white">
+                        <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-white bg-[#FF4400] px-2.5 py-0.5 rounded-full self-start shadow-sm">
                           {item.category}
                         </span>
-                        <h3 className="text-sm font-sans font-bold block">{item.title}</h3>
+                        <div className="flex justify-between items-end gap-3 mt-auto">
+                          <span className="text-xs font-sans font-bold truncate">{item.title}</span>
+                          <Maximize2 className="h-4 w-4 text-white flex-shrink-0" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+
+            {/* Videos Section */}
+            {videos.length > 0 && (
+              <div>
+                <h2 className="font-sans text-2xl sm:text-3xl font-bold text-zinc-900 mb-6 flex items-center gap-2.5 tracking-tight">
+                  <Video className="h-6 w-6 text-[#FF4400]" />
+                  Event Reels & <span className="font-serif italic text-[#FF4400] font-bold">Highlights</span>
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {videos.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => setPlayingVideo(item)}
+                      className="relative aspect-video rounded-xl overflow-hidden bg-zinc-50 border border-zinc-200 hover:border-[#FF4400] transition-all group cursor-pointer shadow-sm hover:shadow-md"
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="h-full w-full object-cover scale-100 group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                        <div className="h-14 w-14 rounded-full bg-[#FF4400] text-white flex items-center justify-center shadow-lg shadow-[#FF4400]/30 group-hover:scale-110 transition-transform duration-300">
+                          <Play className="h-6 w-6 fill-white text-white translate-x-[2px]" />
+                        </div>
+                      </div>
+
+                      <div className="absolute bottom-4 left-4 right-4 z-10 text-white flex justify-between items-end">
+                        <div>
+                          <span className="text-[9px] font-sans font-bold uppercase tracking-widest text-white bg-[#FF4400] px-2.5 py-0.5 rounded-full mb-2 inline-block shadow-sm">
+                            {item.category}
+                          </span>
+                          <h3 className="text-sm font-sans font-bold block">{item.title}</h3>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Photo Lightbox */}
         {selectedPhoto && (
