@@ -69,20 +69,20 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
 
                 {/* Ticket Only Column */}
                 <div className="flex items-center justify-center gap-2 sm:gap-3">
-                  <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through">
+                  <span className="font-sans font-semibold text-xs sm:text-sm text-zinc-500 line-through">
                     {row.origTicket}
                   </span>
-                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-mono tracking-wider">
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-sans tracking-wider">
                     {row.earlyTicket}
                   </span>
                 </div>
 
                 {/* Ticket & Singlet Column */}
                 <div className="flex items-center justify-center gap-2 sm:gap-3">
-                  <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through">
+                  <span className="font-sans font-semibold text-xs sm:text-sm text-zinc-500 line-through">
                     {row.origSinglet}
                   </span>
-                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-mono tracking-wider">
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-sans tracking-wider">
                     {row.earlySinglet}
                   </span>
                 </div>
