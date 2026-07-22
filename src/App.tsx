@@ -247,7 +247,7 @@ export const App: React.FC = () => {
 
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(() => {
     const stored = sessionStorage.getItem('runnicle_selected_event');
-    if (stored) {
+    if (stored && stored !== 'undefined') {
       try {
         return JSON.parse(stored);
       } catch {
@@ -258,7 +258,7 @@ export const App: React.FC = () => {
   });
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(() => {
     const stored = sessionStorage.getItem('runnicle_selected_product');
-    if (stored) {
+    if (stored && stored !== 'undefined') {
       try {
         return JSON.parse(stored);
       } catch {
@@ -270,7 +270,7 @@ export const App: React.FC = () => {
   const [selectedCoach, setSelectedCoach] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(() => {
     const stored = sessionStorage.getItem('runnicle_selected_article');
-    if (stored) {
+    if (stored && stored !== 'undefined') {
       try {
         return JSON.parse(stored);
       } catch {

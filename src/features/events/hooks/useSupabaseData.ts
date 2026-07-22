@@ -5,13 +5,23 @@ import { mockEvents } from '@/data/mockData';
 
 export function useSupabaseData(setIsRegistrationConfirmed?: (confirmed: boolean) => void) {
   const [events, setEvents] = useState<EventItem[]>(() => {
-    const stored = localStorage.getItem('runnicle_events');
-    return stored ? JSON.parse(stored) : mockEvents;
+    try {
+      const stored = localStorage.getItem('runnicle_events');
+      if (stored && stored !== 'undefined') return JSON.parse(stored);
+    } catch {
+      // fallback
+    }
+    return mockEvents;
   });
 
   const [registrations, setRegistrations] = useState<any[]>(() => {
-    const stored = localStorage.getItem('runnicle_registrations');
-    return stored ? JSON.parse(stored) : [];
+    try {
+      const stored = localStorage.getItem('runnicle_registrations');
+      if (stored && stored !== 'undefined') return JSON.parse(stored);
+    } catch {
+      // fallback
+    }
+    return [];
   });
 
   // Sync state with Supabase on mount
