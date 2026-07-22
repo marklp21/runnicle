@@ -1,22 +1,6 @@
 import React from 'react';
-import { Calendar, MapPin, Clock, Award, ArrowLeft, ShieldAlert } from 'lucide-react';
+import { Calendar, MapPin, Clock, ShieldAlert } from 'lucide-react';
 import { type EventItem } from '@/types';
-
-const parseImages = (imgStr?: string): string[] => {
-  if (!imgStr) return [];
-  if (imgStr.startsWith('[')) {
-    try {
-      return JSON.parse(imgStr);
-    } catch {
-      // fallback
-    }
-  }
-  if (imgStr.includes('|')) {
-    return imgStr.split('|');
-  }
-  return [imgStr];
-};
-
 
 interface EventDetailsPageProps {
   event: EventItem;
@@ -29,269 +13,211 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
   onBack,
   onRegisterClick,
 }) => {
-  const kitPhotos = parseImages(event.kitImage);
-  const routeMapPhotos = parseImages(event.routeMapImage);
-  const [activeKitIdx, setActiveKitIdx] = React.useState(0);
-  const [activeRouteIdx, setActiveRouteIdx] = React.useState(0);
-  
-  const activeKitPhoto = kitPhotos[activeKitIdx] || kitPhotos[0] || 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=600&q=80';
-  const activeRoutePhoto = routeMapPhotos[activeRouteIdx] || routeMapPhotos[0] || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=600&q=80';
+  const defaultSchedule = [
+    '04:30 AM - Warm-up & Assembly',
+    '05:00 AM - 10K Gun Start',
+    '05:15 AM - 5K Gun Start',
+    '07:00 AM - Awarding Ceremony',
+  ];
+
+  const scheduleItems = (event.details?.schedule && event.details.schedule.length > 0)
+    ? event.details.schedule
+    : defaultSchedule;
+
+  const inclusionItems = (event.details?.perks && event.details.perks.length > 0)
+    ? event.details.perks
+    : defaultSchedule;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-      
-      {}
-      <button
-        onClick={onBack}
-        className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-orange-500 uppercase tracking-wider transition-colors mb-8 cursor-pointer group"
-      >
-        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-        Back to Events
-      </button>
-
-      {}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+    <div className="bg-[#FBFBFB] min-h-screen py-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {}
-        <div className="lg:col-span-2 space-y-8">
+        {/* Top Back Link */}
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#FF4400] uppercase tracking-widest transition-colors mb-6 cursor-pointer"
+        >
+          <span>&larr;</span> BACK TO HOME
+        </button>
+
+        {/* 2-Column Main Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           
-          {}
-          <div 
-            style={{ backgroundImage: `url(${event.image})` }}
-            className="relative rounded-2xl overflow-hidden bg-cover bg-center border border-zinc-200 p-8 md:p-12 flex flex-col justify-end min-h-[300px] shadow-sm"
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
+          {/* Left Column (Main Content) */}
+          <div className="lg:col-span-2 space-y-6">
             
-            <div className="relative z-20">
-              {}
-              <div className="flex gap-2.5 mb-4">
-                {event.distances.map((dist) => (
-                  <span
-                    key={dist}
-                    className="rounded-sm border border-white/30 bg-black/20 px-2.5 py-0.5 text-[10px] font-black tracking-widest text-white uppercase"
-                  >
-                    {dist}
-                  </span>
-                ))}
-              </div>
-
-              <h1 className="font-display text-4xl sm:text-5xl font-black text-white tracking-tight">
-                {event.title}
-              </h1>
-
-              {}
-              <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs text-zinc-300 font-semibold mt-6">
-                <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-orange-500" /> {event.date}</span>
-                <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4 text-orange-500" /> {event.location}</span>
-                <span className="flex items-center gap-1.5"><Clock className="h-4 w-4 text-orange-500" /> Starts {event.details.time}</span>
-              </div>
-            </div>
-          </div>
-
-          {}
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 md:p-8 space-y-4">
-            <h3 className="font-sans text-lg font-bold text-zinc-900 tracking-tight">Race Description</h3>
-            <p className="text-zinc-700 text-sm leading-relaxed font-medium">
-              {event.description}
-            </p>
-            <p className="text-zinc-500 text-xs leading-relaxed font-medium">
-              Join hundreds of athletes on this iconic course designed for both competitive elites chasing personal bests and recreational runners celebrating community fitness. Our event is certified by regional athletic associations and guarantees premium timing chips and support.
-            </p>
-          </div>
-
-          {}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {}
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h3 className="font-sans text-base font-bold text-zinc-900 mb-4 tracking-tight uppercase">Event Schedule</h3>
-              <ul className="space-y-3.5">
-                {event.details.schedule.map((item, idx) => (
-                  <li key={idx} className="flex gap-3 text-xs text-zinc-600 font-semibold">
-                    <Clock className="h-4.5 w-4.5 text-orange-500 flex-shrink-0 mt-0.5" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {}
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h3 className="font-sans text-base font-bold text-zinc-900 mb-4 tracking-tight uppercase">Runner Inclusions</h3>
-              <ul className="space-y-3.5">
-                {event.details.perks.map((perk, idx) => (
-                  <li key={idx} className="flex gap-3 text-xs text-zinc-600 font-semibold">
-                    <Award className="h-4.5 w-4.5 text-orange-500 flex-shrink-0 mt-0.5" />
-                    <span>{perk}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-          </div>
-
-          {}
-          <div className="rounded-xl border border-red-200 bg-red-50/50 p-6 flex gap-4">
-            <ShieldAlert className="h-6 w-6 text-red-500 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-xs font-bold text-red-650 uppercase tracking-wider">Athlete Safety Briefing</h4>
-              <p className="text-[11px] text-zinc-550 mt-2 font-medium leading-relaxed">
-                All athletes must carry their designated timing BIB visible on the front torso. Hydration points are stationed every 2.5K. Medic stations will be active at loops start and finish lines. Please arrive at assembly points at least 30 minutes before gun start.
-              </p>
-            </div>
-          </div>
-
-
-
-          {}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {}
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 space-y-4 shadow-sm">
-              <div className="flex justify-between items-center border-b border-zinc-200 pb-3">
-                <h3 className="font-sans text-xs font-bold text-zinc-900 uppercase tracking-wider">Official Race Kit</h3>
-                <span className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-widest">Singlet & Perks</span>
-              </div>
-              <div className="relative aspect-video rounded-lg overflow-hidden border border-zinc-200 bg-zinc-50">
-                <img 
-                  src={activeKitPhoto} 
-                  alt="Official Race Kit" 
-                  className="h-full w-full object-cover hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute bottom-3 left-3 bg-zinc-900 rounded px-2.5 py-1 text-[9px] font-black uppercase text-white tracking-widest">
-                  Includes Finisher Tee & Medal
-                </div>
-              </div>
-
-              {/* Race Kit Thumbnail Selection */}
-              {kitPhotos.length > 1 && (
-                <div className="flex gap-2.5 pt-1">
-                  {kitPhotos.map((photo, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setActiveKitIdx(idx)}
-                      className={`relative h-12 w-12 rounded-lg border overflow-hidden transition-all duration-200 cursor-pointer ${
-                        (activeKitIdx === idx || (idx === 0 && activeKitIdx >= kitPhotos.length)) ? 'border-[#FF4400] ring-2 ring-[#FF4400]/20' : 'border-zinc-200 hover:border-zinc-350'
-                      }`}
-                    >
-                      <img src={photo} alt="" className="h-full w-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-              <p className="text-[11px] text-zinc-500 leading-relaxed font-semibold">
-                Your registered slot includes the official Runnicle dry-fit singlet, an official race bib, sponsor vouchers, and a custom die-cast finisher medal upon crossing the finish line.
-              </p>
-            </div>
-
-            {}
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 space-y-4 shadow-sm">
-              <div className="flex justify-between items-center border-b border-zinc-200 pb-3">
-                <h3 className="font-sans text-sm font-bold text-zinc-900 uppercase tracking-wider">Route & Venue Map</h3>
-                <span className="text-[10px] text-zinc-450 font-extrabold uppercase tracking-widest">{event.location}</span>
-              </div>
-              <div className="relative aspect-video rounded-lg overflow-hidden border border-zinc-200 bg-zinc-50">
-                <img 
-                  src={activeRoutePhoto} 
-                  alt="Event Route Map" 
-                  className="h-full w-full object-cover hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute bottom-3 left-3 bg-zinc-900 rounded px-2.5 py-1 text-[9px] font-black uppercase text-white tracking-widest">
-                  Certified Course Map
-                </div>
-              </div>
-
-              {/* Route Map Thumbnail Selection */}
-              {routeMapPhotos.length > 1 && (
-                <div className="flex gap-2.5 pt-1">
-                  {routeMapPhotos.map((photo, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setActiveRouteIdx(idx)}
-                      className={`relative h-12 w-12 rounded-lg border overflow-hidden transition-all duration-200 cursor-pointer ${
-                        (activeRouteIdx === idx || (idx === 0 && activeRouteIdx >= routeMapPhotos.length)) ? 'border-[#FF4400] ring-2 ring-[#FF4400]/20' : 'border-zinc-200 hover:border-zinc-350'
-                      }`}
-                    >
-                      <img src={photo} alt="" className="h-full w-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-              <p className="text-[11px] text-zinc-500 leading-relaxed font-semibold">
-                The certified loop features hydration and nutrition points every 2.5 kilometers, timing mats at key check junctions, and emergency medical personnel stationed along the route.
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-
-        {}
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-6 lg:sticky lg:top-24">
-          <div>
-            <span className="text-[10px] font-black text-zinc-450 uppercase tracking-widest">Registration Status</span>
-            <div className="flex items-center justify-between mt-2.5">
-              <span className={`rounded-sm px-2 py-0.5 text-[9px] font-black tracking-widest uppercase ${
-                event.badge === 'SOLD OUT' ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-orange-500 text-white font-extrabold'
-              }`}>
-                {event.badge}
-              </span>
+            {/* Banner Image Card */}
+            <div 
+              style={{ backgroundImage: `url(${event.image || 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=1200&q=80'})` }}
+              className="relative rounded-xl overflow-hidden bg-cover bg-center border border-zinc-200/80 p-8 sm:p-10 flex flex-col justify-end min-h-[340px] shadow-xs"
+            >
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent z-10" />
               
-              {event.badge !== 'SOLD OUT' && event.details.slotsLeft && (
-                <span className="text-xs text-emerald-600 font-bold">{event.details.slotsLeft} slots left!</span>
-              )}
-            </div>
-          </div>
+              <div className="relative z-20">
+                {/* Distance Badges */}
+                <div className="flex gap-2 mb-3">
+                  {(event.distances && event.distances.length > 0 ? event.distances : ['3K', '5K', '10K']).map((dist) => (
+                    <span
+                      key={dist}
+                      className="rounded bg-black/60 border border-white/20 px-2.5 py-0.5 text-[10px] font-bold text-white tracking-widest uppercase"
+                    >
+                      {dist}
+                    </span>
+                  ))}
+                </div>
 
-          <div className="border-t border-zinc-200 pt-6">
-            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">Entry Price</span>
-            <span className="text-3xl font-mono font-bold text-zinc-900 mt-1.5 block">
-              {event.details.fee}
-            </span>
-          </div>
+                {/* Event Title */}
+                <h1 className="font-sans text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                  {event.title || 'MegaWorld Fun Run'}
+                </h1>
 
-          <div className="border-t border-zinc-200 pt-6 space-y-3.5 text-xs text-zinc-500 font-semibold">
-            <div className="flex justify-between items-start">
-              <span className="text-zinc-400">Route Map</span>
-              <div className="text-zinc-800 text-right space-y-1 max-w-[65%]">
-                {event.details.routes && Object.keys(event.details.routes).length > 0 ? (
-                  Object.entries(event.details.routes).map(([dist, rPath]) => (
-                    <div key={dist} className="text-xs">
-                      <span className="font-mono font-black text-brand mr-1">{dist}:</span>
-                      <span className="font-medium text-zinc-700">{rPath}</span>
-                    </div>
-                  ))
-                ) : (
-                  <span className="font-medium text-zinc-700">{event.details.route}</span>
-                )}
+                {/* Event Meta Line */}
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-zinc-200 font-semibold mt-4">
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 text-[#FF4400]" />
+                    {event.date || 'Oct 24, 2026'}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4 text-[#FF4400]" />
+                    {event.location || 'Bacolod City'}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-[#FF4400]" />
+                    Starts at {event.details?.time || '4:00 AM'}
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-400">Location Area</span>
-              <span className="text-zinc-800">{event.location}</span>
+
+            {/* Race Description Card */}
+            <div className="rounded-xl border border-zinc-200/80 bg-[#F4F4F5] p-6 sm:p-8 space-y-3 shadow-xs">
+              <h3 className="font-sans text-sm font-bold text-zinc-900 tracking-tight">
+                Race Description
+              </h3>
+              <p className="text-zinc-600 text-xs leading-relaxed font-medium">
+                {event.description || 'Conquer the streets of Bacolod in the most anticipated evening run of the year. Featuring a vibrant light show and post-race music festival.'}
+              </p>
+              <p className="text-zinc-500 text-xs leading-relaxed font-medium">
+                Join hundreds of athletes on this iconic course designed for both competitive elites chasing personal bests and recreational runners celebrating community fitness. Our event is certified by regional athletic associations and guarantees premium timing chips and support.
+              </p>
             </div>
+
+            {/* Schedule & Inclusions Sub-cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Event Schedule */}
+              <div className="rounded-xl border border-zinc-200/80 bg-[#F9F9FB] p-6 shadow-xs space-y-4">
+                <h3 className="font-sans text-xs font-bold text-zinc-900 tracking-wider uppercase">
+                  EVENT SCHEDULE
+                </h3>
+                <ul className="space-y-3">
+                  {scheduleItems.map((item, idx) => (
+                    <li key={idx} className="flex items-center gap-2.5 text-xs text-zinc-700 font-semibold">
+                      <Clock className="h-4 w-4 text-[#FF4400] flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Runner Inclusions */}
+              <div className="rounded-xl border border-zinc-200/80 bg-[#F9F9FB] p-6 shadow-xs space-y-4">
+                <h3 className="font-sans text-xs font-bold text-zinc-900 tracking-wider uppercase">
+                  RUNNER INCLUSIONS
+                </h3>
+                <ul className="space-y-3">
+                  {inclusionItems.map((item, idx) => (
+                    <li key={idx} className="flex items-center gap-2.5 text-xs text-zinc-700 font-semibold">
+                      <Clock className="h-4 w-4 text-[#FF4400] flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+            </div>
+
+            {/* Athlete Safety Briefing Card */}
+            <div className="rounded-xl border border-red-300 bg-[#FFF0F0] p-6 flex gap-3.5 shadow-xs">
+              <ShieldAlert className="h-5 w-5 text-[#D93838] flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-xs font-bold text-[#D93838] uppercase tracking-wider">
+                  ATHLETE SAFETY BRIEFING
+                </h4>
+                <p className="text-xs text-[#D93838]/90 mt-1.5 font-medium leading-relaxed">
+                  All athletes must carry their designated timing BiB visible on the front torso. Hydration points are stationed every 2.5K. Medic stations will be active at loops start and finish lines. Please arrive at assembly points at least 30 minutes before gun start.
+                </p>
+              </div>
+            </div>
+
           </div>
 
-          {}
-          <button
-            disabled={event.badge === 'SOLD OUT'}
-            onClick={() => onRegisterClick(event)}
-            className="w-full rounded-md bg-orange-500 py-4 mt-6 text-sm font-black text-white hover:bg-orange-600 active:scale-98 transition-all duration-200 uppercase tracking-wider cursor-pointer disabled:opacity-30 disabled:hover:bg-orange-500 shadow-md shadow-orange-500/10"
-          >
-            {event.badge === 'SOLD OUT' ? 'Sold Out' : 'Register for this Race'}
-          </button>
+          {/* Right Column (Sidebar Registration Status Card) */}
+          <div className="rounded-xl border border-zinc-200/80 bg-[#F9F9FB] p-6 shadow-xs space-y-6 lg:sticky lg:top-24">
+            
+            {/* Registration Status */}
+            <div>
+              <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider block mb-3">
+                REGISTRATION STATUS
+              </span>
+              <div className="flex items-center justify-between">
+                <span className="bg-[#EBF3B5] text-[#708A15] border border-[#D5E488] px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider">
+                  {event.badge || 'CLOSING SOON'}
+                </span>
+                <span className="text-xs font-bold text-[#708A15]">
+                  {event.details?.slotsLeft ? `${event.details.slotsLeft} slots left!` : '42 slots left!'}
+                </span>
+              </div>
+            </div>
 
-          <p className="text-[10px] text-zinc-500 text-center font-medium leading-relaxed">
-            Registration packets can be picked up at the Expo Center 3 days leading up to the race event.
-          </p>
+            <div className="border-t border-zinc-200/80" />
+
+            {/* Entry Price */}
+            <div>
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">
+                ENTRY PRICE
+              </span>
+              <span className="text-3xl font-extrabold text-zinc-900 tracking-tight font-mono block">
+                {event.details?.fee || '₱1,250.00'}
+              </span>
+            </div>
+
+            <div className="border-t border-zinc-200/80" />
+
+            {/* Route Map & Location Metadata */}
+            <div className="space-y-3 text-xs">
+              <div className="flex justify-between items-baseline">
+                <span className="text-zinc-500 font-medium">Route Map</span>
+                <span className="font-bold text-zinc-900 text-right">
+                  {event.details?.route || 'MegaWorld Boulevard Loop'}
+                </span>
+              </div>
+              <div className="flex justify-between items-baseline">
+                <span className="text-zinc-500 font-medium">Location Area</span>
+                <span className="font-bold text-zinc-900 text-right">
+                  {event.location || 'Bacolod City'}
+                </span>
+              </div>
+            </div>
+
+            {/* Register Button */}
+            <button
+              disabled={event.badge === 'SOLD OUT'}
+              onClick={() => onRegisterClick(event)}
+              className="w-full rounded-md bg-[#FF4400] hover:bg-[#E63D00] py-3.5 text-xs font-bold text-white uppercase tracking-wider transition-colors shadow-sm cursor-pointer disabled:opacity-40 disabled:hover:bg-[#FF4400]"
+            >
+              {event.badge === 'SOLD OUT' ? 'SOLD OUT' : 'REGISTER FOR THIS RACE'}
+            </button>
+
+          </div>
 
         </div>
 
       </div>
-
     </div>
   );
 };
+
 export default EventDetailsPage;
+
