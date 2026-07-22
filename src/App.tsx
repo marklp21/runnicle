@@ -16,6 +16,7 @@ import Footer from './components/Footer';
 import Modal from './components/Modal';
 import FeaturedGallery from './components/FeaturedGallery';
 import FAQ from './components/FAQ';
+import { EarlyBirdPricing } from './components/EarlyBirdPricing';
 
 import { EventsPage, EventDetailsPage, EventResultsPage, RegistrationPage, RegistrationPassPage, useSupabaseData } from '@/features/events';
 import { StorePage, CartPage, CheckoutPage, OrderConfirmationPage, ProductDetailsPage, useCart } from '@/features/store';
@@ -611,6 +612,19 @@ export const App: React.FC = () => {
                       }
                     }}
                     targetEventTimestamp={promotedEvent ? new Date(promotedEvent.deadline).getTime() : new Date().getTime()}
+                  />
+
+                  {/* Early Bird Pricing Table */}
+                  <EarlyBirdPricing
+                    event={promotedEvent}
+                    onRegisterClick={() => {
+                      if (promotedEvent) {
+                        setSelectedEvent(promotedEvent);
+                        setPage('register');
+                      } else {
+                        setPage('events');
+                      }
+                    }}
                   />
 
                   { }
