@@ -23,9 +23,19 @@
   --color-orange-900: #4D1400;
 }
 
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 html {
   scroll-behavior: smooth;
-  overscroll-behavior-y: none;
 }
 
 @layer base {
@@ -33,7 +43,6 @@ html {
     font-family: var(--font-sans);
     background-color: #ffffff;
     color: #27272a;
-    overscroll-behavior-y: none;
   }
   
   h1 {

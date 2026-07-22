@@ -4,8 +4,13 @@ import { type Product } from '@/types';
 
 export function useCart() {
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    const stored = localStorage.getItem('runnicle_cart_items');
-    return stored ? JSON.parse(stored) : [];
+    try {
+      const stored = localStorage.getItem('runnicle_cart_items');
+      if (stored && stored !== 'undefined') return JSON.parse(stored);
+    } catch {
+      // fallback
+    }
+    return [];
   });
 
   useEffect(() => {

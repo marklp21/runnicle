@@ -34,7 +34,7 @@ const FAQ_ITEMS: FAQItem[] = [
   },
   {
     question: "What is included in the registration fee?",
-    answer: "Each registration includes an official Runnicle Dry-Fit Singlet, an RFID-equipped timing bib, a finisher medal, and sponsor goodie vouchers."
+    answer: "Each registration includes an official Runnicle Dry-Fit Singlet, an official race bib, a finisher medal, and sponsor goodie vouchers."
   },
   {
     question: "How do I check my race timing results?",
@@ -110,8 +110,18 @@ export const FAQ: React.FC = () => {
   };
 
   return (
-    <section className="py-20 bg-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="relative py-20 bg-white overflow-hidden">
+      
+      {/* Orange Radial Glow with higher opacity for rich visibility */}
+      <div 
+        className="absolute bottom-[-70px] left-1/2 -translate-x-1/2 w-[1200px] max-w-[100vw] h-[360px] pointer-events-none z-0"
+        style={{
+          background: 'radial-gradient(ellipse 85% 90% at 50% 100%, rgba(255, 68, 0, 0.65) 0%, rgba(255, 68, 0, 0.32) 45%, rgba(255, 68, 0, 0.08) 75%, rgba(255, 68, 0, 0) 100%)',
+          filter: 'blur(55px)'
+        }}
+      />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <div className="text-center mb-16">
@@ -127,7 +137,6 @@ export const FAQ: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto">
           {FAQ_ITEMS.map((item, index) => renderCard(item, index))}
         </div>
-
 
       </div>
     </section>

@@ -7,7 +7,7 @@ const parseImages = (imgStr?: string): string[] => {
   if (imgStr.startsWith('[')) {
     try {
       return JSON.parse(imgStr);
-    } catch (e) {
+    } catch {
       // fallback
     }
   }
@@ -141,29 +141,7 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
             </div>
           </div>
 
-          {/* Race Gallery Section */}
-          {event.galleryImages && event.galleryImages.length > 0 && (
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 md:p-8 space-y-4 shadow-sm">
-              <h3 className="font-sans text-base font-bold text-zinc-900 tracking-tight uppercase">Event Gallery</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                {event.galleryImages.map((imgUrl, idx) => (
-                  <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-200 bg-zinc-50 group">
-                    <img 
-                      src={imgUrl} 
-                      alt={`Race gallery photo ${idx + 1}`} 
-                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-zoom-in"
-                      onClick={() => {
-                        const win = window.open();
-                        if (win) {
-                          win.document.write(`<img src="${imgUrl}" style="max-width:100%; max-height:100vh; display:block; margin:auto;"/>`);
-                        }
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+
 
           {}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -203,7 +181,7 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
                 </div>
               )}
               <p className="text-[11px] text-zinc-500 leading-relaxed font-semibold">
-                Your registered slot includes the official Runnicle dry-fit singlet, an RFID-equipped timing bib, sponsor vouchers, and a custom die-cast finisher medal upon crossing the finish line.
+                Your registered slot includes the official Runnicle dry-fit singlet, an official race bib, sponsor vouchers, and a custom die-cast finisher medal upon crossing the finish line.
               </p>
             </div>
 
@@ -289,10 +267,6 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
                   <span className="font-medium text-zinc-700">{event.details.route}</span>
                 )}
               </div>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-400">Timer Method</span>
-              <span className="text-zinc-800">RFID Timing Chip</span>
             </div>
             <div className="flex justify-between">
               <span className="text-zinc-400">Location Area</span>

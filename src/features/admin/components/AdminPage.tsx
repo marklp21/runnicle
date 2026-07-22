@@ -37,7 +37,7 @@ const parseImages = (imgStr?: string): string[] => {
   if (imgStr.startsWith('[')) {
     try {
       return JSON.parse(imgStr);
-    } catch (e) {
+    } catch {
       // fallback
     }
   }
@@ -192,8 +192,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     description: '',
     route: '',
     distances: [] as string[],
-    perks: 'Timing Chip, Finisher Medal, Event Singlet',
+    perks: 'Finisher Medal, Event Singlet',
     highlights: 'Certified race course, Fully loaded hydrations, Post-race concert',
+    schedule: '04:30 AM - Assembly & Timing Tag Inspection\n05:00 AM - Race Gunstart\n08:05 AM - Awarding & Post-race Program',
     image: coverPresets[0].url,
     iconType: 'compass' as 'compass' | 'mountain' | 'drop',
 
@@ -255,7 +256,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       } else {
         setErrorMsg('Invalid username or password.');
       }
-    } catch (err) {
+    } catch {
       setErrorMsg('Authentication error. Try again.');
     } finally {
       setIsAuthenticating(false);
@@ -387,7 +388,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               route: firstRoute,
               routes: distanceRoutes,
               slotsLeft: newEvent.slotsLimit,
-              perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Timing Chip', 'Finisher Medal']
+              schedule: newEvent.schedule ? newEvent.schedule.split('\n').map(s => s.trim()).filter(Boolean) : (evt.details.schedule || []),
+              perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Finisher Medal']
             },
             iconType: newEvent.iconType,
             image: galleryPhotos[0],
@@ -429,12 +431,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           route: firstRoute,
           routes: distanceRoutes,
           slotsLeft: newEvent.slotsLimit,
-          schedule: [
-            '04:30 AM - Assembly & Timing Tag Inspection',
-            '05:00 AM - Race Gunstart',
-            '08:05 AM - Awarding & Post-race Program'
-          ],
-          perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Timing Chip', 'Finisher Medal']
+          schedule: newEvent.schedule
+            ? newEvent.schedule.split('\n').map(s => s.trim()).filter(Boolean)
+            : [
+                '04:30 AM - Assembly & Timing Tag Inspection',
+                '05:00 AM - Race Gunstart',
+                '08:05 AM - Awarding & Post-race Program'
+              ],
+          perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Finisher Medal']
         },
         iconType: newEvent.iconType,
         image: galleryPhotos[0],
@@ -466,8 +470,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       description: '',
       route: '',
       distances: [],
-      perks: 'Timing Chip, Finisher Medal, Event Singlet',
+      perks: 'Finisher Medal, Event Singlet',
       highlights: 'Certified race course, Fully loaded hydrations, Post-race concert',
+      schedule: '04:30 AM - Assembly & Timing Tag Inspection\n05:00 AM - Race Gunstart\n08:05 AM - Awarding & Post-race Program',
       image: coverPresets[0].url,
       iconType: 'compass',
       inclusions: 'Singlet, Race Bib',
@@ -2021,8 +2026,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     description: '',
                     route: '',
                     distances: [],
-                    perks: 'Timing Chip, Finisher Medal, Event Singlet',
+                    perks: 'Finisher Medal, Event Singlet',
                     highlights: 'Certified race course, Fully loaded hydrations, Post-race concert',
+                    schedule: '04:30 AM - Assembly & Timing Tag Inspection\n05:00 AM - Race Gunstart\n08:05 AM - Awarding & Post-race Program',
                     image: '',
                     iconType: 'compass',
                     inclusions: 'Singlet, Race Bib',
@@ -2116,8 +2122,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                             description: evt.description || '',
                             route: evt.details.route || '',
                             distances: evt.distances,
-                            perks: evt.details.perks ? evt.details.perks.join(', ') : 'Timing Chip, Finisher Medal',
+                            perks: evt.details.perks ? evt.details.perks.join(', ') : 'Finisher Medal',
                             highlights: evt.highlights ? evt.highlights.join(', ') : 'Certified race course, Fully loaded hydrations',
+                            schedule: evt.details.schedule ? evt.details.schedule.join('\n') : '04:30 AM - Assembly & Timing Tag Inspection\n05:00 AM - Race Gunstart\n08:05 AM - Awarding & Post-race Program',
                             image: evt.image,
                             iconType: evt.iconType || 'compass',
                             inclusions: evt.inclusions ? evt.inclusions.join(', ') : 'Singlet, Race Bib',
@@ -2553,6 +2560,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         placeholder="Provide registration notes, details about the hydration hubs, medical stands, and finishing criteria..."
                         className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
                       ></textarea>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                        Event Schedule Timeline (One entry per line)
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={newEvent.schedule}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, schedule: e.target.value }))}
+                        placeholder={`04:30 AM - Assembly & Timing Tag Inspection\n05:00 AM - Race Gunstart\n08:05 AM - Awarding & Post-race Program`}
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium leading-relaxed font-mono"
+                      ></textarea>
+                      <span className="text-[10px] text-zinc-450 font-medium mt-1.5 block">
+                        Enter each schedule item on a new line (e.g. "05:00 AM - Race Gunstart"). These will be displayed under EVENT SCHEDULE on the event details page.
+                      </span>
                     </div>
                   </div>
 

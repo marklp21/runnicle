@@ -45,7 +45,8 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 max-w-5xl mx-auto">
+        {/* Event Cards: Horizontal Swipe Carousel on Mobile (< sm), Standard Grid on Desktop (sm+) */}
+        <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 pt-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 md:grid-cols-3 sm:overflow-visible max-w-5xl mx-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {displayEvents.map((event) => {
             const isPast = event.badge === 'SOLD OUT' || event.badge === 'PAST EVENT';
             const badgeClass = event.badge === 'CLOSING SOON'
@@ -67,9 +68,9 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
             return (
               <div
                 key={event.id}
-                className="flex flex-col bg-white border border-[#B0B0B0] overflow-hidden rounded-[7px] h-full"
+                className="flex flex-col bg-white border border-[#B0B0B0] overflow-hidden rounded-[7px] h-full shrink-0 snap-center w-[270px] xs:w-[290px] sm:w-auto sm:shrink shadow-xs"
               >
-                <div className="relative h-48 overflow-hidden bg-zinc-100">
+                <div className="relative h-44 sm:h-48 overflow-hidden bg-zinc-100">
                   <img
                     src={event.image}
                     alt={event.title}
@@ -77,28 +78,28 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
                     loading="lazy"
                   />
                   <div className="absolute inset-0 z-10 pointer-events-auto" />
-                  <span className={`font-sans absolute top-4 right-4 rounded-[4px] px-3.5 py-1.5 text-[11px] tracking-wider uppercase font-bold z-20 ${badgeClass}`}>
+                  <span className={`font-sans absolute top-3.5 right-3.5 sm:top-4 sm:right-4 rounded-[4px] px-3 py-1 sm:px-3.5 sm:py-1.5 text-[10px] sm:text-[11px] tracking-wider uppercase font-bold z-20 ${badgeClass}`}>
                     {event.badge}
                   </span>
                 </div>
 
-                <div className="p-5 flex flex-col flex-1">
-                  <div className="flex flex-wrap gap-2 mb-4">
+                <div className="p-4 sm:p-5 flex flex-col flex-1">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                     {event.distances.map((tag) => (
                       <span
                         key={tag}
-                        className={`font-sans rounded-[4px] border px-3 py-1 text-[11px] font-bold tracking-wider uppercase bg-transparent ${tagClass}`}
+                        className={`font-sans rounded-[4px] border px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-[11px] font-bold tracking-wider uppercase bg-transparent ${tagClass}`}
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
 
-                  <h3 className={`text-lg font-semibold mb-3 ${titleClass}`}>
+                  <h3 className={`text-base sm:text-lg font-semibold mb-3 ${titleClass}`}>
                     {event.title}
                   </h3>
 
-                  <div className="flex items-center justify-between text-[11px] text-zinc-400 font-semibold mb-5 tracking-wide">
+                  <div className="flex items-center justify-between text-[11px] text-zinc-400 font-semibold mb-4 sm:mb-5 tracking-wide">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5" />
                       <span>{event.date}</span>
@@ -112,7 +113,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
                   <div className="mt-auto">
                     <button 
                       onClick={() => onViewDetailsClick(event)} 
-                      className={`font-sans w-full py-3.5 text-[12px] font-bold tracking-wider uppercase transition-colors rounded-[7px] cursor-pointer ${buttonClass}`}
+                      className={`font-sans w-full py-3 sm:py-3.5 text-[12px] font-bold tracking-wider uppercase transition-colors rounded-[7px] cursor-pointer ${buttonClass}`}
                     >
                       VIEW DETAILS
                     </button>

@@ -16,6 +16,7 @@ import Footer from './components/Footer';
 import Modal from './components/Modal';
 import FeaturedGallery from './components/FeaturedGallery';
 import FAQ from './components/FAQ';
+import { EarlyBirdPricing } from './components/EarlyBirdPricing';
 
 import { EventsPage, EventDetailsPage, EventResultsPage, RegistrationPage, RegistrationPassPage, useSupabaseData } from '@/features/events';
 import { StorePage, CartPage, CheckoutPage, OrderConfirmationPage, ProductDetailsPage, useCart } from '@/features/store';
@@ -35,10 +36,10 @@ import {
 
 import {
   mockProducts,
-  mockArticles
+  mockArticles,
+  mockEvents,
+  mockCommunityPosts
 } from './data/mockData';
-
-import { mockCommunityPosts } from './data/mockData';
 
 const getPathFromPage = (pageName: string): string => {
   switch (pageName) {
@@ -247,10 +248,10 @@ export const App: React.FC = () => {
 
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(() => {
     const stored = sessionStorage.getItem('runnicle_selected_event');
-    if (stored) {
+    if (stored && stored !== 'undefined') {
       try {
         return JSON.parse(stored);
-      } catch (e) {
+      } catch {
         return null;
       }
     }
@@ -258,22 +259,24 @@ export const App: React.FC = () => {
   });
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(() => {
     const stored = sessionStorage.getItem('runnicle_selected_product');
-    if (stored) {
+    if (stored && stored !== 'undefined') {
       try {
         return JSON.parse(stored);
-      } catch (e) {
+      } catch {
         return null;
       }
     }
     return null;
   });
   const [selectedCoach, setSelectedCoach] = useState<string | null>(null);
+  const [selectedDistance, setSelectedDistance] = useState<string | undefined>(undefined);
+  const [selectedSingletSize, setSelectedSingletSize] = useState<string | undefined>(undefined);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(() => {
     const stored = sessionStorage.getItem('runnicle_selected_article');
-    if (stored) {
+    if (stored && stored !== 'undefined') {
       try {
         return JSON.parse(stored);
-      } catch (e) {
+      } catch {
         return null;
       }
     }
@@ -428,7 +431,7 @@ export const App: React.FC = () => {
     if (stored) {
       try {
         return JSON.parse(stored);
-      } catch (e) {
+      } catch {
 
       }
     }
@@ -532,7 +535,7 @@ export const App: React.FC = () => {
   const cartTotalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white text-zinc-800 antialiased selection:bg-orange-500 selection:text-white">
+    <div className="flex flex-col min-h-screen bg-white text-zinc-800 antialiased selection:bg-orange-500 selection:text-white overflow-x-hidden max-w-full relative">
 
       { }
       {!page.startsWith('admin-') && (
@@ -560,7 +563,7 @@ export const App: React.FC = () => {
       )}
 
       { }
-      <main className="flex-1 overflow-x-clip">
+      <main className="flex-1 overflow-x-clip pt-20">
         {isAdminView && page !== 'admin-login' ? (
           <AdminPage
             key="admin-portal"
@@ -613,6 +616,20 @@ export const App: React.FC = () => {
                     targetEventTimestamp={promotedEvent ? new Date(promotedEvent.deadline).getTime() : new Date().getTime()}
                   />
 
+                  <EarlyBirdPricing
+                    event={promotedEvent}
+                    onRegisterClick={(dist, singletSize) => {
+                      if (promotedEvent) {
+                        setSelectedEvent(promotedEvent);
+                        setSelectedDistance(dist);
+                        setSelectedSingletSize(singletSize);
+                        setPage('register');
+                      } else {
+                        setPage('events');
+                      }
+                    }}
+                  />
+
                   { }
                   <UpcomingEvents
                     events={events}
@@ -650,9 +667,9 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {page === 'event-details' && selectedEvent && (
+              {page === 'event-details' && (
                 <EventDetailsPage
-                  event={selectedEvent}
+                  event={selectedEvent || events[0] || mockEvents[0]}
                   onBack={() => setPage('events')}
                   onRegisterClick={(ev) => {
                     setSelectedEvent(ev);
@@ -661,9 +678,9 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {page === 'event-results' && selectedEvent && (
+              {page === 'event-results' && (
                 <EventResultsPage
-                  event={selectedEvent}
+                  event={selectedEvent || events[0] || mockEvents[0]}
                   onBack={() => setPage('events')}
                 />
               )}
@@ -672,6 +689,8 @@ export const App: React.FC = () => {
                 <RegistrationPage
                   event={selectedEvent}
                   allEvents={events}
+                  initialDistance={selectedDistance}
+                  initialSingletSize={selectedSingletSize}
                   registrations={registrations}
                   onRegisterComplete={handleRegisterComplete}
                   onBack={() => {
@@ -699,11 +718,11 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {page === 'product-details' && selectedProduct && (
+              {page === 'product-details' && (
                 <ProductDetailsPage
-                  product={selectedProduct}
+                  product={selectedProduct || mockProducts[0]}
                   onBack={() => setPage('store')}
-                  onAddToCart={() => handleAddToCart(selectedProduct)}
+                  onAddToCart={() => handleAddToCart(selectedProduct || mockProducts[0])}
                 />
               )}
 
@@ -729,15 +748,15 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {page === 'order-confirmation' && confirmedOrder && (
+              {page === 'order-confirmation' && (
                 <OrderConfirmationPage
-                  orderInfo={confirmedOrder}
+                  orderInfo={confirmedOrder || { id: 'ORD-0000', items: [], total: 0, date: new Date().toLocaleDateString(), customer: { name: 'Valued Customer', email: '' } }}
                   onContinueShopping={() => setPage('store')}
                 />
               )}
 
               {page === 'gallery' && (
-                <GalleryPage />
+                <GalleryPage onBack={() => setPage('home')} />
               )}
 
               {page === 'news' && (
@@ -750,9 +769,9 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {page === 'article-details' && selectedArticle && (
+              {page === 'article-details' && (
                 <ArticleDetailsPage
-                  article={selectedArticle}
+                  article={selectedArticle || mockArticles[0]}
                   onBack={() => setPage('news')}
                   onNavigateToArticle={(art) => {
                     setSelectedArticle(art);

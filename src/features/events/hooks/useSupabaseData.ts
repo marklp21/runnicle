@@ -5,20 +5,36 @@ import { mockEvents } from '@/data/mockData';
 
 export function useSupabaseData(setIsRegistrationConfirmed?: (confirmed: boolean) => void) {
   const [events, setEvents] = useState<EventItem[]>(() => {
-    const stored = localStorage.getItem('runnicle_events');
-    return stored ? JSON.parse(stored) : mockEvents;
+    try {
+      const stored = localStorage.getItem('runnicle_events');
+      if (stored && stored !== 'undefined') {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+    return mockEvents;
   });
 
   const [registrations, setRegistrations] = useState<any[]>(() => {
-    const stored = localStorage.getItem('runnicle_registrations');
-    return stored ? JSON.parse(stored) : [];
+    try {
+      const stored = localStorage.getItem('runnicle_registrations');
+      if (stored && stored !== 'undefined') {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+    return [];
   });
 
   // Sync state with Supabase on mount
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        // Fetch events
+        // Fetch events from Supabase
         let dbEvents: EventItem[] = [];
         try {
           dbEvents = await supabaseService.fetchEvents();
@@ -26,10 +42,25 @@ export function useSupabaseData(setIsRegistrationConfirmed?: (confirmed: boolean
           console.error("Error fetching events from Supabase:", err);
         }
 
-        let finalEvents = events;
+        // Check local storage events
+        let localEvents: EventItem[] = [];
+        try {
+          const stored = localStorage.getItem('runnicle_events');
+          if (stored && stored !== 'undefined') {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) localEvents = parsed;
+          }
+        } catch {
+          // ignore
+        }
+
+        let finalEvents: EventItem[] = [];
         if (dbEvents && dbEvents.length > 0) {
           finalEvents = dbEvents;
-        } else {
+        } else if (localEvents && localEvents.length > 0) {
+          finalEvents = localEvents;
+        } else if (mockEvents && mockEvents.length > 0) {
+          finalEvents = mockEvents;
           console.log("Supabase events table is empty. Seeding mock events...");
           try {
             const seeded = await supabaseService.seedEvents(mockEvents);
@@ -40,16 +71,37 @@ export function useSupabaseData(setIsRegistrationConfirmed?: (confirmed: boolean
             console.error("Failed to seed events in Supabase:", seedErr);
           }
         }
-        setEvents(finalEvents);
-        localStorage.setItem('runnicle_events', JSON.stringify(finalEvents));
+
+        if (finalEvents.length > 0) {
+          setEvents(finalEvents);
+          localStorage.setItem('runnicle_events', JSON.stringify(finalEvents));
+        }
 
         // Fetch registrations
+        let localRegs: any[] = [];
+        try {
+          const storedRegs = localStorage.getItem('runnicle_registrations');
+          if (storedRegs && storedRegs !== 'undefined') {
+            const parsed = JSON.parse(storedRegs);
+            if (Array.isArray(parsed)) localRegs = parsed;
+          }
+        } catch {
+          // ignore
+        }
+
         try {
           const dbRegs = await supabaseService.fetchRegistrations(finalEvents);
-          setRegistrations(dbRegs);
-          localStorage.setItem('runnicle_registrations', JSON.stringify(dbRegs));
+          if (dbRegs && dbRegs.length > 0) {
+            setRegistrations(dbRegs);
+            localStorage.setItem('runnicle_registrations', JSON.stringify(dbRegs));
+          } else if (localRegs.length > 0) {
+            setRegistrations(localRegs);
+          }
         } catch (regsErr) {
           console.error("Error fetching registrations from Supabase:", regsErr);
+          if (localRegs.length > 0) {
+            setRegistrations(localRegs);
+          }
         }
       } catch (err) {
         console.error("Failed to sync with Supabase on load:", err);
@@ -62,22 +114,24 @@ export function useSupabaseData(setIsRegistrationConfirmed?: (confirmed: boolean
   const handleAddEvent = async (newEvent: EventItem) => {
     const tempId = newEvent.id;
     // Optimistic local update
-    const updated = [newEvent, ...events];
-    setEvents(updated);
-    localStorage.setItem('runnicle_events', JSON.stringify(updated));
+    setEvents(prevEvents => {
+      const updated = [newEvent, ...prevEvents.filter(e => e.id !== tempId)];
+      localStorage.setItem('runnicle_events', JSON.stringify(updated));
+      return updated;
+    });
 
     // Save to Supabase
     try {
       const dbEvent = await supabaseService.insertEvent(newEvent);
-      setEvents(prev => prev.map(item => item.id === tempId ? dbEvent : item));
-      setTimeout(() => {
-        setEvents(currentEvents => {
-          localStorage.setItem('runnicle_events', JSON.stringify(currentEvents));
-          return currentEvents;
+      if (dbEvent && dbEvent.id) {
+        setEvents(prev => {
+          const updatedList = prev.map(item => item.id === tempId ? dbEvent : item);
+          localStorage.setItem('runnicle_events', JSON.stringify(updatedList));
+          return updatedList;
         });
-      }, 100);
+      }
     } catch (err) {
-      console.error("Failed to add event to Supabase:", err);
+      console.error("Failed to add event to Supabase (saving locally instead):", err);
     }
   };
 
@@ -122,7 +176,6 @@ export function useSupabaseData(setIsRegistrationConfirmed?: (confirmed: boolean
       for (const nr of newRegs) {
         const old = registrations.find(r => r.id === nr.id);
         if (old) {
-          // If status, bib, name or details changed, update in DB
           if (
             old.status !== nr.status || 
             old.registeredBib !== nr.registeredBib || 
@@ -135,7 +188,6 @@ export function useSupabaseData(setIsRegistrationConfirmed?: (confirmed: boolean
             await supabaseService.updateRegistration(nr, events);
           }
         } else {
-          // Admin created new registration record directly
           const dbReg = await supabaseService.insertRegistration(nr, events);
           setRegistrations(prev => {
             const updatedList = prev.map(item => item.id === nr.id ? dbReg : item);

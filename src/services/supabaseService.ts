@@ -77,7 +77,7 @@ export function dbRegistrationToFrontend(dbReg: DbRegistration): any {
     if (dbReg.ticket_code) {
       extra = JSON.parse(dbReg.ticket_code);
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
 
@@ -200,7 +200,7 @@ export const supabaseService = {
 
     if (error) throw error;
 
-    return (data || []).map(dbReg => {
+    return (data || []).map((dbReg: any) => {
       const mapped = dbRegistrationToFrontend(dbReg);
       const event = eventsList.find(e => e.id === mapped.eventId);
       mapped.eventTitle = event ? event.title : 'MegaWorld Fun Run';
