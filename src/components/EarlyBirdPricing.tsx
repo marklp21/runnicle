@@ -4,7 +4,7 @@ import { type EventItem } from '../types';
 
 interface EarlyBirdPricingProps {
   event: EventItem | null;
-  onRegisterClick?: (distance?: string) => void;
+  onRegisterClick?: (distance?: string, singletSize?: string) => void;
 }
 
 export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onRegisterClick }) => {
@@ -38,18 +38,16 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
   };
 
   const getBaseFee = (dist: string): number => {
-    if (event.distanceFees && event.distanceFees[dist]) {
-      return event.distanceFees[dist];
+    if (event.distanceFees) {
+      if (event.distanceFees[dist] !== undefined) return event.distanceFees[dist];
+      const upper = dist.toUpperCase();
+      if (event.distanceFees[upper] !== undefined) return event.distanceFees[upper];
     }
     const upper = dist.toUpperCase();
-    if (event.distanceFees && event.distanceFees[upper]) {
-      return event.distanceFees[upper];
-    }
+    if (defaultBasePrices[upper] !== undefined) return defaultBasePrices[upper];
     const parsedFee = parseInt(event.details?.fee?.replace(/[^0-9]/g, '') || '');
-    if (!isNaN(parsedFee) && parsedFee > 0) {
-      return parsedFee;
-    }
-    return defaultBasePrices[upper] || 800;
+    if (!isNaN(parsedFee) && parsedFee > 0) return parsedFee;
+    return 800;
   };
 
   return (
@@ -103,32 +101,45 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
               return (
                 <div
                   key={dist}
-                  onClick={() => onRegisterClick && onRegisterClick(dist)}
-                  className="grid grid-cols-3 gap-2 sm:gap-4 py-4 sm:py-4.5 items-center hover:bg-zinc-50/80 transition-colors cursor-pointer group"
+                  className="grid grid-cols-3 gap-2 sm:gap-4 py-4 sm:py-4.5 items-center hover:bg-zinc-50/80 transition-colors"
                 >
-                  {/* Distance Column */}
-                  <div className="font-sans font-bold text-xs sm:text-sm text-[#FF4400] tracking-wide">
+                  {/* Distance Column (Clickable) */}
+                  <button
+                    type="button"
+                    onClick={() => onRegisterClick && onRegisterClick(dist)}
+                    className="font-sans font-bold text-xs sm:text-sm text-[#FF4400] tracking-wide text-left hover:underline cursor-pointer"
+                  >
                     {displayLabel}
-                  </div>
+                  </button>
 
-                  {/* Ticket Only Column */}
+                  {/* Ticket Only Column (Clickable Pill) */}
                   <div className="flex items-center justify-center gap-2 sm:gap-3">
                     <span className="text-xs sm:text-sm text-zinc-400 font-medium line-through">
                       ₱ {baseFee.toLocaleString()}
                     </span>
-                    <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-sans shadow-2xs group-hover:bg-[#FF4400] group-hover:text-white transition-all">
+                    <button
+                      type="button"
+                      onClick={() => onRegisterClick && onRegisterClick(dist, 'None')}
+                      className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-sans shadow-2xs hover:bg-[#FF4400] hover:text-white transition-all cursor-pointer active:scale-95"
+                      title={`Register for ${displayLabel} Ticket Only`}
+                    >
                       ₱ {earlyBirdTicketOnly.toLocaleString()}
-                    </span>
+                    </button>
                   </div>
 
-                  {/* Ticket & Singlet Column */}
+                  {/* Ticket & Singlet Column (Clickable Pill) */}
                   <div className="flex items-center justify-center gap-2 sm:gap-3">
                     <span className="text-xs sm:text-sm text-zinc-400 font-medium line-through">
                       ₱ {origTicketWithSinglet.toLocaleString()}
                     </span>
-                    <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-sans shadow-2xs group-hover:bg-[#FF4400] group-hover:text-white transition-all">
+                    <button
+                      type="button"
+                      onClick={() => onRegisterClick && onRegisterClick(dist, 'M')}
+                      className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-sans shadow-2xs hover:bg-[#FF4400] hover:text-white transition-all cursor-pointer active:scale-95"
+                      title={`Register for ${displayLabel} Ticket & Singlet`}
+                    >
                       ₱ {earlyBirdWithSinglet.toLocaleString()}
-                    </span>
+                    </button>
                   </div>
                 </div>
               );

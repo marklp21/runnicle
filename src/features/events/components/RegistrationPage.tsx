@@ -7,6 +7,8 @@ interface RegistrationPageProps {
   event: EventItem | null;
   allEvents: EventItem[];
   defaultTitle?: string;
+  initialDistance?: string;
+  initialSingletSize?: string;
   onBack: () => void;
   onRegisterComplete?: (registration: any) => void;
   registrations?: any[];
@@ -76,6 +78,8 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
   event,
   allEvents,
   defaultTitle = 'MegaWorld Fun Run',
+  initialDistance,
+  initialSingletSize,
   onBack,
   onRegisterComplete,
   registrations = []
@@ -101,8 +105,8 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
     email: '',
     phone: '',
     sex: 'Male',
-    distance: distanceOptions[0] || '3K',
-    singletSize: 'None',
+    distance: initialDistance || distanceOptions[0] || '3K',
+    singletSize: initialSingletSize || 'None',
     emergencyName: '',
     emergencyPhone: '',
     waiver: true,

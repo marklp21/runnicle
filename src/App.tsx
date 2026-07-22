@@ -269,6 +269,8 @@ export const App: React.FC = () => {
     return null;
   });
   const [selectedCoach, setSelectedCoach] = useState<string | null>(null);
+  const [selectedDistance, setSelectedDistance] = useState<string | undefined>(undefined);
+  const [selectedSingletSize, setSelectedSingletSize] = useState<string | undefined>(undefined);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(() => {
     const stored = sessionStorage.getItem('runnicle_selected_article');
     if (stored && stored !== 'undefined') {
@@ -617,9 +619,11 @@ export const App: React.FC = () => {
                   {/* Early Bird Pricing Table */}
                   <EarlyBirdPricing
                     event={promotedEvent}
-                    onRegisterClick={() => {
+                    onRegisterClick={(dist, singletSize) => {
                       if (promotedEvent) {
                         setSelectedEvent(promotedEvent);
+                        setSelectedDistance(dist);
+                        setSelectedSingletSize(singletSize);
                         setPage('register');
                       } else {
                         setPage('events');
@@ -686,6 +690,8 @@ export const App: React.FC = () => {
                 <RegistrationPage
                   event={selectedEvent}
                   allEvents={events}
+                  initialDistance={selectedDistance}
+                  initialSingletSize={selectedSingletSize}
                   registrations={registrations}
                   onRegisterComplete={handleRegisterComplete}
                   onBack={() => {
