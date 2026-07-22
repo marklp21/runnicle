@@ -1,0 +1,5 @@
+project_id = "ylhcwftnwlzoeqtilnfj"
+
+[api]
+port = 54321
+schemas = ["public"]

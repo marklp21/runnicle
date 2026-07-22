@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ShieldCheck } from 'lucide-react';
-import { type CartItem } from './CartPage';
+import { type CartItem } from '@/features/store';
 
 interface CheckoutPageProps {
   cartItems: CartItem[];

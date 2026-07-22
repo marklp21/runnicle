@@ -1,93 +1,22 @@
-export interface EventDetails {
-  time: string;
-  fee: string;
-  route: string;
-  routes?: Record<string, string>;
-  slotsLeft?: number;
-  schedule: string[];
-  perks: string[];
-}
+import {
+  type EventDetails,
+  type EventResult,
+  type EventItem,
+  type CommunityPost,
+  type Product,
+  type Article,
+  type GalleryItem
+} from '../types';
 
-export interface EventResult {
-  bib: string;
-  name: string;
-  rank: number;
-  category: string;
-  finishTime: string;
-  pace: string;
-}
-
-export interface EventItem {
-  id: string;
-  title: string;
-  badge: 'CLOSING SOON' | 'OPEN' | 'SOLD OUT' | 'PAST EVENT';
-  distances: string[];
-  date: string;
-  deadline: string;
-  location: string;
-  description: string;
-  highlights?: string[];
-  details: EventDetails;
-  results?: EventResult[];
-  iconType: 'compass' | 'mountain' | 'drop';
-  image: string;
-  kitImage?: string;
-  routeMapImage?: string;
-  galleryImages?: string[];
-  
-  // Settings properties
-  inclusions?: string[];
-  jerseyFee?: number;
-  earlyBirdDeadline?: string;
-  earlyBirdDiscountPercent?: number;
-  distanceFees?: Record<string, number>;
-}
-
-export interface CommunityPost {
-  id: string;
-  username: string;
-  userAvatar: string;
-  image: string;
-  caption: string;
-  likes: number;
-  commentsCount: number;
-  comments: { user: string; text: string }[];
-  date: string;
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  category: 'Race Kits' | 'Jerseys' | 'Merchandise' | 'Accessories';
-  price: number;
-  image: string;
-  description: string;
-  colors: string[];
-  sizes: string[];
-  specs?: string[];
-}
-
-export interface Article {
-  id: string;
-  title: string;
-  category: 'Event Updates' | 'Registration' | 'Sponsors' | 'Route Changes' | 'Community' | 'General Announcements';
-  date: string;
-  author: string;
-  authorAvatar: string;
-  summary: string;
-  content: string[];
-  image: string;
-  readTime: string;
-}
-
-export interface GalleryItem {
-  id: string;
-  title: string;
-  category: 'Race Day' | 'Expo' | 'Behind the Scenes' | 'Community';
-  type: 'photo' | 'video';
-  image: string;
-  videoUrl?: string; 
-}
+export {
+  type EventDetails,
+  type EventResult,
+  type EventItem,
+  type CommunityPost,
+  type Product,
+  type Article,
+  type GalleryItem
+};
 
 export const mockEvents: EventItem[] = [
   {

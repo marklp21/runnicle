@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Search, Trophy, Medal, User } from 'lucide-react';
-import { type EventItem } from '../data/mockData';
+import { type EventItem } from '@/types';
 
 interface EventResultsPageProps {
   event: EventItem;

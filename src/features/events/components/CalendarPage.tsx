@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar as CalendarIcon, ArrowLeft, Search, MapPin, ChevronRight, Activity, CalendarClock } from 'lucide-react';
-import { mockCalendarEvents } from '../data/mockData';
+import { mockCalendarEvents } from '@/data/mockData';
 
 interface CalendarPageProps {
   onBack: () => void;

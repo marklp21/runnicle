@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Trash2, Plus, Minus, ShoppingBag, CreditCard } from 'lucide-react';
-import { type Product } from '../data/mockData';
+import { type Product } from '@/types';
 
 export interface CartItem {
   product: Product;

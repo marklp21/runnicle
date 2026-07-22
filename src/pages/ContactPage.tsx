@@ -62,7 +62,7 @@ export const ContactPage: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-      
+
       <div className="pb-2 mb-12 text-center max-w-3xl mx-auto">
         <span className="inline-block rounded-full border border-[#FF4400] px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-[#FF4400] uppercase bg-transparent">
           CONTACT US
@@ -76,11 +76,11 @@ export const ContactPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8">
-        
+
         {/* Left Column - Form Card */}
         <div className="bg-white border border-[#B0B0B0] rounded-[7px] p-6 sm:p-8">
           <h3 className="text-lg font-bold text-zinc-900 mb-8">SEND INQUIRY</h3>
-          
+
           {status === 'success' ? (
             <div className="text-center py-10 space-y-4">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 border border-emerald-250 text-emerald-600">
@@ -102,64 +102,64 @@ export const ContactPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-bold tracking-widest text-zinc-900 uppercase mb-2">FULL NAME</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="name"
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="Juan De la Cruz" 
-                    className="w-full bg-transparent border border-[#B0B0B0] rounded-[4px] py-3 px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] focus:outline-none transition-colors" 
+                    placeholder="Juan De la Cruz"
+                    className="w-full bg-transparent border border-[#B0B0B0] rounded-[4px] py-3 px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] focus:outline-none transition-colors"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold tracking-widest text-zinc-900 uppercase mb-2">EMAIL ADDRESS</label>
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     name="email"
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="jundelacruz@gmail.com" 
-                    className="w-full bg-transparent border border-[#B0B0B0] rounded-[4px] py-3 px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] focus:outline-none transition-colors" 
+                    placeholder="jundelacruz@gmail.com"
+                    className="w-full bg-transparent border border-[#B0B0B0] rounded-[4px] py-3 px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] focus:outline-none transition-colors"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold tracking-widest text-zinc-900 uppercase mb-2">PHONE NUMBER</label>
-                <input 
-                  type="tel" 
+                <input
+                  type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="091234567891 or +639171234567" 
-                  className="w-full bg-transparent border border-[#B0B0B0] rounded-[4px] py-3 px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] focus:outline-none transition-colors" 
+                  placeholder="091234567891 or +639171234567"
+                  className="w-full bg-transparent border border-[#B0B0B0] rounded-[4px] py-3 px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] focus:outline-none transition-colors"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold tracking-widest text-zinc-900 uppercase mb-2">SUBJECT</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="subject"
                   required
                   value={formData.subject}
                   onChange={handleChange}
-                  placeholder="e.g Singlets sizing questions, racing details, bib claims..." 
-                  className="w-full bg-transparent border border-[#B0B0B0] rounded-[4px] py-3 px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] focus:outline-none transition-colors" 
+                  placeholder="e.g Singlets sizing questions, racing details, bib claims..."
+                  className="w-full bg-transparent border border-[#B0B0B0] rounded-[4px] py-3 px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] focus:outline-none transition-colors"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold tracking-widest text-zinc-900 uppercase mb-2">MESSAGE</label>
-                <textarea 
+                <textarea
                   name="message"
                   required
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder="Type your message details here..." 
-                  rows={5} 
+                  placeholder="Type your message details here..."
+                  rows={5}
                   className="w-full bg-transparent border border-[#B0B0B0] rounded-[4px] py-3 px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] focus:outline-none transition-colors resize-none"
                 ></textarea>
               </div>
@@ -171,8 +171,8 @@ export const ContactPage: React.FC = () => {
                 </div>
               )}
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={status === 'loading'}
                 className="w-full bg-[#FF4400] hover:bg-[#E63D00] text-white text-[10px] font-mono font-semibold tracking-widest uppercase py-4 transition-colors flex items-center justify-center gap-2 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -184,27 +184,27 @@ export const ContactPage: React.FC = () => {
 
         {/* Right Column - Contact Info */}
         <div className="flex flex-col gap-6">
-          
+
           <div className="bg-white border border-[#B0B0B0] rounded-[7px] p-6">
             <Mail className="text-[#FF4400] w-6 h-6 mb-4" />
             <h4 className="text-xs font-bold tracking-widest text-zinc-900 uppercase mb-2">EMAIL ADDRESS</h4>
-            <p className="text-sm text-zinc-500">runnicle@gmail.com</p>
+            <p className="text-sm text-zinc-500">runnicle.evo@gmail.com</p>
           </div>
 
           <div className="bg-white border border-[#B0B0B0] rounded-[7px] p-6">
             <Phone className="text-[#FF4400] w-6 h-6 mb-4" />
             <h4 className="text-xs font-bold tracking-widest text-zinc-900 uppercase mb-2">PHONE NUMBER</h4>
-            <p className="text-sm text-zinc-500">+63 (34) 435-0000</p>
+            <p className="text-sm text-zinc-500">+63969 431 4237</p>
           </div>
 
           <div className="pt-2 text-left">
             <h4 className="text-xs font-bold tracking-widest text-zinc-900 uppercase mb-4">SOCIAL CHANNELS</h4>
             <div className="flex items-center gap-4 text-zinc-600">
-              <a href="https://instagram.com/runnicle" target="_blank" rel="noreferrer" className="hover:text-[#FF4400] transition-colors p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              <a href="https://instagram.com/runnicle.evo" target="_blank" rel="noreferrer" className="hover:text-[#FF4400] transition-colors p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
               </a>
-              <a href="https://facebook.com/runnicle" target="_blank" rel="noreferrer" className="hover:text-[#FF4400] transition-colors p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              <a href="https://facebook.com/Runnicle" target="_blank" rel="noreferrer" className="hover:text-[#FF4400] transition-colors p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
               </a>
             </div>
           </div>

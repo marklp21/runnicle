@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar, MapPin, Clock, Award, ArrowLeft, ShieldAlert } from 'lucide-react';
-import { type EventItem } from '../data/mockData';
+import { type EventItem } from '@/types';
 
 const parseImages = (imgStr?: string): string[] => {
   if (!imgStr) return [];

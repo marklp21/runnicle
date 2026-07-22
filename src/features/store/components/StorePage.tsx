@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, ShoppingCart, Info, Star } from 'lucide-react';
-import { type Product } from '../data/mockData';
+import { type Product } from '@/types';
 
 interface StorePageProps {
   products: Product[];

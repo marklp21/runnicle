@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar, MapPin } from 'lucide-react';
-import { type EventItem } from '../data/mockData';
+import { type EventItem } from '@/types';
 
 interface EventsPageProps {
   events: EventItem[];
