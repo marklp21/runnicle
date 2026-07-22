@@ -7,7 +7,7 @@ interface EarlyBirdPricingProps {
   onRegisterClick?: (distance?: string, singletSize?: string) => void;
 }
 
-export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onRegisterClick }) => {
+export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => {
   if (!event) return null;
 
   const discountPercent = event.earlyBirdDiscountPercent ?? 20;
@@ -21,7 +21,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
   ];
 
   return (
-    <section className="relative bg-white py-16 sm:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden select-none font-sans [font-variant-numeric:normal]">
+    <section className="relative bg-white py-16 sm:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden select-none font-sans slashed-zero [font-variant-numeric:slashed-zero]">
       <div className="max-w-4xl mx-auto text-center">
 
         {/* Section Header */}
@@ -33,7 +33,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
           className="mb-8 sm:mb-10"
         >
           <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-black mb-2">
-            {discountPercent}% Off Early Bird <span className="font-serif italic text-[#FF4400] font-bold">Active</span>
+            <span className="font-mono slashed-zero">{discountPercent}%</span> Off Early Bird <span className="font-serif italic text-[#FF4400] font-bold">Active</span>
           </h2>
           <p className="text-xs sm:text-sm text-zinc-800 font-normal max-w-lg mx-auto">
             Timer is ticking. Lock in your Early Bird slot before rates go up.
@@ -69,20 +69,20 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
 
                 {/* Ticket Only Column */}
                 <div className="flex items-center justify-center gap-2 sm:gap-3">
-                  <span className="font-sans font-medium text-xs sm:text-sm text-zinc-500 line-through">
+                  <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through font-medium slashed-zero">
                     {row.origTicket}
                   </span>
-                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-sans tracking-wide">
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-mono tracking-wider slashed-zero">
                     {row.earlyTicket}
                   </span>
                 </div>
 
                 {/* Ticket & Singlet Column */}
                 <div className="flex items-center justify-center gap-2 sm:gap-3">
-                  <span className="font-sans font-medium text-xs sm:text-sm text-zinc-500 line-through">
+                  <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through font-medium slashed-zero">
                     {row.origSinglet}
                   </span>
-                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-sans tracking-wide">
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-mono tracking-wider slashed-zero">
                     {row.earlySinglet}
                   </span>
                 </div>
