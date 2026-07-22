@@ -53,7 +53,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
   };
 
   return (
-    <section className="relative bg-[#F5F5F5] py-16 sm:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden select-none font-sans">
+    <section className="relative bg-white py-16 sm:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden select-none font-sans">
       <div className="max-w-4xl mx-auto text-center">
 
         {/* Section Header */}
