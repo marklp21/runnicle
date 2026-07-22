@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, Video, X, Maximize2, Play, Clock } from 'lucide-react';
+import { Image, Video, X, Maximize2, Play } from 'lucide-react';
 import { type GalleryItem, mockGalleryItems } from '../data/mockData';
 
 interface GalleryPageProps {
@@ -75,13 +75,7 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ onBack }) => {
         {/* Empty State / Coming Soon */}
         {filteredItems.length === 0 ? (
           <div className="py-16 sm:py-24 text-center max-w-lg mx-auto">
-            <div className="mx-auto w-16 h-16 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-[#FF4400] mb-6 shadow-sm">
-              <Clock className="h-8 w-8" />
-            </div>
-            <span className="rounded-full bg-orange-50 px-4 py-1 text-[11px] font-extrabold tracking-widest text-[#FF4400] border border-orange-200 uppercase">
-              GALLERY UPDATES
-            </span>
-            <h2 className="mt-4 font-sans text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
+            <h2 className="font-sans text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
               Coming <span className="font-serif italic text-[#FF4400] font-bold">Soon</span>
             </h2>
             <p className="mt-3 text-zinc-600 text-sm font-normal leading-relaxed">

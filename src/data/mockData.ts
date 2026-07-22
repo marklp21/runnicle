@@ -105,33 +105,4 @@ export const mockCommunityPosts: CommunityPost[] = [];
 
 export const mockArticles: Article[] = [];
 
-export const mockGalleryItems: GalleryItem[] = [
-  {
-    id: 'gal-1',
-    title: 'MegaWorld 10K Gun Start',
-    category: 'Race Day',
-    type: 'photo',
-    image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 'gal-2',
-    title: 'Lasallian Run Trail Loop',
-    category: 'Race Day',
-    type: 'photo',
-    image: 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 'gal-3',
-    title: 'Race Kit Pickup & Expo',
-    category: 'Expo',
-    type: 'photo',
-    image: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 'gal-4',
-    title: 'Behind The Scenes Setup',
-    category: 'Behind the Scenes',
-    type: 'photo',
-    image: 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=800&q=80'
-  }
-];
+export const mockGalleryItems: GalleryItem[] = [];
