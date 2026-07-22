@@ -466,7 +466,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       description: '',
       route: '',
       distances: [],
-      perks: 'Timing Chip, Finisher Medal, Event Singlet',
+      perks: 'Finisher Medal, Event Singlet',
       highlights: 'Certified race course, Fully loaded hydrations, Post-race concert',
       image: coverPresets[0].url,
       iconType: 'compass',

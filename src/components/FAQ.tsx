@@ -34,7 +34,7 @@ const FAQ_ITEMS: FAQItem[] = [
   },
   {
     question: "What is included in the registration fee?",
-    answer: "Each registration includes an official Runnicle Dry-Fit Singlet, an RFID-equipped timing bib, a finisher medal, and sponsor goodie vouchers."
+    answer: "Each registration includes an official Runnicle Dry-Fit Singlet, an official race bib, a finisher medal, and sponsor goodie vouchers."
   },
   {
     question: "How do I check my race timing results?",

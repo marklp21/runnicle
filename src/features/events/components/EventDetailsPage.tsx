@@ -203,7 +203,7 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
                 </div>
               )}
               <p className="text-[11px] text-zinc-500 leading-relaxed font-semibold">
-                Your registered slot includes the official Runnicle dry-fit singlet, an RFID-equipped timing bib, sponsor vouchers, and a custom die-cast finisher medal upon crossing the finish line.
+                Your registered slot includes the official Runnicle dry-fit singlet, an official race bib, sponsor vouchers, and a custom die-cast finisher medal upon crossing the finish line.
               </p>
             </div>
 
@@ -289,10 +289,6 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
                   <span className="font-medium text-zinc-700">{event.details.route}</span>
                 )}
               </div>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-400">Timer Method</span>
-              <span className="text-zinc-800">RFID Timing Chip</span>
             </div>
             <div className="flex justify-between">
               <span className="text-zinc-400">Location Area</span>
