@@ -19,11 +19,11 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
   ];
 
   return (
-    <section className="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 select-none font-sans slashed-zero [font-variant-numeric:slashed-zero] overflow-x-hidden max-w-full">
+    <section className="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 select-none font-sans slashed-zero [font-variant-numeric:slashed-zero] overflow-hidden">
       
       {/* Orange Glow positioned higher (top-[155px]) for rich, non-faint top visibility */}
       <div 
-        className="absolute top-[155px] left-1/2 -translate-x-1/2 w-[720px] max-w-[92vw] h-[600px] pointer-events-none z-0"
+        className="absolute top-[155px] left-1/2 -translate-x-1/2 w-full max-w-2xl h-[600px] pointer-events-none z-0"
         style={{
           background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.55) 0%, rgba(255, 68, 0, 0.28) 45%, rgba(255, 68, 0, 0.06) 75%, rgba(255, 68, 0, 0) 90%)',
           filter: 'blur(50px)'
