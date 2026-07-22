@@ -107,9 +107,9 @@ export const Hero: React.FC<HeroProps> = ({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center justify-center rounded-full bg-[#FF4400] px-5 py-1.5 mb-8"
+            className="inline-flex items-center justify-center rounded-full bg-[#FF4400] px-3.5 sm:px-5 py-1.5 mb-8 max-w-[92vw]"
           >
-            <span className="font-mono text-xs font-normal tracking-widest text-white uppercase">
+            <span className="font-mono text-[10px] sm:text-xs font-bold tracking-wider sm:tracking-widest text-white uppercase text-center leading-tight">
               {promoBadgeText}
             </span>
           </motion.div>
