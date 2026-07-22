@@ -7,7 +7,7 @@ const parseImages = (imgStr?: string): string[] => {
   if (imgStr.startsWith('[')) {
     try {
       return JSON.parse(imgStr);
-    } catch (e) {
+    } catch {
       // fallback
     }
   }

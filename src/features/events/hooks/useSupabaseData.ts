@@ -26,7 +26,7 @@ export function useSupabaseData(setIsRegistrationConfirmed?: (confirmed: boolean
           console.error("Error fetching events from Supabase:", err);
         }
 
-        let finalEvents = events;
+        let finalEvents = mockEvents;
         if (dbEvents && dbEvents.length > 0) {
           finalEvents = dbEvents;
         } else {

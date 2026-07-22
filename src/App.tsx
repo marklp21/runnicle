@@ -250,7 +250,7 @@ export const App: React.FC = () => {
     if (stored) {
       try {
         return JSON.parse(stored);
-      } catch (e) {
+      } catch {
         return null;
       }
     }
@@ -261,7 +261,7 @@ export const App: React.FC = () => {
     if (stored) {
       try {
         return JSON.parse(stored);
-      } catch (e) {
+      } catch {
         return null;
       }
     }
@@ -273,7 +273,7 @@ export const App: React.FC = () => {
     if (stored) {
       try {
         return JSON.parse(stored);
-      } catch (e) {
+      } catch {
         return null;
       }
     }
@@ -428,7 +428,7 @@ export const App: React.FC = () => {
     if (stored) {
       try {
         return JSON.parse(stored);
-      } catch (e) {
+      } catch {
 
       }
     }

@@ -37,7 +37,7 @@ const parseImages = (imgStr?: string): string[] => {
   if (imgStr.startsWith('[')) {
     try {
       return JSON.parse(imgStr);
-    } catch (e) {
+    } catch {
       // fallback
     }
   }
@@ -255,7 +255,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       } else {
         setErrorMsg('Invalid username or password.');
       }
-    } catch (err) {
+    } catch {
       setErrorMsg('Authentication error. Try again.');
     } finally {
       setIsAuthenticating(false);
