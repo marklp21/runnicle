@@ -23,12 +23,12 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
   return (
     <section className="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 select-none font-sans slashed-zero [font-variant-numeric:slashed-zero]">
       
-      {/* 1:1 Orange Spotlight Glow centered directly under the bottom border of the pricing card */}
+      {/* Soft Orange Glow bleeding gently up below the subtitle text and down into Race Calendar */}
       <div 
-        className="absolute bottom-[20px] left-1/2 -translate-x-1/2 w-[660px] max-w-[90vw] h-[350px] pointer-events-none z-0"
+        className="absolute top-[140px] left-1/2 -translate-x-1/2 w-[570px] max-w-[85vw] h-[640px] pointer-events-none z-0"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.44) 0%, rgba(255, 68, 0, 0.24) 40%, rgba(255, 68, 0, 0.06) 72%, rgba(255, 68, 0, 0) 90%)',
-          filter: 'blur(45px)'
+          background: 'radial-gradient(ellipse at center, rgba(255, 68, 0, 0.35) 0%, rgba(255, 68, 0, 0.16) 45%, rgba(255, 68, 0, 0.03) 75%, rgba(255, 68, 0, 0) 90%)',
+          filter: 'blur(50px)'
         }}
       />
 
@@ -45,7 +45,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
           <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-black mb-2">
             <span className="font-mono slashed-zero">{discountPercent}%</span> Off Early Bird <span className="font-serif italic text-[#FF4400] font-bold">Active</span>
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-800 font-normal max-w-lg mx-auto">
+          <p className="text-xs sm:text-sm text-black font-normal max-w-lg mx-auto">
             Timer is ticking. Lock in your Early Bird slot before rates go up.
           </p>
         </motion.div>
@@ -82,7 +82,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
                   <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through font-medium slashed-zero">
                     {row.origTicket}
                   </span>
-                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-mono tracking-wider slashed-zero">
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#FFF3EB] px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm font-bold font-mono tracking-wider slashed-zero">
                     {row.earlyTicket}
                   </span>
                 </div>
@@ -92,7 +92,7 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event }) => 
                   <span className="font-mono text-xs sm:text-sm text-zinc-500 line-through font-medium slashed-zero">
                     {row.origSinglet}
                   </span>
-                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-white px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-mono tracking-wider slashed-zero">
+                  <span className="inline-flex items-center justify-center rounded-full border border-[#FF4400] text-[#FF4400] bg-[#FFF3EB] px-3 sm:px-4 py-1 text-xs sm:text-sm font-bold font-mono tracking-wider slashed-zero">
                     {row.earlySinglet}
                   </span>
                 </div>
