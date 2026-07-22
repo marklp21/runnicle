@@ -52,14 +52,14 @@ export const EarlyBirdPricing: React.FC<EarlyBirdPricingProps> = ({ event, onReg
           className="relative max-w-2xl mx-auto bg-white rounded-2xl border border-zinc-300 p-6 sm:p-8 text-left overflow-hidden shadow-xs"
         >
           {/* Table Header */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 pb-4 border-b border-zinc-300 text-xs sm:text-sm font-sans font-semibold text-zinc-900">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 pb-2 text-xs sm:text-sm font-sans font-semibold text-zinc-900">
             <div>Distance</div>
             <div className="text-center">Ticket Only</div>
             <div className="text-center">Ticket & Singlet</div>
           </div>
 
           {/* Table Rows */}
-          <div className="divide-y divide-zinc-200">
+          <div>
             {referenceRows.map((row) => (
               <div
                 key={row.label}
