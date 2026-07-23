@@ -174,10 +174,21 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     }
   });
 
+  const [adminGalleryCategories, setAdminGalleryCategories] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('runnicle_gallery_categories');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [activeGalleryTab, setActiveGalleryTab] = useState<string>('all');
   const [isUploadGalleryModalOpen, setIsUploadGalleryModalOpen] = useState(false);
+  const [isCreateAlbumModalOpen, setIsCreateAlbumModalOpen] = useState(false);
+  const [newAlbumName, setNewAlbumName] = useState('');
   const [newGalleryTitle, setNewGalleryTitle] = useState('');
-  const [newGalleryCategory, setNewGalleryCategory] = useState('Race Day');
+  const [newGalleryCategory, setNewGalleryCategory] = useState('');
   const [newGalleryCustomCategory, setNewGalleryCustomCategory] = useState('');
   const [newGalleryImage, setNewGalleryImage] = useState('');
   const [newGalleryType, setNewGalleryType] = useState<'photo' | 'video'>('photo');
@@ -191,6 +202,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       window.dispatchEvent(new Event('storage'));
     } catch (e) {
       console.error("Failed to save gallery items", e);
+    }
+  };
+
+  const saveAdminGalleryCategories = (categories: string[]) => {
+    setAdminGalleryCategories(categories);
+    try {
+      localStorage.setItem('runnicle_gallery_categories', JSON.stringify(categories));
+      window.dispatchEvent(new Event('storage'));
+    } catch (e) {
+      console.error("Failed to save gallery categories", e);
     }
   };
 
@@ -2220,16 +2241,27 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           <div className="space-y-6 animate-fade-in font-sans">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200/80">
-              <div>
-                <h2 className="text-xl font-bold tracking-tight text-zinc-900 flex items-center gap-2.5">
-                  <ImageIcon className="h-5 w-5 text-[#FF4400]" />
-                  Event Gallery Management
-                </h2>
-                <p className="mt-1 text-xs text-zinc-500 font-medium">
-                  Upload photos, organize assets into category tabs, and manage what appears on the public Gallery page.
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-orange-50 text-[#FF4400] border border-orange-200/60 flex items-center justify-center shadow-2xs">
+                  <ImageIcon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold tracking-tight text-zinc-900">
+                    Event <span className="font-serif italic text-[#FF4400] font-bold">Gallery</span> Management
+                  </h2>
+                  <p className="mt-0.5 text-xs text-zinc-500 font-medium">
+                    Upload photos, organize assets into category tabs, and manage what appears on the public Gallery page.
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateAlbumModalOpen(true)}
+                  className="rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 px-3.5 py-2.5 text-xs font-bold transition-all cursor-pointer shadow-xs flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4 text-[#FF4400]" /> Create Album
+                </button>
                 <button
                   type="button"
                   onClick={() => setIsUploadGalleryModalOpen(true)}
@@ -2240,13 +2272,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               </div>
             </div>
 
-            {/* Category Tabs */}
+            {/* Dynamic Category / Album Tabs */}
             {(() => {
-              const baseCats = ['Race Day', 'Expo', 'Behind the Scenes', 'Community'];
-              const customCats = Array.from(new Set(adminGalleryItems.map(item => item.category))).filter(
-                cat => !baseCats.includes(cat)
-              );
-              const allCats = ['all', ...baseCats, ...customCats];
+              const allCats = Array.from(new Set(['all', ...adminGalleryCategories, ...adminGalleryItems.map(i => i.category)])).filter(Boolean);
 
               return (
                 <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -2258,18 +2286,34 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     const isActive = activeGalleryTab === cat;
 
                     return (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => setActiveGalleryTab(cat)}
-                        className={`rounded-full px-4 py-2 text-xs font-bold uppercase transition-all cursor-pointer border ${
-                          isActive
-                            ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-xs'
-                            : 'border-zinc-200 text-zinc-600 hover:text-zinc-900 bg-white hover:bg-zinc-50'
-                        }`}
-                      >
-                        {label} ({count})
-                      </button>
+                      <div key={cat} className="inline-flex items-center group">
+                        <button
+                          type="button"
+                          onClick={() => setActiveGalleryTab(cat)}
+                          className={`rounded-full px-4 py-2 text-xs font-bold uppercase transition-all cursor-pointer border flex items-center gap-2 ${
+                            isActive
+                              ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-xs'
+                              : 'border-zinc-200 text-zinc-600 hover:text-zinc-900 bg-white hover:bg-zinc-50'
+                          }`}
+                        >
+                          <span>{label} ({count})</span>
+                          {cat !== 'all' && (
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const updatedCats = adminGalleryCategories.filter(c => c !== cat);
+                                saveAdminGalleryCategories(updatedCats);
+                                if (activeGalleryTab === cat) setActiveGalleryTab('all');
+                                showToast(`Deleted album tab "${cat}".`);
+                              }}
+                              className={`p-0.5 rounded-full hover:bg-black/20 text-xs transition-colors cursor-pointer ${isActive ? 'text-white' : 'text-zinc-400 hover:text-zinc-700'}`}
+                              title="Delete Album Tab"
+                            >
+                              <X className="h-3 w-3" />
+                            </span>
+                          )}
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -4481,29 +4525,37 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               {/* Category Dropdown & Custom Tab */}
               <div>
                 <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                  Category Tab Group
+                  Album / Category Tab Group
                 </label>
-                <select
-                  value={newGalleryCategory}
-                  onChange={(e) => setNewGalleryCategory(e.target.value)}
-                  className="w-full h-10 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs text-zinc-900 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium outline-none transition-all cursor-pointer"
-                >
-                  <option value="Race Day">Race Day</option>
-                  <option value="Expo">Expo</option>
-                  <option value="Behind the Scenes">Behind the Scenes</option>
-                  <option value="Community">Community</option>
-                  <option value="__custom__">+ Create Custom Category Tab...</option>
-                </select>
+                {(() => {
+                  const availableCats = Array.from(new Set([...adminGalleryCategories, ...adminGalleryItems.map(i => i.category)])).filter(Boolean);
 
-                {newGalleryCategory === '__custom__' && (
-                  <input
-                    type="text"
-                    value={newGalleryCustomCategory}
-                    onChange={(e) => setNewGalleryCustomCategory(e.target.value)}
-                    placeholder="Enter custom category tab name (e.g. Awarding)"
-                    className="w-full h-10 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium outline-none transition-all mt-2"
-                  />
-                )}
+                  return (
+                    <>
+                      <select
+                        value={newGalleryCategory}
+                        onChange={(e) => setNewGalleryCategory(e.target.value)}
+                        className="w-full h-10 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs text-zinc-900 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium outline-none transition-all cursor-pointer"
+                      >
+                        <option value="">Select an album / category...</option>
+                        {availableCats.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                        <option value="__custom__">+ Create New Album / Category...</option>
+                      </select>
+
+                      {(newGalleryCategory === '__custom__' || availableCats.length === 0) && (
+                        <input
+                          type="text"
+                          value={newGalleryCustomCategory}
+                          onChange={(e) => setNewGalleryCustomCategory(e.target.value)}
+                          placeholder="Enter album / category name (e.g. Bacolod Marathon 2026)"
+                          className="w-full h-10 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium outline-none transition-all mt-2"
+                        />
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Image Upload / File or URL */}
@@ -4583,9 +4635,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     return;
                   }
 
-                  const finalCategory = newGalleryCategory === '__custom__'
-                    ? (newGalleryCustomCategory.trim() || 'General')
-                    : newGalleryCategory;
+                  let finalCategory = newGalleryCategory;
+                  if (newGalleryCategory === '__custom__' || !newGalleryCategory) {
+                    finalCategory = newGalleryCustomCategory.trim() || 'General';
+                  }
+
+                  if (finalCategory && !adminGalleryCategories.includes(finalCategory)) {
+                    saveAdminGalleryCategories([...adminGalleryCategories, finalCategory]);
+                  }
 
                   const newItem = {
                     id: 'gal-' + Date.now(),
@@ -4603,12 +4660,97 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   setNewGalleryTitle('');
                   setNewGalleryImage('');
                   setNewGalleryCustomCategory('');
+                  setNewGalleryCategory('');
                   setIsUploadGalleryModalOpen(false);
-                  showToast(`Added photo to gallery under "${finalCategory}"!`);
+                  showToast(`Added photo to album "${finalCategory}"!`);
                 }}
                 className="h-9 px-4 rounded-lg bg-[#FF4400] hover:bg-[#E63D00] text-white text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-[0.98] flex items-center gap-1.5"
               >
                 <Plus className="h-4 w-4" /> Save Photo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Album Modal */}
+      {isCreateAlbumModalOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in font-sans">
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xl max-w-sm w-full p-6 space-y-5 text-zinc-900 animate-scale-in">
+            <div className="flex items-center justify-between border-b border-zinc-150 pb-3 text-zinc-900">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-orange-50 text-[#FF4400] border border-orange-200/60">
+                  <Plus className="h-4 w-4" />
+                </div>
+                <h3 className="text-base font-bold">Create New Album Tab</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCreateAlbumModalOpen(false)}
+                className="text-zinc-400 hover:text-zinc-700 p-1 rounded-lg"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-xs font-bold text-zinc-700">
+                Album / Category Name
+              </label>
+              <input
+                type="text"
+                autoFocus
+                value={newAlbumName}
+                onChange={(e) => setNewAlbumName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (!newAlbumName.trim()) return;
+                    const album = newAlbumName.trim();
+                    if (!adminGalleryCategories.includes(album)) {
+                      saveAdminGalleryCategories([...adminGalleryCategories, album]);
+                    }
+                    setActiveGalleryTab(album);
+                    setNewAlbumName('');
+                    setIsCreateAlbumModalOpen(false);
+                    showToast(`Created album tab "${album}"!`);
+                  }
+                }}
+                placeholder="e.g. Bacolod Marathon 2026, Awarding, Expo..."
+                className="w-full h-10 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium outline-none transition-all"
+              />
+              <span className="text-[11px] text-zinc-450 block font-medium">
+                This album tab will appear on both the Admin Console and the public Event Gallery.
+              </span>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-150">
+              <button
+                type="button"
+                onClick={() => setIsCreateAlbumModalOpen(false)}
+                className="h-9 px-4 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700 shadow-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!newAlbumName.trim()) {
+                    showErrorToast('Please enter an album name.');
+                    return;
+                  }
+                  const album = newAlbumName.trim();
+                  if (!adminGalleryCategories.includes(album)) {
+                    saveAdminGalleryCategories([...adminGalleryCategories, album]);
+                  }
+                  setActiveGalleryTab(album);
+                  setNewAlbumName('');
+                  setIsCreateAlbumModalOpen(false);
+                  showToast(`Created album tab "${album}"!`);
+                }}
+                className="h-9 px-4 rounded-lg bg-[#FF4400] hover:bg-[#E63D00] text-white text-xs font-bold shadow-xs active:scale-[0.98]"
+              >
+                Create Album
               </button>
             </div>
           </div>

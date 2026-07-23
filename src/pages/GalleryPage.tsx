@@ -16,11 +16,22 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ onBack }) => {
     }
   });
 
+  const [galleryCategories, setGalleryCategories] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('runnicle_gallery_categories');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   useEffect(() => {
     const handleStorage = () => {
       try {
-        const saved = localStorage.getItem('runnicle_gallery_items');
-        if (saved) setGalleryItems(JSON.parse(saved));
+        const savedItems = localStorage.getItem('runnicle_gallery_items');
+        if (savedItems) setGalleryItems(JSON.parse(savedItems));
+        const savedCats = localStorage.getItem('runnicle_gallery_categories');
+        if (savedCats) setGalleryCategories(JSON.parse(savedCats));
       } catch {
         // ignore
       }
@@ -33,15 +44,14 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ onBack }) => {
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
   const [playingVideo, setPlayingVideo] = useState<GalleryItem | null>(null);
 
-  const baseCategories = ['Race Day', 'Expo', 'Behind the Scenes', 'Community'];
-  const customCategories = Array.from(new Set(galleryItems.map(item => item.category))).filter(
-    cat => !baseCategories.includes(cat)
-  );
+  // Dynamic categories from admin created albums + assigned photo categories
+  const allDynamicCats = Array.from(
+    new Set([...galleryCategories, ...galleryItems.map(item => item.category)])
+  ).filter(Boolean);
 
   const categories = [
     { id: 'all', label: 'ALL' },
-    ...baseCategories.map(cat => ({ id: cat, label: cat.toUpperCase() })),
-    ...customCategories.map(cat => ({ id: cat, label: cat.toUpperCase() }))
+    ...allDynamicCats.map(cat => ({ id: cat, label: cat.toUpperCase() }))
   ];
 
   const filteredItems = galleryItems.filter((item) => {
