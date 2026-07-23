@@ -4484,6 +4484,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               </div>
             </div>
           </div>
+        </div>
+      )}
+
       {/* Upload Gallery Photo Modal */}
       {isUploadGalleryModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in font-sans">
