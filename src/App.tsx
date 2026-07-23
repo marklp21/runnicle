@@ -65,6 +65,7 @@ const getPathFromPage = (pageName: string): string => {
     case 'admin-create-event': return '/admin_create_event';
     case 'admin-registration-details': return '/admin_registration_details';
     case 'admin-forms': return '/admin_forms';
+    case 'admin-gallery': return '/admin_gallery';
     case 'admin-settings': return '/admin_settings';
     case 'admin-archive': return '/admin_archive';
     case 'admin-archived-events': return '/admin_archive';
@@ -96,6 +97,7 @@ const getPageFromPath = (path: string): string => {
     case '/admin_create_event': return 'admin-create-event';
     case '/admin_registration_details': return 'admin-registration-details';
     case '/admin_forms': return 'admin-forms';
+    case '/admin_gallery': return 'admin-gallery';
     case '/admin_settings': return 'admin-settings';
     case '/admin_archive': return 'admin-archive';
     default: return 'home';
@@ -110,6 +112,7 @@ const ADMIN_PAGES = [
   'admin-create-event',
   'admin-registration-details',
   'admin-forms',
+  'admin-gallery',
   'admin-settings',
   'admin-archive',
   'admin-archived-events'

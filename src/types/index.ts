@@ -83,7 +83,7 @@ export interface Article {
 export interface GalleryItem {
   id: string;
   title: string;
-  category: 'Race Day' | 'Expo' | 'Behind the Scenes' | 'Community';
+  category: 'Race Day' | 'Expo' | 'Behind the Scenes' | 'Community' | string;
   type: 'photo' | 'video';
   image: string;
   videoUrl?: string;

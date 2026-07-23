@@ -164,6 +164,36 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   // Custom Event Gallery Photos State
   const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
 
+  // Admin Site Gallery Management state
+  const [adminGalleryItems, setAdminGalleryItems] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('runnicle_gallery_items');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [activeGalleryTab, setActiveGalleryTab] = useState<string>('all');
+  const [isUploadGalleryModalOpen, setIsUploadGalleryModalOpen] = useState(false);
+  const [newGalleryTitle, setNewGalleryTitle] = useState('');
+  const [newGalleryCategory, setNewGalleryCategory] = useState('Race Day');
+  const [newGalleryCustomCategory, setNewGalleryCustomCategory] = useState('');
+  const [newGalleryImage, setNewGalleryImage] = useState('');
+  const [newGalleryType, setNewGalleryType] = useState<'photo' | 'video'>('photo');
+  const [newGalleryVideoUrl, setNewGalleryVideoUrl] = useState('');
+  const [previewGalleryPhoto, setPreviewGalleryPhoto] = useState<any | null>(null);
+
+  const saveAdminGalleryItems = (items: any[]) => {
+    setAdminGalleryItems(items);
+    try {
+      localStorage.setItem('runnicle_gallery_items', JSON.stringify(items));
+      window.dispatchEvent(new Event('storage'));
+    } catch (e) {
+      console.error("Failed to save gallery items", e);
+    }
+  };
+
   // Event editing state
   const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
 
@@ -878,6 +908,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               </button>
 
               <button
+                onClick={() => onNavigate('admin-gallery')}
+                className={`w-full font-sans text-xs font-semibold tracking-wide transition-all px-3.5 py-2.5 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'gallery'
+                    ? 'bg-orange-50/80 text-[#FF4400] font-bold'
+                    : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                  }`}
+              >
+                <ImageIcon className={`h-4.5 w-4.5 ${view === 'gallery' ? 'text-[#FF4400]' : 'text-zinc-400'}`} />
+                <span>Gallery</span>
+              </button>
+
+              <button
                 onClick={() => onNavigate('admin-settings')}
                 className={`w-full font-sans text-xs font-semibold tracking-wide transition-all px-3.5 py-2.5 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'settings'
                     ? 'bg-orange-50/80 text-[#FF4400] font-bold'
@@ -995,6 +1036,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   }`}
               >
                 Forms
+              </button>
+
+              <button
+                onClick={() => {
+                  onNavigate('admin-gallery');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`block rounded-lg px-4 py-3 text-left text-xs font-semibold transition-colors ${view === 'gallery'
+                    ? 'bg-orange-50 text-[#FF4400] font-bold'
+                    : 'text-zinc-655 hover:bg-zinc-50'
+                  }`}
+              >
+                Gallery
               </button>
 
               <button
@@ -2161,6 +2215,145 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </div>
           );
         })()}
+
+        {view === 'gallery' && (
+          <div className="space-y-6 animate-fade-in font-sans">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200/80">
+              <div>
+                <h2 className="text-xl font-bold tracking-tight text-zinc-900 flex items-center gap-2.5">
+                  <ImageIcon className="h-5 w-5 text-[#FF4400]" />
+                  Event Gallery Management
+                </h2>
+                <p className="mt-1 text-xs text-zinc-500 font-medium">
+                  Upload photos, organize assets into category tabs, and manage what appears on the public Gallery page.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsUploadGalleryModalOpen(true)}
+                  className="rounded-lg bg-[#FF4400] hover:bg-[#E63D00] text-white px-4 py-2.5 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-[0.98] flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" /> Upload Photo
+                </button>
+              </div>
+            </div>
+
+            {/* Category Tabs */}
+            {(() => {
+              const baseCats = ['Race Day', 'Expo', 'Behind the Scenes', 'Community'];
+              const customCats = Array.from(new Set(adminGalleryItems.map(item => item.category))).filter(
+                cat => !baseCats.includes(cat)
+              );
+              const allCats = ['all', ...baseCats, ...customCats];
+
+              return (
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  {allCats.map((cat) => {
+                    const label = cat === 'all' ? 'ALL PHOTOS' : cat.toUpperCase();
+                    const count = cat === 'all'
+                      ? adminGalleryItems.length
+                      : adminGalleryItems.filter(i => i.category === cat).length;
+                    const isActive = activeGalleryTab === cat;
+
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setActiveGalleryTab(cat)}
+                        className={`rounded-full px-4 py-2 text-xs font-bold uppercase transition-all cursor-pointer border ${
+                          isActive
+                            ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-xs'
+                            : 'border-zinc-200 text-zinc-600 hover:text-zinc-900 bg-white hover:bg-zinc-50'
+                        }`}
+                      >
+                        {label} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
+            {/* Gallery Items Grid */}
+            {(() => {
+              const filtered = adminGalleryItems.filter(item => activeGalleryTab === 'all' || item.category === activeGalleryTab);
+
+              if (filtered.length === 0) {
+                return (
+                  <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center space-y-4 shadow-sm my-6">
+                    <div className="h-12 w-12 rounded-full bg-orange-50 text-[#FF4400] flex items-center justify-center mx-auto border border-orange-100">
+                      <ImageIcon className="h-6 w-6" />
+                    </div>
+                    <div className="space-y-1 max-w-sm mx-auto">
+                      <h3 className="text-sm font-bold text-zinc-900">No Gallery Assets Found</h3>
+                      <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                        {activeGalleryTab === 'all'
+                          ? 'No gallery photos have been uploaded yet. Click below to add your first photo.'
+                          : `No photos uploaded under the "${activeGalleryTab}" category.`}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsUploadGalleryModalOpen(true)}
+                      className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 hover:bg-black text-white text-xs font-bold px-4 py-2.5 transition-all cursor-pointer shadow-xs active:scale-[0.98]"
+                    >
+                      <Plus className="h-4 w-4 text-[#FF4400]" /> Upload First Photo
+                    </button>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pt-2">
+                  {filtered.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-white rounded-xl border border-zinc-200 overflow-hidden hover:border-zinc-300 transition-all flex flex-col justify-between group shadow-xs hover:shadow-md"
+                    >
+                      <div>
+                        <div className="h-40 bg-zinc-100 overflow-hidden relative cursor-pointer" onClick={() => setPreviewGalleryPhoto(item)}>
+                          <img src={item.image} alt={item.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <span className="absolute top-2.5 right-2.5 rounded-[4px] border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider font-mono bg-black/60 text-white backdrop-blur-xs border-white/20">
+                            {item.category}
+                          </span>
+                        </div>
+                        <div className="p-3.5 space-y-1">
+                          <h4 className="font-bold text-zinc-900 text-xs leading-snug line-clamp-1">{item.title || 'Untitled Photo'}</h4>
+                          <span className="text-[10px] font-semibold text-zinc-400 block font-mono">
+                            Type: {item.type.toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="px-3.5 pb-3.5 pt-1 flex items-center gap-2 border-t border-zinc-100">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewGalleryPhoto(item)}
+                          className="flex-1 h-8 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                        >
+                          <Eye className="h-3.5 w-3.5 text-zinc-500" /> Preview
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = adminGalleryItems.filter(i => i.id !== item.id);
+                            saveAdminGalleryItems(updated);
+                            showToast(`Deleted "${item.title || 'photo'}" from gallery.`);
+                          }}
+                          className="h-8 w-8 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-650 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                          title="Delete Photo"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        )}
 
         {view === 'settings' && (
           <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in font-sans select-none text-zinc-800">
@@ -4244,6 +4437,202 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 >
                   Open Pass
                 </a>
+              </div>
+            </div>
+          </div>
+      {/* Upload Gallery Photo Modal */}
+      {isUploadGalleryModalOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in font-sans">
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xl max-w-md w-full p-6 space-y-5 text-zinc-900 animate-scale-in">
+            <div className="flex items-center justify-between border-b border-zinc-150 pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-orange-50 text-[#FF4400] border border-orange-200/60">
+                  <ImageIcon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-zinc-900">Upload Gallery Photo</h3>
+                  <p className="text-xs text-zinc-500 font-medium">Add photos and assign them to category tabs.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsUploadGalleryModalOpen(false)}
+                className="text-zinc-400 hover:text-zinc-700 p-1 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Asset Title */}
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 mb-1.5">
+                  Photo Title / Description
+                </label>
+                <input
+                  type="text"
+                  value={newGalleryTitle}
+                  onChange={(e) => setNewGalleryTitle(e.target.value)}
+                  placeholder="e.g. Marathon Finish Line Celebration"
+                  className="w-full h-10 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium outline-none transition-all"
+                />
+              </div>
+
+              {/* Category Dropdown & Custom Tab */}
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 mb-1.5">
+                  Category Tab Group
+                </label>
+                <select
+                  value={newGalleryCategory}
+                  onChange={(e) => setNewGalleryCategory(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs text-zinc-900 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium outline-none transition-all cursor-pointer"
+                >
+                  <option value="Race Day">Race Day</option>
+                  <option value="Expo">Expo</option>
+                  <option value="Behind the Scenes">Behind the Scenes</option>
+                  <option value="Community">Community</option>
+                  <option value="__custom__">+ Create Custom Category Tab...</option>
+                </select>
+
+                {newGalleryCategory === '__custom__' && (
+                  <input
+                    type="text"
+                    value={newGalleryCustomCategory}
+                    onChange={(e) => setNewGalleryCustomCategory(e.target.value)}
+                    placeholder="Enter custom category tab name (e.g. Awarding)"
+                    className="w-full h-10 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium outline-none transition-all mt-2"
+                  />
+                )}
+              </div>
+
+              {/* Image Upload / File or URL */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-zinc-700">
+                  Image Source
+                </label>
+                
+                {/* File Upload Box */}
+                <div className="border-2 border-dashed border-zinc-200 hover:border-[#FF4400] rounded-xl p-4 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-orange-50/20">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = async (evt) => {
+                          const base64 = evt.target?.result as string;
+                          if (base64) {
+                            const compressed = await compressImage(base64);
+                            setNewGalleryImage(compressed);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <ImageIcon className="h-6 w-6 text-zinc-400 mx-auto mb-1" />
+                  <span className="text-xs font-semibold text-zinc-700 block">Click or drag image file here</span>
+                  <span className="text-[10px] text-zinc-450 block mt-0.5">Supports JPG, PNG, WEBP</span>
+                </div>
+
+                {/* Or Image URL */}
+                <div>
+                  <span className="text-[11px] text-zinc-450 font-semibold block mb-1">OR Image URL:</span>
+                  <input
+                    type="text"
+                    value={newGalleryImage}
+                    onChange={(e) => setNewGalleryImage(e.target.value)}
+                    placeholder="https://example.com/photo.jpg"
+                    className="w-full h-9 rounded-lg border border-zinc-200 bg-white px-3 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] outline-none"
+                  />
+                </div>
+
+                {/* Preview Thumbnail */}
+                {newGalleryImage && (
+                  <div className="relative rounded-lg overflow-hidden border border-zinc-200 h-28 bg-zinc-100 mt-2">
+                    <img src={newGalleryImage} alt="Preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setNewGalleryImage('')}
+                      className="absolute top-2 right-2 p-1 bg-black/60 text-white rounded-full hover:bg-black"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-2 pt-4 border-t border-zinc-150">
+              <button
+                type="button"
+                onClick={() => setIsUploadGalleryModalOpen(false)}
+                className="h-9 px-4 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700 transition-all cursor-pointer shadow-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!newGalleryImage) {
+                    showErrorToast('Please choose an image file or provide an image URL.');
+                    return;
+                  }
+
+                  const finalCategory = newGalleryCategory === '__custom__'
+                    ? (newGalleryCustomCategory.trim() || 'General')
+                    : newGalleryCategory;
+
+                  const newItem = {
+                    id: 'gal-' + Date.now(),
+                    title: newGalleryTitle.trim() || 'Race Photo',
+                    category: finalCategory,
+                    type: newGalleryType,
+                    image: newGalleryImage,
+                    videoUrl: newGalleryVideoUrl
+                  };
+
+                  const updated = [newItem, ...adminGalleryItems];
+                  saveAdminGalleryItems(updated);
+
+                  // Reset form & close modal
+                  setNewGalleryTitle('');
+                  setNewGalleryImage('');
+                  setNewGalleryCustomCategory('');
+                  setIsUploadGalleryModalOpen(false);
+                  showToast(`Added photo to gallery under "${finalCategory}"!`);
+                }}
+                className="h-9 px-4 rounded-lg bg-[#FF4400] hover:bg-[#E63D00] text-white text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-[0.98] flex items-center gap-1.5"
+              >
+                <Plus className="h-4 w-4" /> Save Photo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Gallery Photo Modal */}
+      {previewGalleryPhoto && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in font-sans" onClick={() => setPreviewGalleryPhoto(null)}>
+          <div className="relative max-w-3xl w-full bg-zinc-900 rounded-2xl overflow-hidden shadow-2xl border border-zinc-800" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setPreviewGalleryPhoto(null)}
+              className="absolute top-3 right-3 z-10 p-2 bg-black/60 hover:bg-black text-white rounded-full transition-colors cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="max-h-[75vh] overflow-hidden bg-black flex items-center justify-center">
+              <img src={previewGalleryPhoto.image} alt={previewGalleryPhoto.title} className="max-h-[75vh] w-auto object-contain" />
+            </div>
+            <div className="p-4 bg-zinc-950 flex items-center justify-between border-t border-zinc-800">
+              <div>
+                <h3 className="text-sm font-bold text-white">{previewGalleryPhoto.title}</h3>
+                <span className="text-xs text-[#FF4400] font-mono font-bold mt-0.5 block">{previewGalleryPhoto.category}</span>
               </div>
             </div>
           </div>

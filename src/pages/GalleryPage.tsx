@@ -7,19 +7,44 @@ interface GalleryPageProps {
 }
 
 export const GalleryPage: React.FC<GalleryPageProps> = ({ onBack }) => {
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('runnicle_gallery_items');
+      return saved ? JSON.parse(saved) : mockGalleryItems;
+    } catch {
+      return mockGalleryItems;
+    }
+  });
+
+  useEffect(() => {
+    const handleStorage = () => {
+      try {
+        const saved = localStorage.getItem('runnicle_gallery_items');
+        if (saved) setGalleryItems(JSON.parse(saved));
+      } catch {
+        // ignore
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
   const [playingVideo, setPlayingVideo] = useState<GalleryItem | null>(null);
 
+  const baseCategories = ['Race Day', 'Expo', 'Behind the Scenes', 'Community'];
+  const customCategories = Array.from(new Set(galleryItems.map(item => item.category))).filter(
+    cat => !baseCategories.includes(cat)
+  );
+
   const categories = [
     { id: 'all', label: 'ALL' },
-    { id: 'Race Day', label: 'RACE DAY' },
-    { id: 'Expo', label: 'EXPO' },
-    { id: 'Behind the Scenes', label: 'BEHIND THE SCENES' },
-    { id: 'Community', label: 'COMMUNITY' }
+    ...baseCategories.map(cat => ({ id: cat, label: cat.toUpperCase() })),
+    ...customCategories.map(cat => ({ id: cat, label: cat.toUpperCase() }))
   ];
 
-  const filteredItems = mockGalleryItems.filter((item) => {
+  const filteredItems = galleryItems.filter((item) => {
     return activeCategory === 'all' || item.category === activeCategory;
   });
 
@@ -51,12 +76,12 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ onBack }) => {
         </div>
 
         {/* Tab Filters */}
-        {mockGalleryItems.length > 0 && (
+        {galleryItems.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2.5 mb-10">
             {categories.map((cat) => {
               const count = cat.id === 'all'
-                ? mockGalleryItems.length
-                : mockGalleryItems.filter(item => item.category === cat.id).length;
+                ? galleryItems.length
+                : galleryItems.filter(item => item.category === cat.id).length;
               return (
                 <button
                   key={cat.id}
