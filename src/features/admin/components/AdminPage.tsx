@@ -8,7 +8,6 @@ import {
   X,
   AlertCircle,
   Filter,
-  DollarSign,
   Users,
   Sparkles,
   Image as ImageIcon,
@@ -24,10 +23,13 @@ import {
   Settings,
   ArrowLeft,
   Mail,
-  Copy
+  Copy,
+  Archive,
+  RotateCcw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { type EventItem } from '@/types';
+import { EventDetailsPage } from '@/features/events/components/EventDetailsPage';
 import { getNextBibNumber } from '@/utils/bibHelper';
 import { supabase } from '@/lib/supabase';
 import { frontendRegistrationToDb } from '@/services/supabaseService';
@@ -37,7 +39,7 @@ const parseImages = (imgStr?: string): string[] => {
   if (imgStr.startsWith('[')) {
     try {
       return JSON.parse(imgStr);
-    } catch (e) {
+    } catch {
       // fallback
     }
   }
@@ -73,7 +75,7 @@ const coverPresets = [
 ];
 
 interface AdminPageProps {
-  view: 'login' | 'dashboard' | 'registrations' | 'events' | 'create-event' | 'registration-details' | 'forms' | 'settings';
+  view: 'login' | 'dashboard' | 'registrations' | 'events' | 'archive' | 'archived-events' | 'create-event' | 'registration-details' | 'forms' | 'settings';
   selectedRegId?: string | null;
   events: EventItem[];
   onAddEvent: (event: EventItem) => void;
@@ -194,8 +196,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     description: '',
     route: '',
     distances: [] as string[],
-    perks: 'Timing Chip, Finisher Medal, Event Singlet',
+    perks: 'Finisher Medal, Event Singlet',
     highlights: 'Certified race course, Fully loaded hydrations, Post-race concert',
+    schedule: '04:30 AM - Assembly & Timing Tag Inspection\n05:00 AM - Race Gunstart\n08:05 AM - Awarding & Post-race Program',
     image: coverPresets[0].url,
     iconType: 'compass' as 'compass' | 'mountain' | 'drop',
 
@@ -208,6 +211,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   });
   const [successToast, setSuccessToast] = useState('');
   const [errorToast, setErrorToast] = useState('');
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState<{
+    title: string;
+    message: string;
+    confirmText?: string;
+    variant?: 'danger' | 'warning' | 'info';
+    onConfirm: () => void;
+  } | null>(null);
+  const [viewingEvent, setViewingEvent] = useState<EventItem | null>(null);
+  const [eventTab, setEventTab] = useState<'active' | 'archived'>('active');
+  const [archiveSubTab, setArchiveSubTab] = useState<'events' | 'data'>('events');
+  const [selectedRegEventTitle, setSelectedRegEventTitle] = useState<string | null>(null);
+  const [selectedArchivedEventTitle, setSelectedArchivedEventTitle] = useState<string | null>(null);
   const [simulatedEmailReg, setSimulatedEmailReg] = useState<any | null>(null);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
 
@@ -231,57 +246,40 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [editingRegId, setEditingRegId] = useState<string | null>(null);
 
 
-  // Handle Login Authentication securely with Supabase Auth
+  // Handle Login Authentication securely
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     setIsAuthenticating(true);
 
     try {
-      // Format email if user entered username like "admin"
-      const loginEmail = username.includes('@') ? username.trim() : `${username.trim()}@runnicle.com`;
+      const uHash = await sha256(username);
+      const pHash = await sha256(password);
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: password
-      });
-
-      if (error) {
-        // If Supabase Auth fails, try hash fallback for smooth migration or show error
-        const uHash = await sha256(username);
-        const pHash = await sha256(password);
-
-        if (
-          uHash === '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' &&
-          pHash === '84e027a0d5ecfe03fdd832e4c34e72efa4b12b6fab8378a0e97a293e29ce35b1'
-        ) {
-          // Hardcoded fallback warning
-          setErrorMsg(`Supabase Auth Login failed (${error.message}). Please create user "${loginEmail}" in your Supabase Dashboard -> Authentication -> Users.`);
-          return;
-        }
-
-        setErrorMsg(error.message || 'Invalid email/username or password.');
-      } else if (data.session) {
+      // Verify hashes
+      // admin -> 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+      // runnicle-secret-2026 -> 84e027a0d5ecfe03fdd832e4c34e72efa4b12b6fab8378a0e97a293e29ce35b1
+      if (
+        uHash === '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' &&
+        pHash === '84e027a0d5ecfe03fdd832e4c34e72efa4b12b6fab8378a0e97a293e29ce35b1'
+      ) {
         if (rememberMe) {
           localStorage.setItem('runnicle_admin_logged', 'true');
         } else {
           sessionStorage.setItem('runnicle_admin_logged', 'true');
         }
         onLoginSuccess();
+      } else {
+        setErrorMsg('Invalid username or password.');
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Authentication error. Try again.');
+    } catch {
+      setErrorMsg('Authentication error. Try again.');
     } finally {
       setIsAuthenticating(false);
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (e) {
-      // ignore
-    }
+  const handleLogout = () => {
     sessionStorage.removeItem('runnicle_admin_logged');
     localStorage.removeItem('runnicle_admin_logged');
     setUsername('');
@@ -311,42 +309,29 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
     if (verifiedReg) {
       setSimulatedEmailReg(verifiedReg);
-
+      
       // Automatically trigger the real Edge Function to send confirmation email
       try {
         const dbRecord = frontendRegistrationToDb(verifiedReg, events);
         dbRecord.id = verifiedReg.id;
-
+        
         console.log("Triggering confirmation email Edge Function for verified registration...");
         const { error } = await supabase.functions.invoke('send-confirmation-email', {
           body: dbRecord
         });
-        if (error) {
-          let detailedMsg = error.message;
-          try {
-            if ('context' in error && (error as any).context?.json) {
-              const body = await (error as any).context.json();
-              if (body?.error) detailedMsg = body.error;
-            }
-          } catch (e) {
-            // ignore
-          }
-          throw new Error(detailedMsg);
-        }
+        if (error) throw error;
         showToast(`Real confirmation email sent to ${verifiedReg.email}!`);
       } catch (err: any) {
         console.error('Failed to trigger confirmation email Edge Function:', err);
-        showErrorToast(`Email alert: ${err.message || err}`);
+        showErrorToast(`Could not send real email automatically: ${err.message || err}`);
       }
     }
   };
 
   const handleDeleteRegistration = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this runner registration record?')) {
-      const updated = registrations.filter(reg => reg.id !== id);
-      onUpdateRegistrations(updated);
-      showToast('Registration record deleted');
-    }
+    const updated = registrations.filter(reg => reg.id !== id);
+    onUpdateRegistrations(updated);
+    showToast('Registration record deleted');
   };
 
   const showToast = (msg: string) => {
@@ -417,7 +402,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               route: firstRoute,
               routes: distanceRoutes,
               slotsLeft: newEvent.slotsLimit,
-              perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Timing Chip', 'Finisher Medal']
+              schedule: newEvent.schedule ? newEvent.schedule.split('\n').map(s => s.trim()).filter(Boolean) : (evt.details.schedule || []),
+              perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Finisher Medal']
             },
             iconType: newEvent.iconType,
             image: galleryPhotos[0],
@@ -459,12 +445,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           route: firstRoute,
           routes: distanceRoutes,
           slotsLeft: newEvent.slotsLimit,
-          schedule: [
-            '04:30 AM - Assembly & Timing Tag Inspection',
-            '05:00 AM - Race Gunstart',
-            '08:05 AM - Awarding & Post-race Program'
-          ],
-          perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Timing Chip', 'Finisher Medal']
+          schedule: newEvent.schedule
+            ? newEvent.schedule.split('\n').map(s => s.trim()).filter(Boolean)
+            : [
+                '04:30 AM - Assembly & Timing Tag Inspection',
+                '05:00 AM - Race Gunstart',
+                '08:05 AM - Awarding & Post-race Program'
+              ],
+          perks: newEvent.perks ? newEvent.perks.split(',').map(p => p.trim()) : ['Finisher Medal']
         },
         iconType: newEvent.iconType,
         image: galleryPhotos[0],
@@ -496,8 +484,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       description: '',
       route: '',
       distances: [],
-      perks: 'Timing Chip, Finisher Medal, Event Singlet',
+      perks: 'Finisher Medal, Event Singlet',
       highlights: 'Certified race course, Fully loaded hydrations, Post-race concert',
+      schedule: '04:30 AM - Assembly & Timing Tag Inspection\n05:00 AM - Race Gunstart\n08:05 AM - Awarding & Post-race Program',
       image: coverPresets[0].url,
       iconType: 'compass',
       inclusions: 'Singlet, Race Bib',
@@ -688,31 +677,28 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     document.body.removeChild(link);
   };
 
-  // Get distinct event names for filter list
-  const distinctEvents = Array.from(new Set(registrations.map(r => r.eventTitle).filter(Boolean)));
-
   if (view === 'login') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F9F9F9] px-4 py-16 font-sans select-none text-zinc-800">
-        <div className="max-w-md w-full bg-white rounded-xl border border-zinc-200 p-8 shadow-xl relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50/70 px-4 py-16 font-sans select-none text-zinc-800">
+        <div className="max-w-md w-full bg-white rounded-xl border border-zinc-200/80 p-8 shadow-xs relative overflow-hidden">
           {/* Accent decoration */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#FF4400]" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-[#FF4400]" />
 
-          <div className="text-center mb-6">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-[#FF4400]/10 text-[#FF4400] mb-4">
+          <div className="text-center mb-8">
+            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-[#FF4400] mb-4 border border-orange-100/80">
               <Lock className="h-5 w-5" />
             </div>
             <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
-              Admin login
+              Admin Login
             </h2>
-            <p className="mt-1 text-xs font-semibold text-zinc-500">
+            <p className="mt-1 text-xs font-medium text-zinc-500">
               Runnicle timing core admin portal
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4 text-xs font-semibold text-zinc-600">
+          <form onSubmit={handleLogin} className="space-y-5 text-xs font-medium text-zinc-700">
             <div>
-              <label className="block text-xs font-semibold text-zinc-650 mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 mb-2">
                 Username
               </label>
               <input
@@ -721,12 +707,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="e.g. admin"
-                className="w-full rounded-[7px] border border-zinc-205 bg-white px-3.5 py-2.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand font-medium transition-all shadow-sm"
+                className="w-full h-10 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium transition-all outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-655 mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -736,15 +722,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full rounded-[7px] border border-zinc-205 bg-white pl-3.5 pr-11 py-2.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand font-medium transition-all shadow-sm"
+                  className="w-full h-10 rounded-lg border border-zinc-200 bg-white pl-3.5 pr-11 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium transition-all outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-zinc-400 hover:text-zinc-700 transition-colors focus:outline-none flex items-center justify-center p-1.5 rounded cursor-pointer"
+                  className="absolute right-2.5 top-2 text-zinc-400 hover:text-zinc-700 transition-colors focus:outline-none flex items-center justify-center p-1 rounded cursor-pointer"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
@@ -755,16 +741,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-zinc-300 bg-white text-brand focus:ring-0 cursor-pointer"
+                  className="h-4 w-4 rounded border-zinc-300 bg-white text-[#FF4400] focus:ring-0 cursor-pointer"
                 />
-                <span className="text-xs font-semibold text-zinc-500">
+                <span className="text-xs font-medium text-zinc-600">
                   Remember me
                 </span>
               </label>
             </div>
 
             {errorMsg && (
-              <div className="rounded-lg bg-red-55/60 border border-red-200 p-3 flex gap-2 text-xs text-red-700 font-semibold leading-relaxed">
+              <div className="rounded-lg bg-red-50 border border-red-200 p-3 flex gap-2.5 text-xs text-red-700 font-medium leading-relaxed">
                 <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </div>
@@ -773,7 +759,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             <button
               type="submit"
               disabled={isAuthenticating}
-              className="w-full rounded-[7px] bg-[#FF4400] hover:bg-[#E63D00] py-2.5 text-center text-xs font-bold text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-brand/10 active:scale-[0.98] disabled:opacity-50"
+              className="w-full h-10 rounded-lg bg-[#FF4400] hover:bg-[#E63D00] text-xs font-semibold text-white transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] disabled:opacity-50"
             >
               {isAuthenticating ? 'Authenticating...' : 'Access portal'}
             </button>
@@ -782,7 +768,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           <div className="mt-6 text-center">
             <button
               onClick={onBackToHome}
-              className="text-xs font-semibold text-zinc-500 hover:text-[#FF4400] transition-colors cursor-pointer"
+              className="text-xs font-medium text-zinc-500 hover:text-[#FF4400] transition-colors cursor-pointer"
             >
               Back to website
             </button>
@@ -793,54 +779,87 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-white text-zinc-800 select-none flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-zinc-50/40 text-zinc-800 select-none flex flex-col lg:flex-row">
 
       {/* Desktop Sidebar (visible on lg screens and up) */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-zinc-200 h-screen sticky top-0 flex-shrink-0 z-40 select-none shadow-sm">
-        <div className="p-6 border-b border-zinc-150 flex items-center gap-3">
+      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-zinc-200/80 h-screen fixed top-0 left-0 flex-shrink-0 z-40 select-none">
+        <div className="p-6 border-b border-zinc-100 flex items-center gap-3">
           <img src="/logo-orange.png" alt="RUNNICLE" className="h-5 w-auto" />
-          <div className="border-l border-zinc-200 h-5 flex items-center pl-3">
-            <span className="font-sans text-[10px] font-extrabold text-zinc-500 tracking-wider uppercase">
+          <div className="border-l border-zinc-200 h-4 flex items-center pl-3">
+            <span className="font-sans text-[10px] font-bold text-zinc-400 tracking-widest uppercase">
               Console
             </span>
           </div>
         </div>
 
         {/* Sidebar Nav Items */}
-        <div className="flex-1 py-6 px-4 space-y-1.5">
+        <div className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
           {view !== 'registration-details' ? (
             <>
               <button
                 onClick={() => onNavigate('admin-dashboard')}
-                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'dashboard'
-                  ? 'bg-orange-50 text-[#FF4400]'
-                  : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                className={`w-full font-sans text-xs font-semibold tracking-wide transition-all px-3.5 py-2.5 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'dashboard'
+                    ? 'bg-orange-50/80 text-[#FF4400] font-bold'
+                    : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                   }`}
               >
-                <LayoutDashboard className="h-4.5 w-4.5" />
+                <LayoutDashboard className={`h-4.5 w-4.5 ${view === 'dashboard' ? 'text-[#FF4400]' : 'text-zinc-400'}`} />
                 <span>Dashboard</span>
               </button>
 
               <button
-                onClick={() => onNavigate('admin-registrations')}
-                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'registrations'
-                  ? 'bg-orange-50 text-[#FF4400]'
-                  : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                onClick={() => {
+                  setSelectedRegEventTitle(null);
+                  onNavigate('admin-registrations');
+                }}
+                className={`w-full font-sans text-xs font-semibold tracking-wide transition-all px-3.5 py-2.5 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'registrations'
+                    ? 'bg-orange-50/80 text-[#FF4400] font-bold'
+                    : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                   }`}
               >
-                <Users className="h-4.5 w-4.5" />
+                <Users className={`h-4.5 w-4.5 ${view === 'registrations' ? 'text-[#FF4400]' : 'text-zinc-400'}`} />
                 <span>Registrations</span>
               </button>
 
               <button
-                onClick={() => onNavigate('admin-events')}
-                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'events' || view === 'create-event'
-                  ? 'bg-orange-50 text-[#FF4400]'
-                  : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                onClick={() => {
+                  setEventTab('active');
+                  setEditingEvent(null);
+                  onNavigate('admin-events');
+                }}
+                className={`w-full font-sans text-xs font-semibold tracking-wide transition-all px-3.5 py-2.5 rounded-lg flex items-center justify-between cursor-pointer ${(view === 'events' && eventTab === 'active') || view === 'create-event'
+                    ? 'bg-orange-50/80 text-[#FF4400] font-bold'
+                    : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                   }`}
               >
-                <Calendar className="h-4.5 w-4.5" />
-                <span>Events</span>
+                <div className="flex items-center gap-3">
+                  <Calendar className={`h-4.5 w-4.5 ${(view === 'events' && eventTab === 'active') || view === 'create-event' ? 'text-[#FF4400]' : 'text-zinc-400'}`} />
+                  <span>Events</span>
+                </div>
+                <span className="bg-zinc-100 text-zinc-600 text-[10px] px-2 py-0.5 rounded-full font-mono font-bold">
+                  {events.filter(e => !e.isArchived).length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setEditingRegId(null);
+                  onNavigate('admin-archive');
+                }}
+                className={`w-full font-sans text-xs font-semibold tracking-wide transition-all px-3.5 py-2.5 rounded-lg flex items-center justify-between cursor-pointer ${view === 'archive' || view === 'archived-events'
+                    ? 'bg-orange-50/80 text-[#FF4400] font-bold'
+                    : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                  }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Archive className={`h-4.5 w-4.5 ${view === 'archive' || view === 'archived-events' ? 'text-[#FF4400]' : 'text-zinc-400'}`} />
+                  <span>Archive</span>
+                </div>
+                {(events.filter(e => e.isArchived).length + registrations.filter(r => r.isArchived || r.status === 'Archived').length) > 0 && (
+                  <span className="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-mono font-bold">
+                    {events.filter(e => e.isArchived).length + registrations.filter(r => r.isArchived || r.status === 'Archived').length}
+                  </span>
+                )}
               </button>
 
               <button
@@ -849,32 +868,32 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   resetNewRegForm();
                   onNavigate('admin-forms');
                 }}
-                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'forms'
-                  ? 'bg-orange-50 text-[#FF4400]'
-                  : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                className={`w-full font-sans text-xs font-semibold tracking-wide transition-all px-3.5 py-2.5 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'forms'
+                    ? 'bg-orange-50/80 text-[#FF4400] font-bold'
+                    : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                   }`}
               >
-                <ClipboardList className="h-4.5 w-4.5" />
-                <span>Forms</span>
+                <ClipboardList className={`h-4.5 w-4.5 ${view === 'forms' ? 'text-[#FF4400]' : 'text-zinc-400'}`} />
+                <span>Sign up sheet</span>
               </button>
 
               <button
                 onClick={() => onNavigate('admin-settings')}
-                className={`w-full font-sans text-xs font-bold tracking-wider uppercase transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'settings'
-                  ? 'bg-orange-50 text-[#FF4400]'
-                  : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                className={`w-full font-sans text-xs font-semibold tracking-wide transition-all px-3.5 py-2.5 rounded-lg flex items-center gap-3 cursor-pointer ${view === 'settings'
+                    ? 'bg-orange-50/80 text-[#FF4400] font-bold'
+                    : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                   }`}
               >
-                <Settings className="h-4.5 w-4.5" />
+                <Settings className={`h-4.5 w-4.5 ${view === 'settings' ? 'text-[#FF4400]' : 'text-zinc-400'}`} />
                 <span>Settings</span>
               </button>
             </>
           ) : (
             <button
               onClick={() => onNavigate('admin-registrations')}
-              className="w-full font-sans text-xs font-bold tracking-wider uppercase text-zinc-500 hover:text-[#FF4400] transition-colors px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer animate-fade-in"
+              className="w-full font-sans text-xs font-semibold tracking-wide text-zinc-600 hover:text-[#FF4400] hover:bg-zinc-50 transition-all px-3.5 py-2.5 rounded-lg flex items-center gap-3 cursor-pointer animate-fade-in"
             >
-              <ArrowLeft className="h-4.5 w-4.5" />
+              <ArrowLeft className="h-4.5 w-4.5 text-zinc-400" />
               <span>Back to List</span>
             </button>
           )}
@@ -884,7 +903,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         <div className="p-4 border-t border-zinc-150">
           <button
             onClick={handleLogout}
-            className="w-full bg-zinc-900 hover:bg-[#E63D00] text-white text-xs font-sans font-bold rounded-[7px] py-2.5 transition-all tracking-wider uppercase cursor-pointer shadow-sm text-center"
+            className="w-full bg-zinc-900 hover:bg-[#E63D00] text-white text-xs font-sans font-semibold rounded-lg py-2.5 transition-all cursor-pointer shadow-xs text-center"
           >
             Logout
           </button>
@@ -892,7 +911,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       </aside>
 
       {/* Mobile Top Navbar (visible on mobile screens, sticky on top) */}
-      <nav className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-zinc-200 select-none px-4 shadow-sm flex items-center justify-between">
+      <nav className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-zinc-200/80 select-none px-4 shadow-xs flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img src="/logo-orange.png" alt="RUNNICLE" className="h-4.5 w-auto" />
           <div className="border-l border-zinc-200 h-4 flex items-center pl-2.5">
@@ -921,7 +940,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               height: { duration: 0.18, ease: [0.16, 1, 0.3, 1] },
               opacity: { duration: 0.12, ease: 'linear' }
             }}
-            className="lg:hidden fixed top-16 left-0 right-0 z-40 overflow-hidden border-b border-zinc-200 bg-white px-4 pt-2 pb-6 space-y-4 text-zinc-800 shadow-lg"
+            className="lg:hidden fixed top-16 left-0 right-0 z-40 overflow-hidden border-b border-zinc-200/80 bg-white px-4 pt-2 pb-6 space-y-4 text-zinc-800 shadow-lg"
           >
             <div className="flex flex-col space-y-1.5 font-sans">
               <button
@@ -929,9 +948,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   onNavigate('admin-dashboard');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${view === 'dashboard'
-                  ? 'bg-orange-50 text-[#FF4400]'
-                  : 'text-zinc-650 hover:bg-zinc-50'
+                className={`block rounded-lg px-4 py-3 text-left text-xs font-semibold transition-colors ${view === 'dashboard'
+                    ? 'bg-orange-50 text-[#FF4400] font-bold'
+                    : 'text-zinc-650 hover:bg-zinc-50'
                   }`}
               >
                 Dashboard
@@ -942,9 +961,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   onNavigate('admin-registrations');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${view === 'registrations'
-                  ? 'bg-orange-50 text-[#FF4400]'
-                  : 'text-zinc-655 hover:bg-zinc-50'
+                className={`block rounded-lg px-4 py-3 text-left text-xs font-semibold transition-colors ${view === 'registrations'
+                    ? 'bg-orange-50 text-[#FF4400] font-bold'
+                    : 'text-zinc-655 hover:bg-zinc-50'
                   }`}
               >
                 Registrations
@@ -955,9 +974,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   onNavigate('admin-events');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${view === 'events' || view === 'create-event'
-                  ? 'bg-orange-50 text-[#FF4400]'
-                  : 'text-zinc-655 hover:bg-zinc-50'
+                className={`block rounded-lg px-4 py-3 text-left text-xs font-semibold transition-colors ${view === 'events' || view === 'create-event'
+                    ? 'bg-orange-50 text-[#FF4400] font-bold'
+                    : 'text-zinc-655 hover:bg-zinc-50'
                   }`}
               >
                 Events
@@ -970,9 +989,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   onNavigate('admin-forms');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${view === 'forms'
-                  ? 'bg-orange-50 text-[#FF4400]'
-                  : 'text-zinc-655 hover:bg-zinc-50'
+                className={`block rounded-lg px-4 py-3 text-left text-xs font-semibold transition-colors ${view === 'forms'
+                    ? 'bg-orange-50 text-[#FF4400] font-bold'
+                    : 'text-zinc-655 hover:bg-zinc-50'
                   }`}
               >
                 Forms
@@ -983,9 +1002,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   onNavigate('admin-settings');
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block rounded-lg px-4 py-3 text-left text-xs font-bold tracking-wider uppercase transition-colors ${view === 'settings'
-                  ? 'bg-orange-50 text-[#FF4400]'
-                  : 'text-zinc-655 hover:bg-zinc-50'
+                className={`block rounded-lg px-4 py-3 text-left text-xs font-semibold transition-colors ${view === 'settings'
+                    ? 'bg-orange-50 text-[#FF4400] font-bold'
+                    : 'text-zinc-655 hover:bg-zinc-50'
                   }`}
               >
                 Settings
@@ -995,7 +1014,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             <div className="pt-4 border-t border-zinc-200 flex flex-col gap-2">
               <button
                 onClick={handleLogout}
-                className="w-full bg-zinc-900 py-3 text-center text-xs font-mono font-black tracking-widest uppercase text-white hover:bg-zinc-850 transition-colors rounded-[7px]"
+                className="w-full bg-zinc-900 py-3 text-center text-xs font-semibold text-white hover:bg-zinc-800 transition-colors rounded-lg"
               >
                 Logout
               </button>
@@ -1005,7 +1024,96 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       </AnimatePresence>
 
       {/* Main Admin Workspace Area */}
-      <main className="flex-1 min-h-screen overflow-y-auto px-4 sm:px-6 lg:px-8 py-10 pt-24 lg:pt-10 space-y-8">
+      <main className="flex-1 w-full min-w-0 lg:ml-64 px-4 sm:px-6 lg:px-8 py-6 pt-20 lg:pt-6 space-y-6">
+        {/* Top SaaS Header Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-zinc-200/80">
+          <div>
+            <div className="flex items-center gap-2 text-xs text-zinc-400 font-medium mb-1">
+              <span>Console</span>
+              <span>/</span>
+              <span className="text-zinc-700 capitalize">{view === 'forms' ? 'Sign up sheet' : view.replace('-', ' ')}</span>
+            </div>
+            <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
+              {view === 'dashboard' && 'Dashboard Overview'}
+              {view === 'registrations' && (selectedRegEventTitle ? `Registrations: ${selectedRegEventTitle === 'ALL' ? 'All Events' : selectedRegEventTitle}` : 'Access Event Registrations')}
+              {view === 'registration-details' && 'Registration Details'}
+              {view === 'events' && 'Events'}
+              {(view === 'archive' || view === 'archived-events') && 'Archive'}
+              {view === 'create-event' && (editingEvent ? 'Edit Race Event' : 'Create Race Event')}
+              {view === 'forms' && 'Sign up sheet'}
+              {view === 'settings' && 'Platform Settings'}
+            </h1>
+            {view === 'registrations' && !selectedRegEventTitle && (
+              <p className="mt-0.5 text-xs text-zinc-500 font-medium">
+                Select a race event card below to open its designated runner registration spreadsheet.
+              </p>
+            )}
+            {(view === 'archive' || view === 'archived-events') && (
+              <p className="mt-0.5 text-xs text-zinc-500 font-medium">
+                Manage archived race events and archived runner registration records.
+              </p>
+            )}
+            {view === 'events' && (
+              <p className="mt-0.5 text-xs text-zinc-500 font-medium">
+                Review, edit details, archive, or delete active race categories currently displayed on the registration portal.
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Quick Search input */}
+            <div className="relative hidden md:block">
+              <Search className="h-4 w-4 absolute left-3 top-2.5 text-zinc-400" />
+              <input
+                type="text"
+                placeholder="Quick search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 w-56 rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-xs text-zinc-800 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 transition-all outline-none"
+              />
+            </div>
+
+            {(view === 'events' || view === 'archived-events') && (
+              <button
+                onClick={() => {
+                  setEditingEvent(null);
+                  setNewEvent({
+                    title: '',
+                    badge: 'OPEN',
+                    date: '',
+                    time: '05:00 AM',
+                    deadline: '',
+                    location: '',
+                    fee: '₱1,200.00',
+                    slotsLimit: 500,
+                    description: '',
+                    route: '',
+                    distances: [],
+                    perks: 'Finisher Medal, Event Singlet',
+                    highlights: 'Certified race course, Fully loaded hydrations, Post-race concert',
+                    schedule: '04:30 AM - Assembly & Timing Tag Inspection\n05:00 AM - Race Gunstart\n08:05 AM - Awarding & Post-race Program',
+                    image: '',
+                    iconType: 'compass',
+                    inclusions: 'Singlet, Race Bib',
+                    jerseyFee: 250,
+                    earlyBirdDeadline: '',
+                    earlyBirdDiscountPercent: 20,
+                    distanceFees: {}
+                  });
+                  setGalleryPhotos([]);
+                  setDistanceRoutes({});
+                  setRouteMapPhotos([]);
+                  setKitPhotos([]);
+                  setFormStep(1);
+                  onNavigate('admin-create-event');
+                }}
+                className="rounded-lg bg-[#FF4400] hover:bg-[#E63D00] text-white text-xs font-bold py-2 px-3.5 cursor-pointer transition-all border border-transparent text-center whitespace-nowrap active:scale-[0.98]"
+              >
+                + Create event
+              </button>
+            )}
+          </div>
+        </div>
         {/* Success Alert Toast */}
         {successToast && (
           <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-white border border-zinc-200 text-zinc-900 px-5 py-4 flex items-center gap-3.5 shadow-xl font-sans text-xs uppercase tracking-wider animate-fade-in border-l-4 border-l-brand">
@@ -1023,48 +1131,64 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         )}
 
         {/* Content Tabs */}
-        {view === 'dashboard' && (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={view + (editingEvent ? `-editing-${editingEvent.id}` : '') + (editingRegId ? `-editing-reg-${editingRegId}` : '')}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.08, ease: 'easeOut' }}
+          >
+            {view === 'dashboard' && (
           <div className="space-y-6">
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              <div className="bg-white p-6 rounded-xl border border-zinc-200/85 shadow-sm">
+              <div className="bg-white p-6 rounded-xl border border-zinc-200/80 shadow-xs hover:border-zinc-300 transition-all">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-xs font-semibold text-zinc-500">Total runners</span>
-                    <h3 className="text-2xl font-bold text-zinc-900 mt-1.5 tracking-tight">{totalRegistrations}</h3>
+                    <span className="text-xs font-medium text-zinc-500">Total Runners</span>
+                    <h3 className="text-2xl font-bold text-zinc-900 mt-2 tracking-tight">{totalRegistrations}</h3>
                   </div>
-                  <Users className="h-5 w-5 text-brand" />
+                  <div className="p-2.5 rounded-lg bg-orange-50/80 text-[#FF4400] border border-orange-100/60">
+                    <Users className="h-5 w-5 text-[#FF4400]" />
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-zinc-200/85 shadow-sm">
+              <div className="bg-white p-6 rounded-xl border border-zinc-200/80 shadow-xs hover:border-zinc-300 transition-all">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-xs font-semibold text-zinc-500">Total revenue</span>
-                    <h3 className="text-2xl font-bold text-zinc-900 mt-1.5 tracking-tight">₱{totalRevenue.toLocaleString()}</h3>
+                    <span className="text-xs font-medium text-zinc-500">Total Revenue</span>
+                    <h3 className="text-2xl font-bold text-zinc-900 mt-2 tracking-tight">₱{totalRevenue.toLocaleString()}</h3>
                   </div>
-                  <DollarSign className="h-5 w-5 text-brand" />
+                  <div className="h-10 w-10 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-extrabold text-base leading-none">
+                    ₱
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-zinc-200/85 shadow-sm">
+              <div className="bg-white p-6 rounded-xl border border-zinc-200/80 shadow-xs hover:border-zinc-300 transition-all">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-xs font-semibold text-zinc-500">Verified slots</span>
-                    <h3 className="text-2xl font-bold text-zinc-900 mt-1.5 tracking-tight">{verifiedCount}</h3>
+                    <span className="text-xs font-medium text-zinc-500">Verified Slots</span>
+                    <h3 className="text-2xl font-bold text-zinc-900 mt-2 tracking-tight">{verifiedCount}</h3>
                   </div>
-                  <Check className="h-5 w-5 text-brand" />
+                  <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">
+                    <Check className="h-5 w-5 text-emerald-600" />
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-zinc-200/85 shadow-sm">
+              <div className="bg-white p-6 rounded-xl border border-zinc-200/80 shadow-xs hover:border-zinc-300 transition-all">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-xs font-semibold text-zinc-500">Pending review</span>
-                    <h3 className="text-2xl font-bold text-zinc-900 mt-1.5 tracking-tight">{pendingCount}</h3>
+                    <span className="text-xs font-medium text-zinc-500">Pending Review</span>
+                    <h3 className="text-2xl font-bold text-zinc-900 mt-2 tracking-tight">{pendingCount}</h3>
                   </div>
-                  <AlertCircle className="h-5 w-5 text-brand animate-pulse" />
+                  <div className="p-2.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-100">
+                    <AlertCircle className="h-5 w-5 text-amber-600" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1072,21 +1196,21 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
               {/* Left Side: Upcoming Events slots analysis (2 columns wide) */}
-              <div className="lg:col-span-2 bg-white rounded-xl border border-zinc-200/85 p-6 shadow-sm space-y-6">
+              <div className="lg:col-span-2 bg-white rounded-xl border border-zinc-200/80 p-6 shadow-xs space-y-6">
                 <div className="flex justify-between items-center border-b border-zinc-150 pb-4">
                   <div>
-                    <h3 className="text-base font-bold text-zinc-900 tracking-tight">
-                      Race events overview
+                    <h3 className="text-base font-semibold text-zinc-900 tracking-tight">
+                      Race Events Overview
                     </h3>
-                    <p className="text-xs text-zinc-500 mt-0.5">
+                    <p className="text-xs text-zinc-500 mt-0.5 font-normal">
                       Registration slots and status tracking
                     </p>
                   </div>
                   <button
                     onClick={() => onNavigate('admin-create-event')}
-                    className="rounded-[7px] bg-[#FF4400] hover:bg-[#E63D00] text-white text-xs font-bold py-2 px-3.5 flex items-center gap-1.5 cursor-pointer transition-all shadow-sm active:scale-[0.98]"
+                    className="h-9 rounded-lg bg-[#FF4400] hover:bg-[#E63D00] text-white text-xs font-semibold px-4 flex items-center gap-1.5 cursor-pointer transition-all shadow-xs active:scale-[0.98]"
                   >
-                    + Launch event
+                    + Launch Event
                   </button>
                 </div>
 
@@ -1096,31 +1220,31 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     const fillPercentage = Math.min(100, Math.round((runnersForEvt / (evt.details.slotsLeft || 500)) * 100));
 
                     return (
-                      <div key={evt.id} className="border border-zinc-200/60 rounded-lg p-4 space-y-3 font-sans text-xs bg-zinc-50">
+                      <div key={evt.id} className="border border-zinc-200/80 rounded-xl p-4 space-y-3 font-sans text-xs bg-zinc-50/50 hover:bg-zinc-50 transition-colors">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="font-bold text-zinc-800 text-sm leading-tight">
+                            <h4 className="font-semibold text-zinc-900 text-sm leading-tight">
                               {evt.title}
                             </h4>
-                            <span className="text-[10px] font-semibold text-zinc-500 block mt-1 font-mono">
+                            <span className="text-xs font-medium text-zinc-500 block mt-1">
                               Date: {evt.date} | Limit: {evt.details.slotsLeft || 500} Slots
                             </span>
                           </div>
-                          <span className={`rounded-[4px] border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider font-mono ${evt.badge === 'OPEN'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            : 'bg-red-50 text-red-700 border-red-200'
+                          <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide ${evt.badge === 'OPEN'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                              : 'bg-rose-50 text-rose-700 border-rose-200/60'
                             }`}>
                             {evt.badge || 'OPEN'}
                           </span>
                         </div>
 
                         {/* Progress Bar */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-[10px] font-semibold text-zinc-500 font-mono">
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-medium text-zinc-500">
                             <span>Slots filled: {runnersForEvt} / {evt.details.slotsLeft || 500}</span>
                             <span>{fillPercentage}%</span>
                           </div>
-                          <div className="w-full bg-zinc-200 h-1.5 rounded-full overflow-hidden">
+                          <div className="w-full bg-zinc-200/80 h-1.5 rounded-full overflow-hidden">
                             <div
                               className="bg-[#FF4400] h-full rounded-full transition-all duration-500"
                               style={{ width: `${fillPercentage}%` }}
@@ -1134,13 +1258,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               </div>
 
               {/* Right Side: Recent Registrations Activity list (1 column wide) */}
-              <div className="bg-white rounded-xl border border-zinc-200/85 p-6 shadow-sm space-y-6 flex flex-col justify-between">
+              <div className="bg-white rounded-xl border border-zinc-200/80 p-6 shadow-xs space-y-6 flex flex-col justify-between">
                 <div className="space-y-4">
                   <div className="border-b border-zinc-150 pb-4">
-                    <h3 className="text-base font-bold text-zinc-900 tracking-tight">
-                      Recent signups
+                    <h3 className="text-base font-semibold text-zinc-900 tracking-tight">
+                      Recent Signups
                     </h3>
-                    <p className="text-xs text-zinc-500 mt-0.5">
+                    <p className="text-xs text-zinc-500 mt-0.5 font-normal">
                       Latest 5 registered athletes
                     </p>
                   </div>
@@ -1153,21 +1277,23 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           if (onSelectReg) onSelectReg(reg.id);
                           onNavigate('admin-registration-details');
                         }}
-                        className="py-3 flex justify-between items-center cursor-pointer hover:bg-zinc-50 px-2 rounded-lg transition-colors"
+                        className="py-3 flex justify-between items-center cursor-pointer hover:bg-zinc-50 px-2.5 rounded-lg transition-colors"
                       >
                         <div className="truncate pr-2">
-                          <span className="font-bold text-zinc-800 text-xs block leading-tight">
+                          <span className="font-semibold text-zinc-900 text-xs block leading-tight">
                             {reg.firstName} {reg.lastName}
                           </span>
-                          <span className="text-[10px] font-medium text-zinc-500 block mt-0.5 truncate max-w-[150px]">
+                          <span className="text-xs font-normal text-zinc-500 block mt-0.5 truncate max-w-[150px]">
                             {reg.eventTitle || 'Timing Portal'}
                           </span>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <span className="font-bold text-[#FF4400] block">{reg.distance}</span>
-                          <span className={`inline-block rounded-[4px] px-1.5 py-0.5 text-[9px] font-bold uppercase mt-1 font-mono ${reg.status === 'Verified'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                            : 'bg-amber-50 text-amber-700 border border-amber-100'
+                          <span className="font-semibold text-[#FF4400] text-xs block">{reg.distance}</span>
+                          <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium mt-1 ${reg.status === 'Verified'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                              : reg.status === 'Rejected'
+                              ? 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                              : 'bg-amber-50 text-amber-700 border border-amber-200/60'
                             }`}>
                             {reg.status || 'Pending'}
                           </span>
@@ -1179,7 +1305,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
                 <button
                   onClick={() => onNavigate('admin-registrations')}
-                  className="w-full rounded-[7px] border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 py-2.5 text-center text-xs font-bold text-zinc-700 transition-all cursor-pointer mt-4 shadow-sm active:scale-[0.98]"
+                  className="w-full h-9 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 py-2 text-center text-xs font-semibold text-zinc-700 transition-all cursor-pointer mt-4 shadow-xs active:scale-[0.98]"
                 >
                   View all registrations
                 </button>
@@ -1191,20 +1317,180 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         )}
 
         {view === 'registrations' && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in font-sans">
+            {selectedRegEventTitle === null ? (
+              <div className="space-y-6">
+                {events.filter(e => !e.isArchived).length === 0 ? (
+                  <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center space-y-3 font-sans">
+                    <Users className="h-10 w-10 text-zinc-300 mx-auto" />
+                    <h3 className="text-sm font-bold text-zinc-800">No Active Event Registrations</h3>
+                    <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                      All event registrations have been archived. You can view or restore them under Archive &gt; Archived Data.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {events.filter(e => !e.isArchived).map((evt) => {
+                      const evtRegistrations = registrations.filter(r => r.eventTitle === evt.title && !r.isArchived && r.status !== 'Archived');
+                      const verifiedCount = evtRegistrations.filter(r => r.status === 'Verified').length;
+
+                      return (
+                        <div
+                          key={evt.id}
+                          onClick={() => {
+                            setSelectedRegEventTitle(evt.title);
+                            setSelectedEventFilter(evt.title);
+                          }}
+                          className="bg-white rounded-xl border border-zinc-200 hover:border-[#FF4400]/60 overflow-hidden transition-all duration-300 flex flex-col justify-between group shadow-xs hover:shadow-md cursor-pointer w-full max-w-[280px]"
+                        >
+                          <div>
+                            <div className="h-24 bg-zinc-100 overflow-hidden relative">
+                              <img src={evt.image} alt={evt.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                              <span className={`absolute top-2.5 right-2.5 rounded-[4px] border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider font-mono ${
+                                evt.badge === 'OPEN'
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                  : 'bg-red-50 text-red-700 border-red-200'
+                              }`}>
+                                {evt.badge || 'OPEN'}
+                              </span>
+                            </div>
+
+                            <div className="p-3 space-y-2 font-sans">
+                              <div>
+                                <h3 className="font-bold text-zinc-900 text-xs leading-tight group-hover:text-[#FF4400] transition-colors line-clamp-1">
+                                  {evt.title}
+                                </h3>
+                                <span className="text-[9px] font-semibold text-zinc-500 block mt-0.5 font-mono">
+                                  {evt.date} | {evt.location}
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-1.5 text-[11px] border-t border-b border-zinc-150 py-1.5 text-zinc-650 font-sans">
+                                <div>
+                                  <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Total Runners</span>
+                                  <span className="text-zinc-900 font-extrabold text-xs">{evtRegistrations.length}</span>
+                                </div>
+                                <div>
+                                  <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Verified</span>
+                                  <span className="text-emerald-700 font-extrabold text-xs">{verifiedCount}</span>
+                                </div>
+                                <div>
+                                  <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Fee</span>
+                                  <span className="text-zinc-800 font-semibold text-xs">{evt.details.fee}</span>
+                                </div>
+                                <div>
+                                  <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Slots Left</span>
+                                  <span className="text-zinc-800 font-semibold text-xs">{evt.details.slotsLeft || 500}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="px-3 pb-3 pt-0.5 font-sans flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedRegEventTitle(evt.title);
+                                setSelectedEventFilter(evt.title);
+                              }}
+                              className="flex-1 h-8 rounded-md bg-orange-50 hover:bg-[#FF4400] text-[#FF4400] hover:text-white text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs border border-orange-200/80 hover:border-[#FF4400]"
+                            >
+                              <Users className="h-3 w-3" />
+                              <span>View ({evtRegistrations.length})</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteConfirmModal({
+                                  title: 'Archive Race Event?',
+                                  message: `Are you sure you want to archive "${evt.title}"? The event and its registration data will be moved to the Archive.`,
+                                  onConfirm: () => {
+                                    const updatedList = events.map(el => el.id === evt.id ? { ...el, isArchived: true } : el);
+                                    if (onUpdateEvents) onUpdateEvents(updatedList);
+                                    showToast(`Archived "${evt.title}" successfully.`);
+                                  }
+                                });
+                              }}
+                              className="h-8 px-2.5 rounded-md border border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs active:scale-[0.98]"
+                              title="Archive Event"
+                            >
+                              <Archive className="h-3 w-3" />
+                              <span>Archive</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-zinc-200">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setSelectedRegEventTitle(null)}
+                      className="h-8 px-3 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5 text-zinc-500" />
+                      <span>Back to Event Cards</span>
+                    </button>
+                    <div className="h-4 w-[1px] bg-zinc-200" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-zinc-500 font-medium">Registrations</span>
+                      <span className="text-zinc-300 text-xs">/</span>
+                      <h2 className="text-xs font-bold text-zinc-900">
+                        {selectedRegEventTitle === 'ALL' ? 'Master Registration List (All Events)' : selectedRegEventTitle}
+                      </h2>
+                    </div>
+                  </div>
+                  {selectedRegEventTitle && selectedRegEventTitle !== 'ALL' && (
+                    <button
+                      onClick={() => {
+                        setDeleteConfirmModal({
+                          title: 'Archive Event Registration?',
+                          message: `Are you sure you want to archive the entire registration for "${selectedRegEventTitle}"? The event and all its registration data will be moved to the Archive.`,
+                          onConfirm: () => {
+                            // Archive the event
+                            const updatedEvents = events.map(e =>
+                              e.title === selectedRegEventTitle ? { ...e, isArchived: true } : e
+                            );
+                            if (onUpdateEvents) onUpdateEvents(updatedEvents);
+
+                            // Archive all its registrations
+                            const updatedRegs = registrations.map(r =>
+                              r.eventTitle === selectedRegEventTitle
+                                ? { ...r, isArchived: true }
+                                : r
+                            );
+                            onUpdateRegistrations(updatedRegs);
+
+                            showToast(`Archived "${selectedRegEventTitle}" and all its registration data.`);
+                            setSelectedRegEventTitle(null);
+                          }
+                        });
+                      }}
+                      className="h-8 px-3 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+                    >
+                      <Archive className="h-3.5 w-3.5" />
+                      <span>Archive Data</span>
+                    </button>
+                  )}
+                </div>
 
             {/* Filter / Control Bar */}
-            <div className="bg-white rounded-xl border border-zinc-200/85 p-5 shadow-sm space-y-4">
+            <div className="bg-white rounded-xl border border-zinc-200/80 p-5 shadow-xs space-y-4">
               <div className="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
                 {/* Search */}
                 <div className="relative w-full lg:max-w-md">
-                  <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-zinc-400" />
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by name, email, bib number..."
-                    className="w-full rounded-[7px] border border-zinc-200 bg-white pl-9.5 pr-4 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand font-medium shadow-sm transition-all"
+                    className="w-full h-9 rounded-lg border border-zinc-200 bg-white pl-9.5 pr-4 text-xs text-zinc-800 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium outline-none transition-all"
                   />
                 </div>
 
@@ -1216,45 +1502,26 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       resetNewRegForm();
                       onNavigate('admin-forms');
                     }}
-                    className="w-full lg:w-auto rounded-[7px] bg-[#FF4400] hover:bg-[#E63D00] px-4 py-2 text-xs font-bold text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-brand/10 active:scale-[0.98]"
+                    className="w-full lg:w-auto h-9 rounded-lg bg-[#FF4400] hover:bg-[#E63D00] px-4 text-xs font-semibold text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs active:scale-[0.98]"
                   >
                     <Plus className="h-4 w-4" />
-                    New registration
+                    New Registration
                   </button>
                   <button
                     onClick={exportToCSV}
-                    className="w-full lg:w-auto rounded-[7px] bg-white hover:bg-zinc-50 px-4 py-2 text-xs font-bold text-zinc-700 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm border border-zinc-200 active:scale-[0.98]"
+                    className="w-full lg:w-auto h-9 rounded-lg bg-white hover:bg-zinc-50 px-4 text-xs font-semibold text-zinc-700 transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs border border-zinc-200 active:scale-[0.98]"
                   >
                     <Download className="h-4 w-4" />
-                    Export sheet
+                    Export Sheet
                   </button>
                 </div>
               </div>
 
               {/* Filters list */}
-              <div className="flex flex-wrap gap-3 pt-2 border-t border-zinc-150 items-center">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 mr-2">
+              <div className="flex flex-wrap gap-3 pt-3 border-t border-zinc-150 items-center">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 mr-2">
                   <Filter className="h-3.5 w-3.5 text-zinc-400" />
                   <span>Filters</span>
-                </div>
-
-                {/* Event Title filter */}
-                <div className="relative">
-                  <select
-                    value={selectedEventFilter}
-                    onChange={(e) => setSelectedEventFilter(e.target.value)}
-                    className="rounded-[7px] border border-zinc-200 bg-white pl-3.5 pr-8 py-2 text-xs text-zinc-600 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors appearance-none"
-                  >
-                    <option value="">All events</option>
-                    {distinctEvents.map(evt => (
-                      <option key={evt} value={evt} className="bg-white">{evt}</option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-400">
-                    <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                    </svg>
-                  </div>
                 </div>
 
                 {/* Payment filter */}
@@ -1262,15 +1529,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   <select
                     value={selectedPaymentFilter}
                     onChange={(e) => setSelectedPaymentFilter(e.target.value)}
-                    className="rounded-[7px] border border-zinc-200 bg-white pl-3.5 pr-8 py-2 text-xs text-zinc-600 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors appearance-none"
+                    className="h-8 rounded-lg border border-zinc-200 bg-white pl-3 pr-8 text-xs text-zinc-700 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] cursor-pointer font-medium shadow-xs transition-colors appearance-none outline-none"
                   >
-                    <option value="" className="bg-white">All payment methods</option>
+                    <option value="" className="bg-white">All Payment Methods</option>
                     <option value="GCash" className="bg-white">GCash</option>
                     <option value="Maya" className="bg-white">Maya</option>
                     <option value="Bank" className="bg-white">Bank Deposit</option>
                     <option value="Card" className="bg-white">Credit/Debit Card</option>
                   </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-400">
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-zinc-400">
                     <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                       <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                     </svg>
@@ -1282,14 +1549,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   <select
                     value={selectedStatusFilter}
                     onChange={(e) => setSelectedStatusFilter(e.target.value)}
-                    className="rounded-[7px] border border-zinc-200 bg-white pl-3.5 pr-8 py-2 text-xs text-zinc-600 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors appearance-none"
+                    className="h-8 rounded-lg border border-zinc-200 bg-white pl-3 pr-8 text-xs text-zinc-700 focus:border-[#FF4400] focus:ring-1 focus:ring-[#FF4400] cursor-pointer font-medium shadow-xs transition-colors appearance-none outline-none"
                   >
-                    <option value="" className="bg-white">All statuses</option>
+                    <option value="" className="bg-white">All Statuses</option>
                     <option value="Verified" className="bg-white">Verified</option>
                     <option value="Pending" className="bg-white">Pending</option>
                     <option value="Cancelled" className="bg-white">Cancelled</option>
                   </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-400">
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-zinc-400">
                     <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                       <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                     </svg>
@@ -1307,28 +1574,28 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     }}
                     className="text-xs font-semibold text-[#FF4400] hover:text-[#E63D00] transition-colors ml-auto cursor-pointer"
                   >
-                    Clear filters
+                    Clear Filters
                   </button>
                 )}
               </div>
             </div>
 
             {/* Spreadsheet Table */}
-            <div className="bg-white rounded-xl border border-zinc-200/85 shadow-sm overflow-hidden font-sans">
+            <div className="bg-white rounded-xl border border-zinc-200/80 shadow-xs overflow-hidden font-sans">
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-left text-xs font-semibold text-zinc-600">
+                <table className="w-full border-collapse text-left text-xs font-medium text-zinc-700">
                   <thead>
-                    <tr className="bg-zinc-50 border-b border-zinc-200 text-[10px] font-bold text-zinc-500 uppercase tracking-wider select-none font-sans">
-                      <th className="px-5 py-4">Bib #</th>
-                      <th className="px-5 py-4">Runner Name</th>
-                      <th className="px-5 py-4">Email Address</th>
-                      <th className="px-5 py-4">Phone</th>
-                      <th className="px-5 py-4">Category</th>
-                      <th className="px-5 py-4">Dist / Size</th>
-                      <th className="px-5 py-4">Method</th>
-                      <th className="px-5 py-4">Ref # / Date</th>
-                      <th className="px-5 py-4 text-center">Status</th>
-                      <th className="px-5 py-4 text-right">Actions</th>
+                    <tr className="bg-zinc-50/80 border-b border-zinc-200/80 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider select-none">
+                      <th className="px-5 py-3.5">Bib #</th>
+                      <th className="px-5 py-3.5">Runner Name</th>
+                      <th className="px-5 py-3.5">Email Address</th>
+                      <th className="px-5 py-3.5">Phone</th>
+                      <th className="px-5 py-3.5">Category</th>
+                      <th className="px-5 py-3.5">Dist / Size</th>
+                      <th className="px-5 py-3.5">Method</th>
+                      <th className="px-5 py-3.5">Ref # / Date</th>
+                      <th className="px-5 py-3.5 text-center">Status</th>
+                      <th className="px-5 py-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-100">
@@ -1346,83 +1613,100 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                             if (onSelectReg) onSelectReg(reg.id);
                             onNavigate('admin-registration-details');
                           }}
-                          className="hover:bg-zinc-50/70 transition-colors cursor-pointer text-zinc-600"
+                          className="hover:bg-zinc-50/60 transition-colors cursor-pointer text-zinc-700"
                         >
                           {/* Bib */}
-                          <td className="px-5 py-4 font-extrabold text-zinc-900">
+                          <td className="px-5 py-3.5 font-bold text-zinc-900">
                             {reg.registeredBib ? `${reg.registeredBib}` : '—'}
                           </td>
                           {/* Name */}
-                          <td className="px-5 py-4 text-xs font-bold text-zinc-900">
+                          <td className="px-5 py-3.5 text-xs font-semibold text-zinc-900">
                             {reg.firstName} {reg.lastName}
-                            <span className="text-[10px] block font-medium text-zinc-500 truncate max-w-[160px] mt-0.5 font-mono">
+                            <span className="text-[11px] block font-normal text-zinc-500 truncate max-w-[160px] mt-0.5">
                               {reg.eventTitle || 'Timing Portal'}
                             </span>
                           </td>
                           {/* Email */}
-                          <td className="px-5 py-4 text-zinc-500 font-medium">
+                          <td className="px-5 py-3.5 text-zinc-500 font-normal">
                             {reg.email}
                           </td>
                           {/* Phone */}
-                          <td className="px-5 py-4 text-zinc-500 font-medium text-[11px]">
+                          <td className="px-5 py-3.5 text-zinc-500 font-normal text-xs">
                             {reg.phone || '—'}
                           </td>
                           {/* Gender */}
-                          <td className="px-5 py-4 text-zinc-500 font-semibold text-[11px]">
+                          <td className="px-5 py-3.5 text-zinc-500 font-medium text-xs">
                             {reg.gender || '—'}
                           </td>
                           {/* Distance & Size */}
-                          <td className="px-5 py-4 text-[11px]">
-                            <span className="text-[#FF4400] font-bold block">{reg.distance}</span>
-                            <span className="text-zinc-500 font-medium text-[10px] block truncate max-w-[100px]">{reg.size ? reg.size.replace('Unisex - ', '') : '—'}</span>
+                          <td className="px-5 py-3.5 text-xs">
+                            <span className="text-[#FF4400] font-semibold block">{reg.distance}</span>
+                            <span className="text-zinc-500 font-normal text-[11px] block truncate max-w-[100px]">{reg.size ? reg.size.replace('Unisex - ', '') : '—'}</span>
                           </td>
                           {/* Method */}
-                          <td className="px-5 py-4 text-[11px] font-semibold text-zinc-700">
+                          <td className="px-5 py-3.5 text-xs font-medium text-zinc-700">
                             {reg.paymentMethod}
                           </td>
                           {/* Ref # / Date */}
-                          <td className="px-5 py-4 text-[10px] leading-tight text-zinc-500">
-                            <span className="font-semibold text-zinc-750 block truncate max-w-[120px] font-sans">{reg.referenceNumber}</span>
-                            <span className="text-[9px] font-medium block mt-0.5 font-mono">
+                          <td className="px-5 py-3.5 text-xs leading-tight text-zinc-500">
+                            <span className="font-semibold text-zinc-800 block truncate max-w-[120px]">{reg.referenceNumber}</span>
+                            <span className="text-[11px] font-normal text-zinc-400 block mt-0.5">
                               {reg.registrationDate ? new Date(reg.registrationDate).toLocaleDateString() : '—'}
                             </span>
                           </td>
                           {/* Status */}
-                          <td className="px-5 py-4 text-center">
-                            <span className={`inline-block rounded-[4px] px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase border font-mono ${reg.status === 'Verified'
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              : reg.status === 'Cancelled'
-                                ? 'bg-red-50 text-red-700 border-red-200'
-                                : 'bg-amber-50 text-amber-700 border-amber-200'
+                          <td className="px-5 py-3.5 text-center">
+                            <span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium ${reg.status === 'Verified'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                                : reg.status === 'Cancelled'
+                                  ? 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                                  : 'bg-amber-50 text-amber-700 border border-amber-200/60'
                               }`}>
                               {reg.status || 'Pending'}
                             </span>
                           </td>
                           {/* Actions */}
-                          <td className="px-5 py-4 text-right">
-                            <div className="flex gap-2 justify-end" onClick={(e) => e.stopPropagation()}>
+                          <td className="px-5 py-3.5 text-right">
+                            <div className="flex gap-1.5 justify-end" onClick={(e) => e.stopPropagation()}>
                               {reg.status !== 'Verified' && (
                                 <button
                                   onClick={() => handleVerifyStatus(reg.id, 'Verified')}
                                   title="Verify Runner"
-                                  className="h-7 w-7 rounded-[7px] border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 flex items-center justify-center transition-all cursor-pointer text-zinc-600 active:scale-[0.98] shadow-sm"
+                                  className="h-7 w-7 rounded-md border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-emerald-300 flex items-center justify-center transition-all cursor-pointer text-zinc-600 hover:text-emerald-600 active:scale-[0.98] shadow-xs"
                                 >
-                                  <Check className="h-4 w-4" />
+                                  <Check className="h-3.5 w-3.5" />
                                 </button>
                               )}
                               {reg.status !== 'Cancelled' && (
                                 <button
                                   onClick={() => handleVerifyStatus(reg.id, 'Cancelled')}
                                   title="Cancel Registration"
-                                  className="h-7 w-7 rounded-[7px] border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 flex items-center justify-center transition-all cursor-pointer text-zinc-600 active:scale-[0.98] shadow-sm"
+                                  className="h-7 w-7 rounded-md border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-amber-300 flex items-center justify-center transition-all cursor-pointer text-zinc-600 hover:text-amber-600 active:scale-[0.98] shadow-xs"
                                 >
-                                  <X className="h-4 w-4" />
+                                  <X className="h-3.5 w-3.5" />
                                 </button>
                               )}
                               <button
-                                onClick={() => handleDeleteRegistration(reg.id)}
+                                onClick={() => {
+                                  const updatedRegs = registrations.map(r => r.id === reg.id ? { ...r, isArchived: true } : r);
+                                  onUpdateRegistrations(updatedRegs);
+                                  showToast(`Archived record for ${reg.firstName} ${reg.lastName}`);
+                                }}
+                                title="Archive Record"
+                                className="h-7 w-7 rounded-md border border-zinc-200 bg-white hover:bg-amber-50 hover:border-amber-300 flex items-center justify-center transition-all cursor-pointer text-zinc-600 hover:text-amber-600 active:scale-[0.98] shadow-xs"
+                              >
+                                <Archive className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setDeleteConfirmModal({
+                                    title: 'Delete Runner Record?',
+                                    message: `Are you sure you want to permanently delete registration record for "${reg.firstName} ${reg.lastName}"?`,
+                                    onConfirm: () => handleDeleteRegistration(reg.id)
+                                  });
+                                }}
                                 title="Delete Record"
-                                className="h-7 w-7 rounded-[7px] border border-zinc-200 bg-zinc-50 hover:bg-red-50 hover:text-red-650 flex items-center justify-center transition-all cursor-pointer text-zinc-600 active:scale-[0.98] shadow-sm"
+                                className="h-7 w-7 rounded-md border border-zinc-200 bg-white hover:bg-rose-50 hover:border-rose-300 flex items-center justify-center transition-all cursor-pointer text-zinc-600 hover:text-rose-600 active:scale-[0.98] shadow-xs"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
@@ -1437,6 +1721,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </div>
           </div>
         )}
+      </div>
+    )}
 
         {view === 'forms' && (() => {
           const selectedEvent = events.find(e => e.title === newReg.eventTitle) || events[0];
@@ -1454,39 +1740,44 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               earlyBirdDiscount = Math.round(baseFee * (selectedEvent.earlyBirdDiscountPercent / 100));
             }
           }
-          const totalFee = Math.max(0, baseFee - earlyBirdDiscount);
+
+          const hasJersey = Boolean(newReg.size && newReg.size !== 'None / No Jersey' && newReg.size !== 'None');
+          const jerseyFee = hasJersey ? (selectedEvent?.jerseyFee !== undefined ? selectedEvent.jerseyFee : 250) : 0;
+          const totalFee = Math.max(0, baseFee + jerseyFee - earlyBirdDiscount);
           const inclusionsList = selectedEvent?.inclusions || selectedEvent?.details?.perks || [];
 
           return (
-            <div className="bg-white p-6 md:p-8 w-full animate-fade-in font-sans text-zinc-800">
+            <div className="w-full max-w-5xl mx-auto space-y-4 animate-fade-in font-sans text-zinc-800">
 
-              <div className="mb-8">
-                <h1 className="font-sans text-3xl font-extrabold tracking-tight text-zinc-900">
-                  Runner <span className="font-serif italic font-bold text-brand">Registration</span>
-                </h1>
-                <p className="mt-2 text-sm text-zinc-500 font-medium">
-                  {editingRegId
-                    ? 'Update profile details to verify the slot in the administrative dashboard.'
-                    : 'Manually register a runner profile to verify slots and timing tags.'
-                  }
-                </p>
+              <div className="pb-3 border-b border-zinc-200/80 flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold tracking-tight text-zinc-900">
+                    Runner Registration Profile
+                  </h2>
+                  <p className="text-xs text-zinc-600 font-medium mt-0.5">
+                    {editingRegId
+                      ? 'Update profile details to verify the slot in the administrative dashboard.'
+                      : 'Manually register a runner profile to verify slots and timing tags.'
+                    }
+                  </p>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
                 {/* Form Column */}
-                <form onSubmit={handleAddRegSubmit} className="lg:col-span-2 space-y-8 text-xs font-semibold text-zinc-650">
+                <form onSubmit={handleAddRegSubmit} className="lg:col-span-2 space-y-4 text-xs font-medium text-zinc-700">
 
                   {/* Personal Data */}
-                  <div className="space-y-5">
-                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-900 pb-1">
-                      PERSONAL DATA
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900 pb-1.5 border-b border-zinc-200/80">
+                      Personal Data
                     </h3>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          FIRST NAME
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          First Name
                         </label>
                         <input
                           type="text"
@@ -1494,12 +1785,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           value={newReg.firstName}
                           onChange={(e) => setNewReg(prev => ({ ...prev, firstName: e.target.value }))}
                           placeholder="e.g. Juan"
-                          className="w-full rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none transition-colors shadow-sm font-sans"
+                          className="w-full h-9 rounded-lg border border-zinc-300 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none transition-all shadow-xs"
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          LAST NAME
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Last Name
                         </label>
                         <input
                           type="text"
@@ -1507,15 +1798,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           value={newReg.lastName}
                           onChange={(e) => setNewReg(prev => ({ ...prev, lastName: e.target.value }))}
                           placeholder="e.g. Dela Cruz"
-                          className="w-full rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none transition-colors shadow-sm font-sans"
+                          className="w-full h-9 rounded-lg border border-zinc-300 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none transition-all shadow-xs"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          EMAIL ADDRESS
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Email Address
                         </label>
                         <input
                           type="email"
@@ -1523,12 +1814,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           value={newReg.email}
                           onChange={(e) => setNewReg(prev => ({ ...prev, email: e.target.value }))}
                           placeholder="jundelacruz@gmail.com"
-                          className="w-full rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none transition-colors shadow-sm font-sans"
+                          className="w-full h-9 rounded-lg border border-zinc-300 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none transition-all shadow-xs"
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          PHONE NUMBER
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Phone Number
                         </label>
                         <input
                           type="text"
@@ -1536,26 +1827,26 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           value={newReg.phone}
                           onChange={(e) => setNewReg(prev => ({ ...prev, phone: e.target.value }))}
                           placeholder="09123456789"
-                          className="w-full rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none transition-colors shadow-sm font-sans"
+                          className="w-full h-9 rounded-lg border border-zinc-300 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none transition-all shadow-xs"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          GENDER IDENTIFICATION
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Gender Identification
                         </label>
                         <div className="relative">
                           <select
                             value={newReg.gender}
                             onChange={(e) => setNewReg(prev => ({ ...prev, gender: e.target.value }))}
-                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                            className="w-full h-9 rounded-lg border border-zinc-300 bg-white pl-3.5 pr-8 text-xs text-zinc-900 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none cursor-pointer appearance-none transition-all shadow-xs"
                           >
                             <option value="Male" className="bg-white">Male</option>
                             <option value="Female" className="bg-white">Female</option>
                           </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                             </svg>
@@ -1563,15 +1854,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </div>
                       </div>
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          JERSEY SIZE (OPTIONAL)
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Jersey Size (Optional)
                         </label>
                         <div className="relative">
                           <select
                             value={newReg.size}
                             onChange={(e) => setNewReg(prev => ({ ...prev, size: e.target.value }))}
-                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                            className="w-full h-9 rounded-lg border border-zinc-300 bg-white pl-3.5 pr-8 text-xs text-zinc-900 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none cursor-pointer appearance-none transition-all shadow-xs"
                           >
+                            <option value="None / No Jersey" className="bg-white">None (No Jersey)</option>
                             <option value="Unisex - Extra Small (XS)" className="bg-white">Extra Small (XS)</option>
                             <option value="Unisex - Small (S)" className="bg-white">Small (S)</option>
                             <option value="Unisex - Medium (M)" className="bg-white">Medium (M)</option>
@@ -1580,7 +1872,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                             <option value="Unisex - Double Extra Large (2XL)" className="bg-white">Double Extra Large (2XL)</option>
                             <option value="Unisex - Triple Extra Large (3XL)" className="bg-white">Triple Extra Large (3XL)</option>
                           </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                             </svg>
@@ -1591,27 +1883,27 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   </div>
 
                   {/* Event Selection */}
-                  <div className="space-y-5">
-                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-900 pb-1">
-                      EVENT SELECTION
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900 pb-1.5 border-b border-zinc-200/80">
+                      Event Selection
                     </h3>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          SELECTED EVENT
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Selected Event
                         </label>
                         <div className="relative">
                           <select
                             value={newReg.eventTitle}
                             onChange={(e) => handleNewRegEventChange(e.target.value)}
-                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                            className="w-full h-9 rounded-lg border border-zinc-300 bg-white pl-3.5 pr-8 text-xs text-zinc-900 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none cursor-pointer appearance-none transition-all shadow-xs"
                           >
                             {events.map(evt => (
                               <option key={evt.id} value={evt.title} className="bg-white">{evt.title}</option>
                             ))}
                           </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                             </svg>
@@ -1619,20 +1911,20 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </div>
                       </div>
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          SELECTED DISTANCE
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Selected Distance
                         </label>
                         <div className="relative">
                           <select
                             value={newReg.distance}
                             onChange={(e) => setNewReg(prev => ({ ...prev, distance: e.target.value }))}
-                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                            className="w-full h-9 rounded-lg border border-zinc-300 bg-white pl-3.5 pr-8 text-xs text-zinc-900 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none cursor-pointer appearance-none transition-all shadow-xs"
                           >
                             {((events.find(e => e.title === newReg.eventTitle))?.distances || ['3K', '5K', '10K']).map(dist => (
                               <option key={dist} value={dist} className="bg-white">{dist}</option>
                             ))}
                           </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                             </svg>
@@ -1641,23 +1933,23 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          PAYMENT METHOD
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Payment Method
                         </label>
                         <div className="relative">
                           <select
                             value={newReg.paymentMethod}
                             onChange={(e) => setNewReg(prev => ({ ...prev, paymentMethod: e.target.value }))}
-                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                            className="w-full h-9 rounded-lg border border-zinc-300 bg-white pl-3.5 pr-8 text-xs text-zinc-900 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none cursor-pointer appearance-none transition-all shadow-xs"
                           >
                             <option value="GCash" className="bg-white">GCash</option>
                             <option value="Maya" className="bg-white">Maya</option>
                             <option value="Bank" className="bg-white">Bank Deposit</option>
                             <option value="Card" className="bg-white">Credit/Debit Card</option>
                           </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                             </svg>
@@ -1665,8 +1957,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </div>
                       </div>
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          REFERENCE NUMBER
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Reference Number
                         </label>
                         <input
                           type="text"
@@ -1674,27 +1966,27 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           value={newReg.referenceNumber}
                           onChange={(e) => setNewReg(prev => ({ ...prev, referenceNumber: e.target.value }))}
                           placeholder="e.g. 1029384756102"
-                          className="w-full rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none transition-colors shadow-sm font-sans"
+                          className="w-full h-9 rounded-lg border border-zinc-300 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none transition-all shadow-xs"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          REGISTRATION STATUS
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Registration Status
                         </label>
                         <div className="relative">
                           <select
                             value={newReg.status}
                             onChange={(e) => setNewReg(prev => ({ ...prev, status: e.target.value as any }))}
-                            className="w-full rounded-md border border-zinc-200 bg-white pl-4 pr-10 py-3 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors font-sans appearance-none"
+                            className="w-full h-9 rounded-lg border border-zinc-300 bg-white pl-3.5 pr-8 text-xs text-zinc-900 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none cursor-pointer appearance-none transition-all shadow-xs"
                           >
                             <option value="Verified" className="bg-white">Verified</option>
                             <option value="Pending" className="bg-white">Pending</option>
                             <option value="Cancelled" className="bg-white">Cancelled</option>
                           </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                             </svg>
@@ -1702,56 +1994,56 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </div>
                       </div>
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          ASSIGNED BIB NUMBER (OPTIONAL)
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Assigned Bib Number (Optional)
                         </label>
                         <input
                           type="text"
                           value={newReg.registeredBib}
                           onChange={(e) => setNewReg(prev => ({ ...prev, registeredBib: e.target.value.replace(/\D/g, '') }))}
                           placeholder="Auto-generated if empty"
-                          className="w-full rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none transition-colors shadow-sm font-sans font-mono"
+                          className="w-full h-9 rounded-lg border border-zinc-300 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none transition-all shadow-xs font-mono"
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Emergency Contact */}
-                  <div className="space-y-5">
-                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-900 pb-1">
-                      EMERGENCY CONTACT
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900 pb-1.5 border-b border-zinc-200/80">
+                      Emergency Contact
                     </h3>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          EMERGENCY NAME
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Emergency Contact Name
                         </label>
                         <input
                           type="text"
                           value={newReg.emergencyContact}
                           onChange={(e) => setNewReg(prev => ({ ...prev, emergencyContact: e.target.value }))}
                           placeholder="Maria Dela Cruz"
-                          className="w-full rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none transition-colors shadow-sm font-sans"
+                          className="w-full h-9 rounded-lg border border-zinc-300 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none transition-all shadow-xs"
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 block">
-                          EMERGENCY PHONE NUMBER
+                        <label className="text-[12px] font-bold text-zinc-800 mb-1 block">
+                          Emergency Phone Number
                         </label>
                         <input
                           type="text"
                           value={newReg.emergencyPhone}
                           onChange={(e) => setNewReg(prev => ({ ...prev, emergencyPhone: e.target.value }))}
                           placeholder="e.g. 09187654321"
-                          className="w-full rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none transition-colors shadow-sm font-sans"
+                          className="w-full h-9 rounded-lg border border-zinc-300 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-semibold outline-none transition-all shadow-xs"
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-4 pt-6 font-sans">
+                  <div className="flex gap-3 pt-2 font-sans">
                     <button
                       type="button"
                       onClick={() => {
@@ -1763,50 +2055,50 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           onNavigate('admin-registrations');
                         }
                       }}
-                      className="flex-1 rounded-[7px] border border-zinc-200 bg-white py-3.5 text-center text-sm font-sans font-bold text-zinc-700 hover:bg-zinc-50 transition-colors uppercase tracking-widest cursor-pointer shadow-sm"
+                      className="flex-1 h-9.5 rounded-lg border border-zinc-300 bg-white hover:bg-zinc-50 text-xs font-bold text-zinc-800 transition-all cursor-pointer shadow-xs"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 rounded-[7px] bg-[#FF4400] hover:bg-[#E63D00] py-3.5 text-center text-sm font-sans font-bold text-white transition-colors uppercase tracking-widest cursor-pointer shadow-md shadow-brand/10"
+                      className="flex-1 h-9.5 rounded-lg bg-[#FF4400] hover:bg-[#E63D00] text-xs font-bold text-white transition-all cursor-pointer shadow-xs active:scale-[0.98]"
                     >
-                      {editingRegId ? 'Save changes' : 'Proceed to Register'}
+                      {editingRegId ? 'Save Changes' : 'Proceed to Register'}
                     </button>
                   </div>
                 </form>
 
                 {/* Right Column: Registration Summary */}
                 <div className="lg:col-span-1">
-                  <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm space-y-5 text-left font-sans lg:sticky lg:top-6">
-                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-900">
-                      REGISTRATION SUMMARY
+                  <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-xs space-y-4 text-left font-sans">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900">
+                      Registration Summary
                     </h3>
 
-                    <div className="border-t border-zinc-150 pt-4 space-y-4">
+                    <div className="border-t border-zinc-200/80 pt-3 space-y-3">
                       <div>
-                        <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
-                          SELECTED EVENT
+                        <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
+                          Selected Event
                         </span>
-                        <span className="text-sm font-bold text-zinc-900 mt-1 block">
+                        <span className="text-xs font-bold text-zinc-900 mt-0.5 block truncate">
                           {newReg.eventTitle || '—'}
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
-                            LOCATION
+                          <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
+                            Location
                           </span>
-                          <span className="text-xs font-semibold text-zinc-750 mt-1 block">
+                          <span className="text-xs font-semibold text-zinc-800 mt-0.5 block truncate">
                             {selectedEvent?.location || '—'}
                           </span>
                         </div>
                         <div>
-                          <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
-                            RACE DATE
+                          <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
+                            Race Date
                           </span>
-                          <span className="text-xs font-semibold text-zinc-750 mt-1 block">
+                          <span className="text-xs font-semibold text-zinc-800 mt-0.5 block">
                             {formattedRaceDate}
                           </span>
                         </div>
@@ -1814,14 +2106,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     </div>
 
                     {inclusionsList.length > 0 && (
-                      <div className="border-t border-zinc-150 pt-4">
-                        <span className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest block">
-                          INCLUSIONS FOR {newReg.distance || '—'} EARLY BIRD
+                      <div className="border-t border-zinc-200/80 pt-3">
+                        <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
+                          Inclusions for {newReg.distance || '—'} Early Bird
                         </span>
-                        <ul className="mt-2.5 space-y-1.5 text-xs text-zinc-550 font-semibold list-none pl-0">
+                        <ul className="mt-2 space-y-1 text-xs text-zinc-700 font-medium list-none pl-0">
                           {inclusionsList.map((inclusion, idx) => (
-                            <li key={idx} className="flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 flex-shrink-0" />
+                            <li key={idx} className="flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 flex-shrink-0" />
                               {inclusion}
                             </li>
                           ))}
@@ -1830,25 +2122,36 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     )}
 
                     {/* Charge Breakdown */}
-                    <div className="border-t border-zinc-150 pt-4 space-y-2">
-                      <div className="flex justify-between items-center text-xs text-zinc-550 font-semibold">
+                    <div className="border-t border-zinc-200/80 pt-3 space-y-1.5">
+                      <div className="flex justify-between items-center text-xs text-zinc-700 font-medium">
                         <span>Base Fee ({newReg.distance || '—'})</span>
-                        <span>P {baseFee.toLocaleString()}</span>
+                        <span className="font-semibold text-zinc-900">₱{baseFee.toLocaleString()}</span>
                       </div>
+                      {hasJersey ? (
+                        <div className="flex justify-between items-center text-xs text-zinc-700 font-medium">
+                          <span>Jersey Add-on ({newReg.size ? newReg.size.replace('Unisex - ', '') : 'With Jersey'})</span>
+                          <span className="font-semibold text-zinc-900">+ ₱{jerseyFee.toLocaleString()}</span>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between items-center text-xs text-zinc-500 font-medium">
+                          <span>Jersey Add-on</span>
+                          <span className="font-medium text-zinc-500">No Jersey (₱0)</span>
+                        </div>
+                      )}
                       {earlyBirdDiscount > 0 ? (
-                        <div className="flex justify-between items-center text-xs text-emerald-600 font-extrabold font-mono">
+                        <div className="flex justify-between items-center text-xs text-emerald-600 font-semibold font-mono">
                           <span>Early Bird Discount ({selectedEvent?.earlyBirdDiscountPercent || 0}%)</span>
-                          <span>- P {earlyBirdDiscount.toLocaleString()}</span>
+                          <span>- ₱{earlyBirdDiscount.toLocaleString()}</span>
                         </div>
                       ) : null}
                     </div>
 
-                    <div className="border-t border-zinc-150 pt-4 flex justify-between items-center">
-                      <span className="text-sm font-bold text-zinc-900">
+                    <div className="border-t border-zinc-200/80 pt-3 flex justify-between items-center">
+                      <span className="text-xs font-bold text-zinc-900">
                         Total Charge
                       </span>
-                      <span className="text-sm font-extrabold text-brand">
-                        P {totalFee.toLocaleString()}
+                      <span className="text-base font-bold text-[#FF4400]">
+                        ₱{totalFee.toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -1860,13 +2163,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         })()}
 
         {view === 'settings' && (
-          <div className="bg-white p-6 md:p-8 w-full animate-fade-in font-sans select-none">
+          <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in font-sans select-none text-zinc-800">
 
-            <div className="mb-8">
-              <h2 className="text-2xl font-black uppercase tracking-tight text-zinc-900">
+            <div className="pb-4 border-b border-zinc-200/80">
+              <h2 className="text-xl font-bold tracking-tight text-zinc-900">
                 Hero & Promotion Settings
               </h2>
-              <p className="mt-1.5 text-sm text-zinc-500 font-medium">
+              <p className="mt-1 text-xs text-zinc-500 font-medium">
                 Configure which race is promoted in the Hero section and customize its appearance.
               </p>
             </div>
@@ -1874,7 +2177,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             <div className="space-y-6">
               {/* Select Promoted Event */}
               <div>
-                <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 font-sans">
+                <label className="block text-xs font-semibold text-zinc-700 mb-2">
                   Select Promoted Event / Race
                 </label>
                 <div className="relative">
@@ -1888,7 +2191,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         });
                       }
                     }}
-                    className="w-full rounded-[7px] border border-zinc-200 bg-white pl-4 pr-10 py-3.5 text-sm text-zinc-900 focus:border-brand focus:outline-none cursor-pointer font-medium shadow-sm transition-colors animate-fade-in appearance-none"
+                    className="w-full h-10 rounded-lg border border-zinc-200 bg-white pl-3.5 pr-10 text-xs text-zinc-900 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium outline-none cursor-pointer appearance-none transition-all"
                   >
                     <option value="" className="bg-white">Automatic (Resolve Nearest Upcoming Event)</option>
                     {events.map((evt) => (
@@ -1897,30 +2200,30 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       </option>
                     ))}
                   </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-400">
                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                       <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                     </svg>
                   </div>
                 </div>
-                <p className="text-xs text-zinc-500 font-medium mt-1.5">
+                <p className="text-xs text-zinc-500 font-normal mt-1.5">
                   The selected event's name will replace the Hero text, and the countdown clock will target its registration deadline.
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <label className="block text-xs font-extrabold uppercase tracking-wider text-zinc-900 mb-2 font-sans">
+              <div className="space-y-3 border-t border-zinc-200/80 pt-6">
+                <label className="block text-xs font-semibold text-zinc-700 mb-2">
                   Hero Section Background Image
                 </label>
 
-                <div className="relative h-44 rounded-2xl border border-zinc-200 overflow-hidden shadow-sm bg-zinc-50 flex items-center justify-center">
+                <div className="relative h-44 rounded-xl border border-zinc-200 overflow-hidden shadow-xs bg-zinc-50 flex items-center justify-center">
                   <img
                     src={heroSettings?.heroBackgroundImage || '/images/hero-bg.png'}
                     alt="Hero Background Preview"
                     className="h-full w-full object-cover opacity-80"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent flex items-end p-4">
-                    <span className="text-[10px] font-mono text-white/95 overflow-hidden text-ellipsis whitespace-nowrap max-w-full">
+                    <span className="text-[11px] font-mono text-white/95 overflow-hidden text-ellipsis whitespace-nowrap max-w-full">
                       Active Image: {heroSettings?.heroBackgroundImage}
                     </span>
                   </div>
@@ -1928,7 +2231,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-600 block font-sans mb-1">Custom URL</span>
+                    <span className="text-xs font-semibold text-zinc-700 block">Custom URL</span>
                     <input
                       type="text"
                       value={heroSettings?.heroBackgroundImage || ''}
@@ -1941,13 +2244,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         }
                       }}
                       placeholder="e.g. https://example.com/image.jpg"
-                      className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-brand focus:outline-none shadow-sm"
+                      className="w-full h-10 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:border-[#FF4400] focus:ring-2 focus:ring-[#FF4400]/10 font-medium outline-none transition-all"
                     />
                   </div>
 
-                  <div className="space-y-1.5 font-sans">
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-600 block font-sans mb-1">Upload File</span>
-                    <div className="border border-dashed border-zinc-200 hover:border-brand rounded-lg p-3.5 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-brand/[0.01] flex items-center justify-center gap-2 h-[46px] shadow-sm">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-semibold text-zinc-700 block">Upload File</span>
+                    <div className="border border-dashed border-zinc-200 hover:border-[#FF4400] rounded-lg p-3 text-center transition-colors cursor-pointer relative bg-zinc-50 hover:bg-orange-50/20 flex items-center justify-center gap-2 h-10 shadow-xs">
                       <input
                         type="file"
                         accept="image/*"
@@ -1969,13 +2272,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       />
                       <ImageIcon className="h-4 w-4 text-zinc-500" />
-                      <span className="text-xs font-bold text-zinc-700">Choose custom file</span>
+                      <span className="text-xs font-semibold text-zinc-700">Choose custom file</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-600 block font-sans mb-1">Presets</span>
+                <div className="space-y-2 pt-2">
+                  <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block mb-1">Presets</span>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
                       { name: 'Original', url: '/images/hero-bg.png' },
@@ -1996,9 +2299,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                               });
                             }
                           }}
-                          className={`rounded-lg border py-3 px-4 text-center text-xs font-bold transition-all cursor-pointer truncate ${isActive
-                            ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-sm font-black font-sans'
-                            : 'border-zinc-200 text-zinc-600 bg-white hover:border-brand hover:text-brand'
+                          className={`h-10 rounded-lg border px-3 text-center text-xs font-semibold transition-all cursor-pointer truncate ${isActive
+                              ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-xs'
+                              : 'border-zinc-200 text-zinc-700 bg-white hover:border-[#FF4400] hover:text-[#FF4400]'
                             }`}
                         >
                           {preset.name}
@@ -2009,176 +2312,661 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 </div>
               </div>
 
-              <div className="pt-6 flex justify-end">
+              <div className="pt-6 border-t border-zinc-200/80 flex justify-end">
                 <button
                   type="button"
                   onClick={() => {
                     showToast('Hero and Promotion settings saved successfully!');
                     onNavigate('admin-dashboard');
                   }}
-                  className="rounded-[7px] bg-[#FF4400] hover:bg-[#E63D00] text-white text-sm font-bold py-3.5 px-8 cursor-pointer transition-all shadow-md shadow-brand/10 active:scale-[0.98] font-sans"
+                  className="h-10 rounded-lg bg-[#FF4400] hover:bg-[#E63D00] text-white text-xs font-semibold px-6 cursor-pointer transition-all shadow-xs active:scale-[0.98]"
                 >
-                  Save settings
+                  Save Settings
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {view === 'events' && !editingEvent && (
-          <div className="space-y-6 animate-fade-in font-sans">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-xl border border-zinc-200 shadow-sm gap-4">
-              <div>
-                <h2 className="text-xl font-bold tracking-tight text-zinc-900 animate-fade-in">
-                  Active race events
-                </h2>
-                <p className="mt-1 text-xs text-zinc-500 font-medium animate-fade-in">
-                  Review, edit details, or delete active race categories currently displayed on the registration portal.
-                </p>
+        {view === 'events' && viewingEvent && !editingEvent && (
+          <div className="space-y-4 animate-fade-in font-sans">
+            {/* Top Navigation Header for Viewing Event */}
+            <div className="flex items-center justify-between py-3 px-4 bg-white rounded-xl border border-zinc-200 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setViewingEvent(null)}
+                  className="h-8 px-3 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5 text-zinc-500" />
+                  <span>Back</span>
+                </button>
+                <div className="h-4 w-[1px] bg-zinc-200" />
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-zinc-500 font-medium">Active race events</span>
+                  <span className="text-zinc-300 text-xs">/</span>
+                  <h2 className="text-xs font-bold text-zinc-900">{viewingEvent.title}</h2>
+                  <span className="ml-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Live Customer Preview
+                  </span>
+                </div>
               </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const evtToArchive = viewingEvent;
+                    const willArchive = !evtToArchive.isArchived;
+                    const updatedList = events.map(e => e.id === evtToArchive.id ? { ...e, isArchived: willArchive } : e);
+                    if (onUpdateEvents) onUpdateEvents(updatedList);
+                    showToast(willArchive ? `Archived "${evtToArchive.title}"` : `Restored "${evtToArchive.title}" to active events`);
+                    setViewingEvent({ ...evtToArchive, isArchived: willArchive });
+                  }}
+                  className={`h-8 px-3 rounded-lg border text-xs font-semibold transition-all cursor-pointer shadow-2xs active:scale-[0.98] flex items-center gap-1.5 ${
+                    viewingEvent.isArchived
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                      : 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                  }`}
+                >
+                  {viewingEvent.isArchived ? <RotateCcw className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
+                  <span>{viewingEvent.isArchived ? 'Restore Event' : 'Archive Event'}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    const evtToEdit = viewingEvent;
+                    setViewingEvent(null);
+                    setEditingEvent(evtToEdit);
+                    setNewEvent({
+                      title: evtToEdit.title,
+                      badge: evtToEdit.badge || 'OPEN',
+                      date: evtToEdit.date,
+                      time: evtToEdit.details.time,
+                      deadline: evtToEdit.deadline || evtToEdit.date,
+                      location: evtToEdit.location,
+                      fee: evtToEdit.details.fee,
+                      slotsLimit: evtToEdit.details.slotsLeft || 500,
+                      description: evtToEdit.description || '',
+                      route: evtToEdit.details.route || '',
+                      distances: evtToEdit.distances,
+                      perks: evtToEdit.details.perks ? evtToEdit.details.perks.join(', ') : 'Finisher Medal',
+                      highlights: evtToEdit.highlights ? evtToEdit.highlights.join(', ') : 'Certified race course',
+                      schedule: evtToEdit.details.schedule ? evtToEdit.details.schedule.join('\n') : '',
+                      image: evtToEdit.image,
+                      iconType: evtToEdit.iconType || 'compass',
+                      inclusions: evtToEdit.inclusions ? evtToEdit.inclusions.join(', ') : 'Singlet, Race Bib',
+                      jerseyFee: evtToEdit.jerseyFee !== undefined ? evtToEdit.jerseyFee : 250,
+                      earlyBirdDeadline: evtToEdit.earlyBirdDeadline || '',
+                      earlyBirdDiscountPercent: evtToEdit.earlyBirdDiscountPercent !== undefined ? evtToEdit.earlyBirdDiscountPercent : 20,
+                      distanceFees: evtToEdit.distanceFees || {}
+                    });
+                    setGalleryPhotos(evtToEdit.galleryImages || [evtToEdit.image]);
+                    const initialRoutes: Record<string, string> = {};
+                    evtToEdit.distances.forEach(d => {
+                      initialRoutes[d] = evtToEdit.details.routes?.[d] || evtToEdit.details.route || '';
+                    });
+                    setDistanceRoutes(initialRoutes);
+                    setRouteMapPhotos(parseImages(evtToEdit.routeMapImage));
+                    setKitPhotos(parseImages(evtToEdit.kitImage));
+                    setFormStep(1);
+                  }}
+                  className="h-8 px-3 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 text-xs font-semibold transition-all cursor-pointer shadow-2xs active:scale-[0.98] flex items-center gap-1.5"
+                >
+                  <Edit2 className="h-3.5 w-3.5 text-zinc-500" />
+                  <span>Edit Event</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Full Page Customer Experience View */}
+            <EventDetailsPage
+              event={viewingEvent}
+              hideBackLink={true}
+              onBack={() => setViewingEvent(null)}
+              onRegisterClick={() => {
+                const evtToEdit = viewingEvent;
+                setViewingEvent(null);
+                setEditingEvent(evtToEdit);
+                setNewEvent({
+                  title: evtToEdit.title,
+                  badge: evtToEdit.badge || 'OPEN',
+                  date: evtToEdit.date,
+                  time: evtToEdit.details.time,
+                  deadline: evtToEdit.deadline || evtToEdit.date,
+                  location: evtToEdit.location,
+                  fee: evtToEdit.details.fee,
+                  slotsLimit: evtToEdit.details.slotsLeft || 500,
+                  description: evtToEdit.description || '',
+                  route: evtToEdit.details.route || '',
+                  distances: evtToEdit.distances,
+                  perks: evtToEdit.details.perks ? evtToEdit.details.perks.join(', ') : 'Finisher Medal',
+                  highlights: evtToEdit.highlights ? evtToEdit.highlights.join(', ') : 'Certified race course',
+                  schedule: evtToEdit.details.schedule ? evtToEdit.details.schedule.join('\n') : '',
+                  image: evtToEdit.image,
+                  iconType: evtToEdit.iconType || 'compass',
+                  inclusions: evtToEdit.inclusions ? evtToEdit.inclusions.join(', ') : 'Singlet, Race Bib',
+                  jerseyFee: evtToEdit.jerseyFee !== undefined ? evtToEdit.jerseyFee : 250,
+                  earlyBirdDeadline: evtToEdit.earlyBirdDeadline || '',
+                  earlyBirdDiscountPercent: evtToEdit.earlyBirdDiscountPercent !== undefined ? evtToEdit.earlyBirdDiscountPercent : 20,
+                  distanceFees: evtToEdit.distanceFees || {}
+                });
+                setGalleryPhotos(evtToEdit.galleryImages || [evtToEdit.image]);
+                const initialRoutes: Record<string, string> = {};
+                evtToEdit.distances.forEach(d => {
+                  initialRoutes[d] = evtToEdit.details.routes?.[d] || evtToEdit.details.route || '';
+                });
+                setDistanceRoutes(initialRoutes);
+                setRouteMapPhotos(parseImages(evtToEdit.routeMapImage));
+                setKitPhotos(parseImages(evtToEdit.kitImage));
+                setFormStep(1);
+              }}
+            />
+          </div>
+        )}
+
+        {(view === 'archive' || view === 'archived-events') && !viewingEvent && !editingEvent && (
+          <div className="space-y-6 animate-fade-in font-sans">
+            {/* Archive Sub-tabs Bar */}
+            <div className="flex items-center gap-2 border-b border-zinc-200 pb-3">
               <button
-                onClick={() => {
-                  setEditingEvent(null);
-                  setNewEvent({
-                    title: '',
-                    badge: 'OPEN',
-                    date: '',
-                    time: '05:00 AM',
-                    deadline: '',
-                    location: '',
-                    fee: '₱1,200.00',
-                    slotsLimit: 500,
-                    description: '',
-                    route: '',
-                    distances: [],
-                    perks: 'Timing Chip, Finisher Medal, Event Singlet',
-                    highlights: 'Certified race course, Fully loaded hydrations, Post-race concert',
-                    image: '',
-                    iconType: 'compass',
-                    inclusions: 'Singlet, Race Bib',
-                    jerseyFee: 250,
-                    earlyBirdDeadline: '',
-                    earlyBirdDiscountPercent: 20,
-                    distanceFees: {}
-                  });
-                  setGalleryPhotos([]);
-                  setDistanceRoutes({});
-                  setRouteMapPhotos([]);
-                  setKitPhotos([]);
-                  setFormStep(1);
-                  onNavigate('admin-create-event');
-                }}
-                className="w-full sm:w-auto rounded-[7px] bg-[#FF4400] hover:bg-[#E63D00] text-white text-xs font-bold py-2 px-3.5 cursor-pointer transition-all shadow-md shadow-brand/10 text-center whitespace-nowrap active:scale-[0.98]"
+                type="button"
+                onClick={() => setArchiveSubTab('events')}
+                className={`h-9 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                  archiveSubTab === 'events'
+                    ? 'bg-zinc-900 text-white shadow-xs'
+                    : 'bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50'
+                }`}
               >
-                + Create event
+                <Calendar className="h-4 w-4" />
+                <span>Archived Events</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                  archiveSubTab === 'events' ? 'bg-zinc-800 text-white' : 'bg-zinc-100 text-zinc-600'
+                }`}>
+                  {events.filter(e => e.isArchived).length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setArchiveSubTab('data')}
+                className={`h-9 px-4 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                  archiveSubTab === 'data'
+                    ? 'bg-zinc-900 text-white shadow-xs'
+                    : 'bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50'
+                }`}
+              >
+                <Users className="h-4 w-4" />
+                <span>Archived Data</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                  archiveSubTab === 'data' ? 'bg-zinc-800 text-white' : 'bg-zinc-100 text-zinc-600'
+                }`}>
+                  {events.filter(e => e.isArchived).length + registrations.filter(r => (r.isArchived || r.status === 'Archived') && !events.some(e => e.isArchived && e.title === r.eventTitle)).length}
+                </span>
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((evt) => {
+            {/* Tab 1: Archived Events */}
+            {archiveSubTab === 'events' && (
+              <div>
+                {events.filter(e => e.isArchived).length === 0 ? (
+                  <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center space-y-3">
+                    <Archive className="h-10 w-10 text-zinc-300 mx-auto" />
+                    <h3 className="text-sm font-bold text-zinc-800">No Archived Events</h3>
+                    <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                      Race events you archive will appear here. You can view, restore, or permanently delete them at any time.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {events.filter(e => e.isArchived).map((evt) => {
+                      const verifiedRunners = registrations.filter(r => r.eventTitle === evt.title && r.status === 'Verified').length;
+                      return (
+                        <div key={evt.id} className="bg-white rounded-xl border border-zinc-200 hover:border-zinc-300 overflow-hidden transition-all duration-300 flex flex-col justify-between group w-full max-w-[280px]">
+                          <div>
+                            <div className="h-24 bg-zinc-100 overflow-hidden relative">
+                              <img src={evt.image} alt={evt.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                              <span className="absolute top-2.5 right-2.5 rounded-[4px] border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider font-mono bg-amber-50 text-amber-700 border-amber-200">
+                                ARCHIVED
+                              </span>
+                            </div>
+                            <div className="p-3 space-y-2">
+                              <div>
+                                <h3 className="font-bold text-zinc-900 text-xs leading-tight line-clamp-1">{evt.title}</h3>
+                                <span className="text-[9px] font-semibold text-zinc-500 block mt-0.5 font-mono">{evt.date} | {evt.location}</span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-1.5 text-[11px] border-t border-b border-zinc-150 py-1.5 text-zinc-650 font-sans">
+                                <div>
+                                  <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Fee</span>
+                                  <span className="text-zinc-800 font-semibold text-xs">{evt.details.fee}</span>
+                                </div>
+                                <div>
+                                  <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Slots Left</span>
+                                  <span className="text-zinc-800 font-semibold text-xs">{evt.details.slotsLeft || 500}</span>
+                                </div>
+                                <div>
+                                  <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Distances</span>
+                                  <div className="flex flex-wrap gap-1 mt-0.5">
+                                    {evt.distances.map(d => (
+                                      <span key={d} className="bg-zinc-50 border border-zinc-150 px-1 py-0.2 rounded-[3px] font-bold text-[#FF4400] text-[8.5px]">{d}</span>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Subscribers</span>
+                                  <span className="text-zinc-800 font-semibold text-xs">{verifiedRunners} Verified</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="px-3 pb-3 pt-0.5 flex gap-1.5 text-xs">
+                            <button
+                              onClick={() => setViewingEvent(evt)}
+                              className="flex-1 rounded-md border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 h-7 text-center text-[10.5px] font-bold text-zinc-700 transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
+                            >
+                              <Eye className="h-3 w-3 text-zinc-500" />
+                              View
+                            </button>
+                            <button
+                              onClick={() => {
+                                const updatedList = events.map(e => e.id === evt.id ? { ...e, isArchived: false } : e);
+                                if (onUpdateEvents) onUpdateEvents(updatedList);
+                                showToast(`Restored "${evt.title}" to active events.`);
+                              }}
+                              className="flex-1 rounded-md border border-emerald-200 hover:border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-all cursor-pointer flex items-center justify-center gap-1 text-[10.5px] font-bold shadow-2xs"
+                              title="Restore Event"
+                            >
+                              <RotateCcw className="h-3 w-3" />
+                              Restore
+                            </button>
+                            <button
+                              onClick={() => {
+                                setDeleteConfirmModal({
+                                  title: 'Delete Race Event?',
+                                  message: `Are you sure you want to permanently delete event "${evt.title}"?`,
+                                  onConfirm: () => {
+                                    const updatedList = events.filter(e => e.id !== evt.id);
+                                    if (onUpdateEvents) onUpdateEvents(updatedList);
+                                    showToast(`Successfully deleted event: "${evt.title}"`);
+                                  }
+                                });
+                              }}
+                              className="h-7 w-7 rounded-md border border-red-200 hover:border-red-300 bg-red-50 flex items-center justify-center text-red-650 hover:bg-red-100/80 transition-all cursor-pointer"
+                              title="Delete Event"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Tab 2: Archived Data */}
+            {archiveSubTab === 'data' && (
+              <div className="space-y-6">
+                {selectedArchivedEventTitle === null ? (
+                  <div>
+                    {events.filter(e => e.isArchived).length === 0 ? (
+                      <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center space-y-3 font-sans">
+                        <Archive className="h-10 w-10 text-zinc-300 mx-auto" />
+                        <h3 className="text-sm font-bold text-zinc-800">No Archived Event Data</h3>
+                        <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                          Archived event registration cards will appear here. You can view their registration details or restore them anytime.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 font-sans">
+                        {events.filter(e => e.isArchived).map((evt) => {
+                          const evtRegistrations = registrations.filter(r => r.eventTitle === evt.title);
+                          const verifiedCount = evtRegistrations.filter(r => r.status === 'Verified').length;
+
+                          return (
+                            <div
+                              key={evt.id}
+                              className="bg-white rounded-xl border border-zinc-200 hover:border-zinc-300 overflow-hidden transition-all duration-300 flex flex-col justify-between group shadow-xs hover:shadow-md cursor-pointer w-full max-w-[280px]"
+                            >
+                              <div>
+                                <div className="h-24 bg-zinc-100 overflow-hidden relative">
+                                  <img src={evt.image} alt={evt.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60 grayscale-[40%]" />
+                                  <span className="absolute top-2.5 right-2.5 rounded-[4px] border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider font-mono bg-zinc-100 text-zinc-600 border-zinc-300">
+                                    ARCHIVED
+                                  </span>
+                                </div>
+
+                                <div className="p-3 space-y-2 font-sans">
+                                  <div>
+                                    <h3 className="font-bold text-zinc-900 text-xs leading-tight line-clamp-1">{evt.title}</h3>
+                                    <span className="text-[9px] font-semibold text-zinc-500 block mt-0.5 font-mono">{evt.date} | {evt.location}</span>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-1.5 text-[11px] border-t border-b border-zinc-150 py-1.5 text-zinc-650 font-sans">
+                                    <div>
+                                      <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Total Runners</span>
+                                      <span className="text-zinc-900 font-extrabold text-xs">{evtRegistrations.length}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Verified</span>
+                                      <span className="text-emerald-700 font-extrabold text-xs">{verifiedCount}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Fee</span>
+                                      <span className="text-zinc-800 font-semibold text-xs">{evt.details.fee}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Slots Left</span>
+                                      <span className="text-zinc-800 font-semibold text-xs">{evt.details.slotsLeft || 500}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="px-3 pb-3 pt-0.5 flex items-center gap-2 font-sans">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedArchivedEventTitle(evt.title)}
+                                  className="flex-1 h-8 rounded-lg bg-orange-50/80 border border-orange-200/80 hover:bg-orange-100 text-[#FF4400] text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+                                >
+                                  <Users className="h-3.5 w-3.5" />
+                                  <span>View ({evtRegistrations.length})</span>
+                                </button>
+
+                                <button
+                                  className="h-8 px-3 rounded-lg bg-emerald-50/80 border border-emerald-200/80 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+                                >
+                                  <RotateCcw className="h-3.5 w-3.5" />
+                                  <span>Restore</span>
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4 font-sans">
+                    <div className="flex items-center justify-between pb-3 border-b border-zinc-200">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setSelectedArchivedEventTitle(null)}
+                          className="h-8 px-3 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+                        >
+                          <ArrowLeft className="h-3.5 w-3.5 text-zinc-500" />
+                          <span>Back to Archived Cards</span>
+                        </button>
+                        <div className="h-4 w-[1px] bg-zinc-200" />
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-zinc-500 font-medium">Archived Data</span>
+                          <span className="text-zinc-300 text-xs">/</span>
+                          <h2 className="text-xs font-bold text-zinc-900">{selectedArchivedEventTitle}</h2>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const targetEvt = events.find(e => e.title === selectedArchivedEventTitle);
+                          if (!targetEvt) return;
+                          setDeleteConfirmModal({
+                            title: 'Restore Race Event?',
+                            message: `Are you sure you want to restore "${targetEvt.title}" to active events?`,
+                            onConfirm: () => {
+                              const updatedList = events.map(e => e.id === targetEvt.id ? { ...e, isArchived: false } : e);
+                              if (onUpdateEvents) onUpdateEvents(updatedList);
+                              showToast(`Restored "${targetEvt.title}" to active events.`);
+                              setSelectedArchivedEventTitle(null);
+                            }
+                          });
+                        }}
+                        className="h-8 px-3 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        <span>Restore Event</span>
+                      </button>
+                    </div>
+
+                    <div className="bg-white rounded-xl border border-zinc-200/80 shadow-xs overflow-hidden">
+                      <div className="p-4 border-b border-zinc-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div className="relative w-full sm:w-72">
+                          <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
+                          <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search runner records..."
+                            className="w-full h-9 rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-xs text-zinc-800 placeholder-zinc-400 focus:border-[#FF4400] outline-none font-medium"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse text-left text-xs font-medium text-zinc-700">
+                          <thead>
+                            <tr className="bg-zinc-50/80 border-b border-zinc-200/80 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider select-none">
+                              <th className="px-5 py-3.5">Bib #</th>
+                              <th className="px-5 py-3.5">Runner Name</th>
+                              <th className="px-5 py-3.5">Email Address</th>
+                              <th className="px-5 py-3.5">Category</th>
+                              <th className="px-5 py-3.5 text-center">Status</th>
+                              <th className="px-5 py-3.5 text-right">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-zinc-100">
+                            {registrations.filter(r => r.eventTitle === selectedArchivedEventTitle).length === 0 ? (
+                              <tr>
+                                <td colSpan={6} className="px-5 py-12 text-center text-zinc-400 font-medium">
+                                  No runner records found for this archived event.
+                                </td>
+                              </tr>
+                            ) : (
+                              registrations
+                                .filter(r => r.eventTitle === selectedArchivedEventTitle)
+                                .filter(r => !searchQuery || `${r.firstName} ${r.lastName} ${r.email} ${r.bibNumber}`.toLowerCase().includes(searchQuery.toLowerCase()))
+                                .map((reg) => (
+                                  <tr key={reg.id} className="hover:bg-zinc-50/80 transition-colors">
+                                    <td className="px-5 py-3.5 font-mono font-bold text-[#FF4400]">{reg.bibNumber || '—'}</td>
+                                    <td className="px-5 py-3.5 font-semibold text-zinc-900">{reg.firstName} {reg.lastName}</td>
+                                    <td className="px-5 py-3.5 text-zinc-500">{reg.email}</td>
+                                    <td className="px-5 py-3.5 font-semibold text-zinc-800">{reg.distance}</td>
+                                    <td className="px-5 py-3.5 text-center">
+                                      <span className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                                        {reg.status || 'Archived'}
+                                      </span>
+                                    </td>
+                                    <td className="px-5 py-3.5 text-right">
+                                      <div className="flex gap-1.5 justify-end">
+                                        <button
+                                          onClick={() => {
+                                            const updatedRegs = registrations.map(r => r.id === reg.id ? { ...r, isArchived: false, status: r.status === 'Archived' ? 'Verified' : r.status } : r);
+                                            onUpdateRegistrations(updatedRegs);
+                                            showToast(`Restored registration for ${reg.firstName} ${reg.lastName}`);
+                                          }}
+                                          className="h-7 px-2.5 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                                        >
+                                          <RotateCcw className="h-3 w-3" />
+                                          Restore
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            setDeleteConfirmModal({
+                                              title: 'Delete Archived Record?',
+                                              message: `Are you sure you want to permanently delete archived record for "${reg.firstName} ${reg.lastName}"?`,
+                                              onConfirm: () => handleDeleteRegistration(reg.id)
+                                            });
+                                          }}
+                                          className="h-7 w-7 rounded-md border border-red-200 bg-red-50 text-red-650 hover:bg-red-100 flex items-center justify-center cursor-pointer"
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {view === 'events' && !viewingEvent && !editingEvent && (
+          <div className="space-y-6 animate-fade-in font-sans">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+              {events
+                .filter(evt => !evt.isArchived)
+                .map((evt) => {
                 const verifiedRunners = registrations.filter(r => r.eventTitle === evt.title && r.status === 'Verified').length;
 
                 return (
-                  <div key={evt.id} className="bg-white rounded-xl border border-zinc-200/85 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+                  <div key={evt.id} className="bg-white rounded-xl border border-zinc-200 hover:border-zinc-300 overflow-hidden transition-all duration-300 flex flex-col justify-between group w-full max-w-[280px]">
                     <div>
                       {/* Image header */}
-                      <div className="h-44 bg-zinc-100 overflow-hidden relative">
+                      <div className="h-24 bg-zinc-100 overflow-hidden relative">
                         <img src={evt.image} alt={evt.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <span className={`absolute top-4 right-4 rounded-[4px] border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider font-mono ${evt.badge === 'OPEN'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                          : 'bg-red-50 text-red-700 border-red-200'
+                        <span className={`absolute top-2.5 right-2.5 rounded-[4px] border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider font-mono ${evt.badge === 'OPEN'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-red-50 text-red-700 border-red-200'
                           }`}>
                           {evt.badge || 'OPEN'}
                         </span>
                       </div>
 
                       {/* Content */}
-                      <div className="p-6 space-y-4">
+                      <div className="p-3 space-y-2">
                         <div>
-                          <h3 className="font-bold text-zinc-800 text-sm leading-snug line-clamp-2">
+                          <h3 className="font-bold text-zinc-900 text-xs leading-tight line-clamp-1">
                             {evt.title}
                           </h3>
-                          <span className="text-[10px] font-semibold text-zinc-500 block mt-1.5 font-mono">
+                          <span className="text-[9px] font-semibold text-zinc-500 block mt-0.5 font-mono">
                             {evt.date} | {evt.location}
                           </span>
                         </div>
 
                         {/* Details Grid */}
-                        <div className="grid grid-cols-2 gap-3 text-xs border-t border-b border-zinc-150 py-3 text-zinc-650 font-sans">
+                        <div className="grid grid-cols-2 gap-1.5 text-[11px] border-t border-b border-zinc-150 py-1.5 text-zinc-650 font-sans">
                           <div>
-                            <span className="text-zinc-450 font-bold uppercase tracking-wider block text-[9px]">Fee</span>
-                            <span className="text-zinc-800 font-semibold">{evt.details.fee}</span>
+                            <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Fee</span>
+                            <span className="text-zinc-800 font-semibold text-xs">{evt.details.fee}</span>
                           </div>
                           <div>
-                            <span className="text-zinc-450 font-bold uppercase tracking-wider block text-[9px]">Slots Left</span>
-                            <span className="text-zinc-800 font-semibold">{evt.details.slotsLeft || 500}</span>
+                            <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Slots Left</span>
+                            <span className="text-zinc-800 font-semibold text-xs">{evt.details.slotsLeft || 500}</span>
                           </div>
                           <div>
-                            <span className="text-zinc-450 font-bold uppercase tracking-wider block text-[9px]">Distances</span>
+                            <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Distances</span>
                             <div className="flex flex-wrap gap-1 mt-0.5">
                               {evt.distances.map(d => (
-                                <span key={d} className="bg-zinc-50 border border-zinc-150 px-1.5 py-0.5 rounded-[4px] font-bold text-[#FF4400] text-[10px]">{d}</span>
+                                <span key={d} className="bg-zinc-50 border border-zinc-150 px-1 py-0.2 rounded-[3px] font-bold text-[#FF4400] text-[8.5px]">{d}</span>
                               ))}
                             </div>
                           </div>
                           <div>
-                            <span className="text-zinc-455 font-bold uppercase tracking-wider block text-[9px]">Subscribers</span>
-                            <span className="text-zinc-800 font-semibold">{verifiedRunners} Verified</span>
+                            <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[8.5px]">Subscribers</span>
+                            <span className="text-zinc-800 font-semibold text-xs">{verifiedRunners} Verified</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Actions bar */}
-                    <div className="px-6 pb-6 pt-2 flex gap-3 text-xs">
+                    <div className="px-3 pb-3 pt-0.5 flex gap-1.5 text-xs">
                       <button
-                        onClick={() => {
-                          setEditingEvent(evt);
-                          setNewEvent({
-                            title: evt.title,
-                            badge: evt.badge || 'OPEN',
-                            date: evt.date,
-                            time: evt.details.time,
-                            deadline: evt.deadline || evt.date,
-                            location: evt.location,
-                            fee: evt.details.fee,
-                            slotsLimit: evt.details.slotsLeft || 500,
-                            description: evt.description || '',
-                            route: evt.details.route || '',
-                            distances: evt.distances,
-                            perks: evt.details.perks ? evt.details.perks.join(', ') : 'Timing Chip, Finisher Medal',
-                            highlights: evt.highlights ? evt.highlights.join(', ') : 'Certified race course, Fully loaded hydrations',
-                            image: evt.image,
-                            iconType: evt.iconType || 'compass',
-                            inclusions: evt.inclusions ? evt.inclusions.join(', ') : 'Singlet, Race Bib',
-                            jerseyFee: evt.jerseyFee !== undefined ? evt.jerseyFee : 250,
-                            earlyBirdDeadline: evt.earlyBirdDeadline || '',
-                            earlyBirdDiscountPercent: evt.earlyBirdDiscountPercent !== undefined ? evt.earlyBirdDiscountPercent : 20,
-                            distanceFees: evt.distanceFees || {}
-                          });
-                          setGalleryPhotos(evt.galleryImages || [evt.image]);
-                          const initialRoutes: Record<string, string> = {};
-                          evt.distances.forEach(d => {
-                            initialRoutes[d] = evt.details.routes?.[d] || evt.details.route || '';
-                          });
-                          setDistanceRoutes(initialRoutes);
-                          setRouteMapPhotos(parseImages(evt.routeMapImage));
-                          setKitPhotos(parseImages(evt.kitImage));
-                          setFormStep(1);
-                        }}
-                        className="flex-1 rounded-[7px] border border-zinc-200 bg-zinc-50 py-2 text-center text-xs font-bold text-zinc-700 hover:bg-zinc-100 transition-all cursor-pointer shadow-sm active:scale-[0.98]"
+                        onClick={() => setViewingEvent(evt)}
+                        className="flex-1 rounded-md border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 h-7 text-center text-[10.5px] font-bold text-zinc-700 transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-1 shadow-2xs"
                       >
-                        Edit info
+                        <Eye className="h-3 w-3 text-zinc-500" />
+                        View
                       </button>
+
+                      {!evt.isArchived ? (
+                        <>
+                          <button
+                            onClick={() => {
+                              setEditingEvent(evt);
+                              setNewEvent({
+                                title: evt.title,
+                                badge: evt.badge || 'OPEN',
+                                date: evt.date,
+                                time: evt.details.time,
+                                deadline: evt.deadline || evt.date,
+                                location: evt.location,
+                                fee: evt.details.fee,
+                                slotsLimit: evt.details.slotsLeft || 500,
+                                description: evt.description || '',
+                                route: evt.details.route || '',
+                                distances: evt.distances,
+                                perks: evt.details.perks ? evt.details.perks.join(', ') : 'Finisher Medal',
+                                highlights: evt.highlights ? evt.highlights.join(', ') : 'Certified race course, Fully loaded hydrations',
+                                schedule: evt.details.schedule ? evt.details.schedule.join('\n') : '04:30 AM - Assembly & Timing Tag Inspection\n05:00 AM - Race Gunstart\n08:05 AM - Awarding & Post-race Program',
+                                image: evt.image,
+                                iconType: evt.iconType || 'compass',
+                                inclusions: evt.inclusions ? evt.inclusions.join(', ') : 'Singlet, Race Bib',
+                                jerseyFee: evt.jerseyFee !== undefined ? evt.jerseyFee : 250,
+                                earlyBirdDeadline: evt.earlyBirdDeadline || '',
+                                earlyBirdDiscountPercent: evt.earlyBirdDiscountPercent !== undefined ? evt.earlyBirdDiscountPercent : 20,
+                                distanceFees: evt.distanceFees || {}
+                              });
+                              setGalleryPhotos(evt.galleryImages || [evt.image]);
+                              const initialRoutes: Record<string, string> = {};
+                              evt.distances.forEach(d => {
+                                initialRoutes[d] = evt.details.routes?.[d] || evt.details.route || '';
+                              });
+                              setDistanceRoutes(initialRoutes);
+                              setRouteMapPhotos(parseImages(evt.routeMapImage));
+                              setKitPhotos(parseImages(evt.kitImage));
+                              setFormStep(1);
+                            }}
+                            className="flex-1 rounded-md border border-zinc-200 bg-zinc-50 h-7 text-center text-[10.5px] font-bold text-zinc-700 hover:bg-zinc-100 hover:border-zinc-300 transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-1 shadow-2xs"
+                          >
+                            <Edit2 className="h-3 w-3 text-zinc-500" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => {
+                              const updatedList = events.map(e => e.id === evt.id ? { ...e, isArchived: true } : e);
+                              if (onUpdateEvents) onUpdateEvents(updatedList);
+                              showToast(`Archived "${evt.title}" successfully.`);
+                            }}
+                            className="h-7 px-2 rounded-md border border-amber-200 hover:border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-1 text-[10.5px] font-bold shadow-2xs"
+                            title="Archive Event"
+                          >
+                            <Archive className="h-3 w-3" />
+                            Archive
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            const updatedList = events.map(e => e.id === evt.id ? { ...e, isArchived: false } : e);
+                            if (onUpdateEvents) onUpdateEvents(updatedList);
+                            showToast(`Restored "${evt.title}" to active events.`);
+                          }}
+                          className="flex-1 rounded-md border border-emerald-200 hover:border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-1 text-[10.5px] font-bold shadow-2xs"
+                          title="Restore Event"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          Restore
+                        </button>
+                      )}
+
                       <button
                         onClick={() => {
-                          if (confirm(`Are you sure you want to permanently delete event "${evt.title}"?`)) {
-                            const updatedList = events.filter(e => e.id !== evt.id);
-                            if (onUpdateEvents) onUpdateEvents(updatedList);
-                            showToast(`Successfully deleted event: "${evt.title}"`);
-                          }
+                          setDeleteConfirmModal({
+                            title: 'Delete Race Event?',
+                            message: `Are you sure you want to permanently delete event "${evt.title}"?`,
+                            onConfirm: () => {
+                              const updatedList = events.filter(e => e.id !== evt.id);
+                              if (onUpdateEvents) onUpdateEvents(updatedList);
+                              showToast(`Successfully deleted event: "${evt.title}"`);
+                            }
+                          });
                         }}
-                        className="rounded-[7px] border border-red-200 hover:border-red-350 bg-red-50 px-3 py-2 text-red-650 hover:bg-red-100/80 transition-all cursor-pointer active:scale-[0.98]"
+                        className="h-7 w-7 rounded-md border border-red-200 hover:border-red-300 bg-red-50 flex items-center justify-center text-red-650 hover:bg-red-100/80 transition-all cursor-pointer active:scale-[0.98]"
                         title="Delete Event"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -2192,10 +2980,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         )}
 
         {(view === 'create-event' || (view === 'events' && editingEvent)) && (
-          <div className="bg-white p-6 md:p-8 w-full text-zinc-800">
+          <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in font-sans text-zinc-800">
 
-            <div className="mb-8">
-              <h2 className="font-display text-2xl font-black text-zinc-900 uppercase tracking-tight">
+            <div className="pb-4 border-b border-zinc-200/80">
+              <h2 className="text-xl font-bold tracking-tight text-zinc-900">
                 {editingEvent ? "Edit Race Event Details" : "Race Event Upload Form"}
               </h2>
               <p className="mt-1 text-sm text-zinc-500 font-medium animate-fade-in">
@@ -2583,6 +3371,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         placeholder="Provide registration notes, details about the hydration hubs, medical stands, and finishing criteria..."
                         className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium"
                       ></textarea>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-2">
+                        Event Schedule Timeline (One entry per line)
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={newEvent.schedule}
+                        onChange={(e) => setNewEvent(prev => ({ ...prev, schedule: e.target.value }))}
+                        placeholder={`04:30 AM - Assembly & Timing Tag Inspection\n05:00 AM - Race Gunstart\n08:05 AM - Awarding & Post-race Program`}
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-355 focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-none transition-all shadow-sm font-medium leading-relaxed font-mono"
+                      ></textarea>
+                      <span className="text-[10px] text-zinc-450 font-medium mt-1.5 block">
+                        Enter each schedule item on a new line (e.g. "05:00 AM - Race Gunstart"). These will be displayed under EVENT SCHEDULE on the event details page.
+                      </span>
                     </div>
                   </div>
 
@@ -3112,7 +3916,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     <h3 className="font-mono text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-150 pb-2">
                       Registration Management
                     </h3>
-
+                    
                     {/* Public Pass URL (Dynamic Origin) */}
                     <div className="pt-1">
                       <span className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest block mb-1.5">
@@ -3202,10 +4006,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       </button>
                       <button
                         onClick={() => {
-                          if (confirm(`Are you sure you want to permanently delete this registration record?`)) {
-                            handleDeleteRegistration(selectedReg.id);
-                            onNavigate('admin-registrations');
-                          }
+                          setDeleteConfirmModal({
+                            title: 'Delete Runner Record?',
+                            message: `Are you sure you want to permanently delete registration record for "${selectedReg.firstName} ${selectedReg.lastName}"?`,
+                            onConfirm: () => {
+                              handleDeleteRegistration(selectedReg.id);
+                              onNavigate('admin-registrations');
+                            }
+                          });
                         }}
                         className="rounded-[7px] border border-red-200 hover:border-red-350 bg-red-50 px-4 py-2.5 text-xs font-bold text-red-650 transition-colors cursor-pointer flex items-center gap-2 shadow-sm ml-auto active:scale-[0.98]"
                       >
@@ -3220,8 +4028,85 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </div>
           );
         })()}
+          </motion.div>
+        </AnimatePresence>
 
       </main>
+
+      {/* Custom Confirmation Modal */}
+      {deleteConfirmModal && (() => {
+        const isArchive = deleteConfirmModal.title.toLowerCase().includes('archive');
+        const isRestore = deleteConfirmModal.title.toLowerCase().includes('restore');
+
+        let confirmText = deleteConfirmModal.confirmText;
+        if (!confirmText) {
+          if (isArchive) confirmText = 'Confirm Archive';
+          else if (isRestore) confirmText = 'Confirm Restore';
+          else confirmText = 'Confirm Delete';
+        }
+
+        const isAmber = isArchive || deleteConfirmModal.variant === 'warning';
+        const isEmerald = isRestore;
+
+        return (
+          <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in font-sans">
+            <div className="bg-white rounded-xl border border-zinc-200 shadow-2xl max-w-sm w-full p-5 space-y-4 text-zinc-900 animate-scale-in">
+              <div className="flex items-start gap-3.5">
+                <div className={`p-2.5 rounded-lg border flex-shrink-0 mt-0.5 ${
+                  isAmber
+                    ? 'bg-amber-50 text-amber-600 border-amber-200'
+                    : isEmerald
+                      ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                      : 'bg-rose-50 text-rose-600 border-rose-200'
+                }`}>
+                  {isAmber ? (
+                    <Archive className="h-5 w-5 text-amber-600" />
+                  ) : isEmerald ? (
+                    <RotateCcw className="h-5 w-5 text-emerald-600" />
+                  ) : (
+                    <Trash2 className="h-5 w-5 text-rose-600" />
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-zinc-900">
+                    {deleteConfirmModal.title || 'Are you sure?'}
+                  </h3>
+                  <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                    {deleteConfirmModal.message}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-150">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmModal(null)}
+                  className="h-9 px-4 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700 transition-all cursor-pointer shadow-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    deleteConfirmModal.onConfirm();
+                    setDeleteConfirmModal(null);
+                  }}
+                  className={`h-9 px-4 rounded-lg text-white text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-[0.98] ${
+                    isAmber
+                      ? 'bg-amber-600 hover:bg-amber-700'
+                      : isEmerald
+                        ? 'bg-emerald-600 hover:bg-emerald-700'
+                        : 'bg-rose-600 hover:bg-rose-700'
+                  }`}
+                >
+                  {confirmText}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+
 
       {/* Simulated Confirmation Email Modal */}
       {simulatedEmailReg && (
@@ -3311,7 +4196,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               >
                 <Copy className="h-3.5 w-3.5" /> Copy Link
               </button>
-
+              
               <div className="flex gap-2">
                 <button
                   disabled={isSendingEmail}
@@ -3321,6 +4206,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       const dbRecord = frontendRegistrationToDb(simulatedEmailReg, events);
                       dbRecord.id = simulatedEmailReg.id;
 
+                      console.log("Resending confirmation email via Edge Function...");
                       const { error } = await supabase.functions.invoke('send-confirmation-email', {
                         body: dbRecord
                       });
