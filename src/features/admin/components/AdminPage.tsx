@@ -2516,11 +2516,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                     {events.filter(e => e.isArchived).map((evt) => {
                       const verifiedRunners = registrations.filter(r => r.eventTitle === evt.title && r.status === 'Verified').length;
                       return (
-                        <div key={evt.id} className="bg-white rounded-xl border border-zinc-200 hover:border-zinc-300 overflow-hidden transition-all duration-300 flex flex-col justify-between group w-full max-w-[280px]">
+                        <div key={evt.id} className="bg-white rounded-xl border border-zinc-200 hover:border-zinc-300 overflow-hidden transition-all duration-300 flex flex-col justify-between group w-full">
                           <div>
                             <div className="h-24 bg-zinc-100 overflow-hidden relative">
                               <img src={evt.image} alt={evt.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -2617,7 +2617,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 font-sans">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 font-sans">
                         {events.filter(e => e.isArchived).map((evt) => {
                           const evtRegistrations = registrations.filter(r => r.eventTitle === evt.title);
                           const verifiedCount = evtRegistrations.filter(r => r.status === 'Verified').length;
@@ -2625,7 +2625,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           return (
                             <div
                               key={evt.id}
-                              className="bg-white rounded-xl border border-zinc-200 hover:border-zinc-300 overflow-hidden transition-all duration-300 flex flex-col justify-between group shadow-xs hover:shadow-md cursor-pointer w-full max-w-[280px]"
+                              className="bg-white rounded-xl border border-zinc-200 hover:border-zinc-300 overflow-hidden transition-all duration-300 flex flex-col justify-between group shadow-xs hover:shadow-md cursor-pointer w-full"
                             >
                               <div>
                                 <div className="h-24 bg-zinc-100 overflow-hidden relative">
@@ -2816,14 +2816,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
         {view === 'events' && !viewingEvent && !editingEvent && (
           <div className="space-y-6 animate-fade-in font-sans">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {events
                 .filter(evt => !evt.isArchived)
                 .map((evt) => {
                 const verifiedRunners = registrations.filter(r => r.eventTitle === evt.title && r.status === 'Verified').length;
 
                 return (
-                  <div key={evt.id} className="bg-white rounded-xl border border-zinc-200 hover:border-zinc-300 overflow-hidden transition-all duration-300 flex flex-col justify-between group w-full max-w-[280px]">
+                  <div key={evt.id} className="bg-white rounded-xl border border-zinc-200 hover:border-zinc-300 overflow-hidden transition-all duration-300 flex flex-col justify-between group w-full">
                     <div>
                       {/* Image header */}
                       <div className="h-24 bg-zinc-100 overflow-hidden relative">
