@@ -34,13 +34,13 @@ export interface EventItem {
   kitImage?: string;
   routeMapImage?: string;
   galleryImages?: string[];
-  
-  // Settings properties
+
   inclusions?: string[];
   jerseyFee?: number;
   earlyBirdDeadline?: string;
   earlyBirdDiscountPercent?: number;
   distanceFees?: Record<string, number>;
+  isArchived?: boolean;
 }
 
 export interface CommunityPost {
@@ -86,7 +86,7 @@ export interface GalleryItem {
   category: 'Race Day' | 'Expo' | 'Behind the Scenes' | 'Community';
   type: 'photo' | 'video';
   image: string;
-  videoUrl?: string; 
+  videoUrl?: string;
 }
 
 export type DbEvent = {
@@ -135,7 +135,7 @@ export type DbRegistration = {
   ticket_code_hash: string;
   ticket_expires_at: string | null;
   created_at: string;
-  
+
   // Custom columns added for registration detail persistence
   email: string;
   phone: string;

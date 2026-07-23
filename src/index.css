@@ -21,12 +21,19 @@
   --color-orange-700: #B33000;
   --color-orange-800: #802200;
   --color-orange-900: #4D1400;
+
+  --color-zinc-55: #f7f7f8;
+  --color-zinc-150: #e4e4e7;
+  --color-zinc-350: #d4d4d8;
+  --color-zinc-550: #64646b;
+  --color-zinc-650: #4c4c52;
+  --color-zinc-750: #333338;
+  --color-zinc-850: #1c1c1f;
 }
 
 html, body {
   max-width: 100%;
   overflow-x: hidden;
-  overscroll-behavior-x: none;
 }
 
 #root {

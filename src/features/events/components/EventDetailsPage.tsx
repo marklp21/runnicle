@@ -22,12 +22,14 @@ interface EventDetailsPageProps {
   event: EventItem;
   onBack: () => void;
   onRegisterClick: (event: EventItem) => void;
+  hideBackLink?: boolean;
 }
 
 export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
   event,
   onBack,
   onRegisterClick,
+  hideBackLink = false
 }) => {
   const kitPhotos = parseImages(event.kitImage);
   const routeMapPhotos = parseImages(event.routeMapImage);
@@ -107,16 +109,18 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
     : defaultSchedule;
 
   return (
-    <div className="bg-[#FBFBFB] min-h-screen py-8">
+    <div className={hideBackLink ? 'bg-[#FBFBFB] py-2 font-sans' : 'bg-[#FBFBFB] min-h-screen py-8 font-sans'}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Top Back Link */}
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#FF4400] uppercase tracking-widest transition-colors mb-6 cursor-pointer"
-        >
-          <span>&larr;</span> BACK TO HOME
-        </button>
+        {!hideBackLink && (
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#FF4400] uppercase tracking-widest transition-colors mb-6 cursor-pointer"
+          >
+            <span>&larr;</span> BACK TO HOME
+          </button>
+        )}
 
         {/* 2-Column Main Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">

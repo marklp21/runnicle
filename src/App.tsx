@@ -66,6 +66,8 @@ const getPathFromPage = (pageName: string): string => {
     case 'admin-registration-details': return '/admin_registration_details';
     case 'admin-forms': return '/admin_forms';
     case 'admin-settings': return '/admin_settings';
+    case 'admin-archive': return '/admin_archive';
+    case 'admin-archived-events': return '/admin_archive';
     default: return '/';
   }
 };
@@ -95,6 +97,7 @@ const getPageFromPath = (path: string): string => {
     case '/admin_registration_details': return 'admin-registration-details';
     case '/admin_forms': return 'admin-forms';
     case '/admin_settings': return 'admin-settings';
+    case '/admin_archive': return 'admin-archive';
     default: return 'home';
   }
 };
@@ -107,7 +110,9 @@ const ADMIN_PAGES = [
   'admin-create-event',
   'admin-registration-details',
   'admin-forms',
-  'admin-settings'
+  'admin-settings',
+  'admin-archive',
+  'admin-archived-events'
 ];
 
 export const App: React.FC = () => {
@@ -563,7 +568,7 @@ export const App: React.FC = () => {
       )}
 
       { }
-      <main className="flex-1 overflow-x-clip pt-20">
+      <main className={`flex-1 ${isAdminView ? '' : 'pt-20 overflow-x-hidden'}`}>
         {isAdminView && page !== 'admin-login' ? (
           <AdminPage
             key="admin-portal"
@@ -578,6 +583,10 @@ export const App: React.FC = () => {
             onNavigate={(route) => setPage(route)}
             onLoginSuccess={() => setPage('admin-dashboard')}
             onSelectReg={handleSelectReg}
+            onSelectEvent={(evt) => {
+              setSelectedEvent(evt);
+              setPage('event-details');
+            }}
             heroSettings={heroSettings}
             onUpdateHeroSettings={setHeroSettings}
           />
@@ -585,15 +594,14 @@ export const App: React.FC = () => {
           <AnimatePresence mode="wait">
             <motion.div
               key={page}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15, ease: 'easeInOut' }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
             >
 
               {page === 'home' && (
                 <>
-                  { }
                   <Hero
                     event={promotedEvent}
                     backgroundImage={heroSettings.heroBackgroundImage}
@@ -632,7 +640,7 @@ export const App: React.FC = () => {
 
                   { }
                   <UpcomingEvents
-                    events={events}
+                    events={events.filter(e => !e.isArchived)}
                     onViewDetailsClick={(event) => {
                       setSelectedEvent(event);
                       setPage('event-details');
@@ -650,7 +658,7 @@ export const App: React.FC = () => {
 
               {page === 'events' && (
                 <EventsPage
-                  events={events}
+                  events={events.filter(e => !e.isArchived)}
                   onBack={() => setPage('home')}
                   onRegisterClick={(event) => {
                     setSelectedEvent(event);
@@ -660,8 +668,7 @@ export const App: React.FC = () => {
                     setSelectedEvent(event);
                     setPage('event-details');
                   }}
-                  onViewResultsClick={(event) => {
-                    setSelectedEvent(event);
+                  onViewResultsClick={() => {
                     setPage('event-results');
                   }}
                 />
@@ -670,7 +677,13 @@ export const App: React.FC = () => {
               {page === 'event-details' && (
                 <EventDetailsPage
                   event={selectedEvent || events[0] || mockEvents[0]}
-                  onBack={() => setPage('events')}
+                  onBack={() => {
+                    if (sessionStorage.getItem('runnicle_admin_logged') || localStorage.getItem('runnicle_admin_logged')) {
+                      setPage('admin-events');
+                    } else {
+                      setPage('events');
+                    }
+                  }}
                   onRegisterClick={(ev) => {
                     setSelectedEvent(ev);
                     setPage('register');
@@ -941,9 +954,9 @@ export const App: React.FC = () => {
                                 setPlanDistance(fullName);
                                 setGeneratedPlan(null);
                               }}
-                              className={`rounded-full border py-2.5 text-center text-[10px] font-black tracking-wider uppercase transition-all cursor-pointer ${planDistance === (dist === 'Half' ? 'Half Marathon' : dist === 'Full' ? 'Full Marathon' : dist)
-                                ? 'bg-black text-white border-black shadow-sm'
-                                : 'border-zinc-200 text-zinc-600 bg-white hover:border-black hover:text-black'
+                              className={`rounded-full border py-2.5 text-center text-[10px] font-bold tracking-wider uppercase transition-all cursor-pointer ${planDistance === (dist === 'Half' ? 'Half Marathon' : dist === 'Full' ? 'Full Marathon' : dist)
+                                ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-xs'
+                                : 'border-zinc-200 text-zinc-600 bg-white hover:border-[#FF4400] hover:text-[#FF4400]'
                                 }`}
                             >
                               {dist}
@@ -954,7 +967,7 @@ export const App: React.FC = () => {
 
                       { }
                       <div>
-                        <label className="block text-xs font-black text-zinc-900 uppercase tracking-widest mb-3">Fitness Level</label>
+                        <label className="block text-xs font-bold text-zinc-900 uppercase tracking-wider mb-3">Fitness Level</label>
                         <div className="grid grid-cols-3 gap-2.5">
                           {['Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
                             <button
@@ -964,9 +977,9 @@ export const App: React.FC = () => {
                                 setPlanLevel(lvl);
                                 setGeneratedPlan(null);
                               }}
-                              className={`rounded-full border py-2.5 text-center text-[10px] font-black tracking-wider uppercase transition-all cursor-pointer ${planLevel === lvl
-                                ? 'bg-black text-white border-black shadow-sm'
-                                : 'border-zinc-200 text-zinc-600 bg-white hover:border-black hover:text-black'
+                              className={`rounded-full border py-2.5 text-center text-[10px] font-bold tracking-wider uppercase transition-all cursor-pointer ${planLevel === lvl
+                                ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-xs'
+                                : 'border-zinc-200 text-zinc-600 bg-white hover:border-[#FF4400] hover:text-[#FF4400]'
                                 }`}
                             >
                               {lvl}
@@ -979,7 +992,7 @@ export const App: React.FC = () => {
 
                     <button
                       onClick={handleGeneratePlan}
-                      className="w-full rounded-full bg-black py-3.5 text-xs font-black text-white hover:bg-zinc-900 active:scale-98 transition-all duration-200 cursor-pointer uppercase tracking-widest shadow-md shadow-black/10"
+                      className="w-full rounded-full bg-[#FF4400] py-3.5 text-xs font-bold text-white hover:bg-[#E63D00] active:scale-98 transition-all duration-200 cursor-pointer uppercase tracking-widest shadow-xs"
                     >
                       Generate 4-Week Plan
                     </button>
