@@ -84,6 +84,7 @@ interface AdminPageProps {
   onNavigate: (page: string) => void;
   onLoginSuccess: () => void;
   onSelectReg?: (id: string | null) => void;
+  onSelectEvent?: (event: EventItem) => void;
 
   // Settings view properties
   heroSettings?: { promotedEventId: string; heroBackgroundImage: string };
@@ -141,6 +142,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   onNavigate,
   onLoginSuccess,
   onSelectReg,
+  onSelectEvent,
   heroSettings,
   onUpdateHeroSettings
 }) => {
