@@ -1,6 +1,7 @@
 import React from 'react';
-import { Calendar, MapPin, Clock, ShieldAlert } from 'lucide-react';
+import { Calendar, MapPin, Clock, ShieldAlert, ZoomIn, Maximize2 } from 'lucide-react';
 import { type EventItem } from '@/types';
+import { EventImageLightbox, type ImageSection } from './EventImageLightbox';
 
 const parseImages = (imgStr?: string): string[] => {
   if (!imgStr) return [];
@@ -30,11 +31,65 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
 }) => {
   const kitPhotos = parseImages(event.kitImage);
   const routeMapPhotos = parseImages(event.routeMapImage);
+  const galleryPhotos = event.galleryImages || [];
+  
+  const heroPhoto = event.image || 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=1200&q=80';
+  const effectiveKitPhotos = kitPhotos.length > 0 ? kitPhotos : ['https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=800&q=80'];
+  const effectiveRoutePhotos = routeMapPhotos.length > 0 ? routeMapPhotos : ['https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80'];
+
   const [activeKitIdx, setActiveKitIdx] = React.useState(0);
   const [activeRouteIdx, setActiveRouteIdx] = React.useState(0);
 
-  const activeKitPhoto = kitPhotos[activeKitIdx] || kitPhotos[0] || 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=800&q=80';
-  const activeRoutePhoto = routeMapPhotos[activeRouteIdx] || routeMapPhotos[0] || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80';
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = React.useState(false);
+  const [lightboxSectionId, setLightboxSectionId] = React.useState('hero');
+  const [lightboxImageIdx, setLightboxImageIdx] = React.useState(0);
+
+  const activeKitPhoto = effectiveKitPhotos[activeKitIdx] || effectiveKitPhotos[0];
+  const activeRoutePhoto = effectiveRoutePhotos[activeRouteIdx] || effectiveRoutePhotos[0];
+
+  // Construct sections for the lightbox switcher
+  const imageSections: ImageSection[] = [
+    {
+      id: 'all',
+      title: 'All Event Photos',
+      subtitle: event.title,
+      images: Array.from(new Set([heroPhoto, ...effectiveKitPhotos, ...effectiveRoutePhotos, ...galleryPhotos])),
+    },
+    {
+      id: 'hero',
+      title: 'Event Banner',
+      subtitle: event.title,
+      images: [heroPhoto],
+    },
+    {
+      id: 'kit',
+      title: 'Official Race Kit',
+      subtitle: 'Singlet & Perks',
+      images: effectiveKitPhotos,
+    },
+    {
+      id: 'route',
+      title: 'Route & Venue Map',
+      subtitle: event.location || 'Bacolod City',
+      images: effectiveRoutePhotos,
+    },
+  ];
+
+  if (galleryPhotos.length > 0) {
+    imageSections.push({
+      id: 'gallery',
+      title: 'Event Gallery',
+      subtitle: `${galleryPhotos.length} Photos`,
+      images: galleryPhotos,
+    });
+  }
+
+  const openLightbox = (sectionId: string, index: number = 0) => {
+    setLightboxSectionId(sectionId);
+    setLightboxImageIdx(index);
+    setLightboxOpen(true);
+  };
 
   const defaultSchedule = [
     '04:30 AM - Warm-up & Assembly',
@@ -71,12 +126,19 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
             
             {/* Banner Image Card */}
             <div 
-              style={{ backgroundImage: `url(${event.image || 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=1200&q=80'})` }}
-              className="relative rounded-xl overflow-hidden bg-cover bg-center border border-zinc-200/80 p-8 sm:p-10 flex flex-col justify-end min-h-[340px] shadow-xs"
+              onClick={() => openLightbox('hero', 0)}
+              style={{ backgroundImage: `url(${heroPhoto})` }}
+              className="group relative rounded-xl overflow-hidden bg-cover bg-center border border-zinc-200/80 p-8 sm:p-10 flex flex-col justify-end min-h-[340px] shadow-xs cursor-pointer hover:border-zinc-400 transition-all"
             >
               {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent z-10 group-hover:from-black/90 group-hover:via-black/50 transition-colors" />
               
+              {/* Expand Indicator Badge */}
+              <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-black/60 group-hover:bg-[#FF4400] text-white backdrop-blur-xs px-3 py-1.5 rounded-full text-xs font-bold border border-white/20 transition-all shadow-md group-hover:scale-105">
+                <ZoomIn className="w-3.5 h-3.5" />
+                <span>Click to Expand</span>
+              </div>
+
               <div className="relative z-20">
                 {/* Distance Badges */}
                 <div className="flex gap-2 mb-3">
@@ -135,35 +197,54 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
                   <h3 className="font-sans text-xs font-bold text-zinc-900 uppercase tracking-wider">
                     OFFICIAL RACE KIT
                   </h3>
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                    SINGLET &amp; PERKS
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => openLightbox('kit', activeKitIdx)}
+                    className="text-[10px] font-bold text-[#FF4400] hover:text-[#E63D00] uppercase tracking-widest flex items-center gap-1 cursor-pointer"
+                  >
+                    <ZoomIn className="w-3 h-3" />
+                    <span>VIEW {effectiveKitPhotos.length} {effectiveKitPhotos.length === 1 ? 'PHOTO' : 'PHOTOS'}</span>
+                  </button>
                 </div>
                 
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-zinc-200/60 shadow-inner flex items-center justify-center">
+                <div 
+                  onClick={() => openLightbox('kit', activeKitIdx)}
+                  className="group relative aspect-video rounded-xl overflow-hidden bg-black border border-zinc-200/60 shadow-inner flex items-center justify-center cursor-pointer"
+                >
                   <img
                     src={activeKitPhoto}
                     alt="Official Race Kit"
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                  <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-xs rounded px-2.5 py-1 text-[10px] font-bold uppercase text-white tracking-wider border border-white/10">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:via-black/30 transition-colors" />
+                  
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 backdrop-blur-xs rounded-full px-2.5 py-1 text-[10px] font-bold text-white flex items-center gap-1 border border-white/20 shadow-md">
+                    <ZoomIn className="w-3 h-3 text-[#FF4400]" />
+                    <span>Expand</span>
+                  </div>
+
+                  <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-xs rounded px-2.5 py-1 text-[10px] font-bold uppercase text-white tracking-wider border border-white/10 flex items-center gap-1.5">
+                    <Maximize2 className="w-3 h-3 text-[#FF4400]" />
                     INCLUDES FINISHER TEE &amp; MEDAL
                   </div>
                 </div>
 
-                {kitPhotos.length > 1 && (
+                {effectiveKitPhotos.length > 1 && (
                   <div className="flex gap-2 pt-1">
-                    {kitPhotos.map((photo, idx) => (
+                    {effectiveKitPhotos.map((photo, idx) => (
                       <button
                         key={idx}
                         type="button"
-                        onClick={() => setActiveKitIdx(idx)}
-                        className={`relative h-11 w-11 rounded-lg border overflow-hidden transition-all duration-200 cursor-pointer ${
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveKitIdx(idx);
+                          openLightbox('kit', idx);
+                        }}
+                        className={`group relative h-11 w-11 rounded-lg border overflow-hidden transition-all duration-200 cursor-pointer ${
                           activeKitIdx === idx ? 'border-[#FF4400] ring-2 ring-[#FF4400]/20' : 'border-zinc-200 hover:border-zinc-350'
                         }`}
                       >
-                        <img src={photo} alt="" className="h-full w-full object-cover" />
+                        <img src={photo} alt="" className="h-full w-full object-cover group-hover:scale-110 transition-transform" />
                       </button>
                     ))}
                   </div>
@@ -180,35 +261,54 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
                   <h3 className="font-sans text-xs font-bold text-zinc-900 uppercase tracking-wider">
                     ROUTE &amp; VENUE MAP
                   </h3>
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                    {event.location ? event.location.toUpperCase() : 'BACOLOD CITY'}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => openLightbox('route', activeRouteIdx)}
+                    className="text-[10px] font-bold text-[#FF4400] hover:text-[#E63D00] uppercase tracking-widest flex items-center gap-1 cursor-pointer"
+                  >
+                    <ZoomIn className="w-3 h-3" />
+                    <span>VIEW {effectiveRoutePhotos.length} {effectiveRoutePhotos.length === 1 ? 'MAP' : 'MAPS'}</span>
+                  </button>
                 </div>
                 
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-zinc-200/60 shadow-inner flex items-center justify-center">
+                <div 
+                  onClick={() => openLightbox('route', activeRouteIdx)}
+                  className="group relative aspect-video rounded-xl overflow-hidden bg-black border border-zinc-200/60 shadow-inner flex items-center justify-center cursor-pointer"
+                >
                   <img
                     src={activeRoutePhoto}
                     alt="Route & Venue Map"
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                  <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-xs rounded px-2.5 py-1 text-[10px] font-bold uppercase text-white tracking-wider border border-white/10">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:via-black/30 transition-colors" />
+                  
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 backdrop-blur-xs rounded-full px-2.5 py-1 text-[10px] font-bold text-white flex items-center gap-1 border border-white/20 shadow-md">
+                    <ZoomIn className="w-3 h-3 text-[#FF4400]" />
+                    <span>Expand Map</span>
+                  </div>
+
+                  <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-xs rounded px-2.5 py-1 text-[10px] font-bold uppercase text-white tracking-wider border border-white/10 flex items-center gap-1.5">
+                    <Maximize2 className="w-3 h-3 text-[#FF4400]" />
                     CERTIFIED COURSE MAP
                   </div>
                 </div>
 
-                {routeMapPhotos.length > 1 && (
+                {effectiveRoutePhotos.length > 1 && (
                   <div className="flex gap-2 pt-1">
-                    {routeMapPhotos.map((photo, idx) => (
+                    {effectiveRoutePhotos.map((photo, idx) => (
                       <button
                         key={idx}
                         type="button"
-                        onClick={() => setActiveRouteIdx(idx)}
-                        className={`relative h-11 w-11 rounded-lg border overflow-hidden transition-all duration-200 cursor-pointer ${
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveRouteIdx(idx);
+                          openLightbox('route', idx);
+                        }}
+                        className={`group relative h-11 w-11 rounded-lg border overflow-hidden transition-all duration-200 cursor-pointer ${
                           activeRouteIdx === idx ? 'border-[#FF4400] ring-2 ring-[#FF4400]/20' : 'border-zinc-200 hover:border-zinc-350'
                         }`}
                       >
-                        <img src={photo} alt="" className="h-full w-full object-cover" />
+                        <img src={photo} alt="" className="h-full w-full object-cover group-hover:scale-110 transition-transform" />
                       </button>
                     ))}
                   </div>
@@ -220,6 +320,7 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
               </div>
 
             </div>
+
 
             {/* Schedule & Inclusions Sub-cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -333,6 +434,16 @@ export const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
         </div>
 
       </div>
+
+      {/* Expanded Image Lightbox */}
+      <EventImageLightbox
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        sections={imageSections}
+        initialSectionId={lightboxSectionId}
+        initialImageIndex={lightboxImageIdx}
+        eventTitle={event.title}
+      />
     </div>
   );
 };
