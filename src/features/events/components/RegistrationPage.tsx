@@ -551,6 +551,22 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                     </div>
                   </div>
 
+                  {/* Registration Summary Card - Mobile Only (Appears above checkbox & proceed button) */}
+                  <div className="block lg:hidden pt-2">
+                    <RegistrationSummaryCard 
+                      eventTitle={eventTitle}
+                      eventLocation={eventLocation}
+                      eventDate={eventDate}
+                      distance={formData.distance}
+                      baseFee={baseDetails.fee}
+                      jerseyFee={jerseyAddonFee}
+                      totalFee={totalFee}
+                      inclusions={baseDetails.inclusions}
+                      discountAmount={discountAmount}
+                      discountPercent={discountPercent}
+                    />
+                  </div>
+
                   {/* Consent Checkbox */}
                   <div className="pt-2">
                     <label className="flex items-start gap-3.5 cursor-pointer select-none">
@@ -591,8 +607,8 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   </div>
                 </div>
 
-                {/* Sidebar Column - Sticky below stepper */}
-                <div className="lg:col-span-1 lg:sticky lg:top-[170px] z-20">
+                {/* Sidebar Column - Desktop Only */}
+                <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-[170px] z-20">
                   <RegistrationSummaryCard 
                     eventTitle={eventTitle}
                     eventLocation={eventLocation}
@@ -837,6 +853,22 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                     </div>
                   </div>
 
+                  {/* Registration Summary Card - Mobile Only (Appears above payment buttons) */}
+                  <div className="block lg:hidden pt-2">
+                    <RegistrationSummaryCard 
+                      eventTitle={eventTitle}
+                      eventLocation={eventLocation}
+                      eventDate={eventDate}
+                      distance={formData.distance}
+                      baseFee={baseDetails.fee}
+                      jerseyFee={jerseyAddonFee}
+                      totalFee={totalFee}
+                      inclusions={baseDetails.inclusions}
+                      discountAmount={discountAmount}
+                      discountPercent={discountPercent}
+                    />
+                  </div>
+
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
                     <button
@@ -859,8 +891,8 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({
                   </div>
                 </div>
 
-                {/* Sidebar Column - Sticky below stepper */}
-                <div className="lg:col-span-1 lg:sticky lg:top-[170px] z-20">
+                {/* Sidebar Column - Desktop Only */}
+                <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-[170px] z-20">
                   <RegistrationSummaryCard 
                     eventTitle={eventTitle}
                     eventLocation={eventLocation}
