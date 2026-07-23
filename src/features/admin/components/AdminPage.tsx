@@ -297,40 +297,57 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [editingRegId, setEditingRegId] = useState<string | null>(null);
 
 
-  // Handle Login Authentication securely
+  // Handle Login Authentication securely with Supabase Auth
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     setIsAuthenticating(true);
 
     try {
-      const uHash = await sha256(username);
-      const pHash = await sha256(password);
+      // Format email if user entered username like "admin"
+      const loginEmail = username.includes('@') ? username.trim() : `${username.trim()}@runnicle.com`;
 
-      // Verify hashes
-      // admin -> 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
-      // runnicle-secret-2026 -> 84e027a0d5ecfe03fdd832e4c34e72efa4b12b6fab8378a0e97a293e29ce35b1
-      if (
-        uHash === '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' &&
-        pHash === '84e027a0d5ecfe03fdd832e4c34e72efa4b12b6fab8378a0e97a293e29ce35b1'
-      ) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: password
+      });
+
+      if (error) {
+        // If Supabase Auth fails, try hash fallback for smooth migration or show error
+        const uHash = await sha256(username);
+        const pHash = await sha256(password);
+
+        if (
+          uHash === '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' &&
+          pHash === '84e027a0d5ecfe03fdd832e4c34e72efa4b12b6fab8378a0e97a293e29ce35b1'
+        ) {
+          // Hardcoded fallback warning
+          setErrorMsg(`Supabase Auth Login failed (${error.message}). Please create user "${loginEmail}" in your Supabase Dashboard -> Authentication -> Users.`);
+          return;
+        }
+
+        setErrorMsg(error.message || 'Invalid email/username or password.');
+      } else if (data.session) {
         if (rememberMe) {
           localStorage.setItem('runnicle_admin_logged', 'true');
         } else {
           sessionStorage.setItem('runnicle_admin_logged', 'true');
         }
         onLoginSuccess();
-      } else {
-        setErrorMsg('Invalid username or password.');
       }
-    } catch {
-      setErrorMsg('Authentication error. Try again.');
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Authentication error. Try again.');
     } finally {
       setIsAuthenticating(false);
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      // ignore
+    }
     sessionStorage.removeItem('runnicle_admin_logged');
     localStorage.removeItem('runnicle_admin_logged');
     setUsername('');
