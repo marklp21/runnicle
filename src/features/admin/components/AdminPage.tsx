@@ -75,7 +75,7 @@ const coverPresets = [
 ];
 
 interface AdminPageProps {
-  view: 'login' | 'dashboard' | 'registrations' | 'events' | 'archive' | 'archived-events' | 'create-event' | 'registration-details' | 'forms' | 'settings';
+  view: 'login' | 'dashboard' | 'registrations' | 'events' | 'archive' | 'archived-events' | 'create-event' | 'registration-details' | 'forms' | 'settings' | 'gallery' | 'admin-gallery';
   selectedRegId?: string | null;
   events: EventItem[];
   onAddEvent: (event: EventItem) => void;
@@ -191,8 +191,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [newGalleryCategory, setNewGalleryCategory] = useState('');
   const [newGalleryCustomCategory, setNewGalleryCustomCategory] = useState('');
   const [newGalleryImage, setNewGalleryImage] = useState('');
-  const [newGalleryType, setNewGalleryType] = useState<'photo' | 'video'>('photo');
-  const [newGalleryVideoUrl, setNewGalleryVideoUrl] = useState('');
+  const [newGalleryType, _setNewGalleryType] = useState<'photo' | 'video'>('photo');
+  const [newGalleryVideoUrl, _setNewGalleryVideoUrl] = useState('');
   const [previewGalleryPhoto, setPreviewGalleryPhoto] = useState<any | null>(null);
 
   const saveAdminGalleryItems = (items: any[]) => {
@@ -2242,7 +2242,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200/80">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-orange-50 text-[#FF4400] border border-orange-200/60 flex items-center justify-center shadow-2xs">
+                <div className="p-2.5 rounded-xl bg-orange-50 text-[#FF4400] border border-orange-200/60 flex items-center justify-center flex-shrink-0">
                   <ImageIcon className="h-5 w-5" />
                 </div>
                 <div>
@@ -2254,20 +2254,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsCreateAlbumModalOpen(true)}
-                  className="rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 px-3.5 py-2.5 text-xs font-bold transition-all cursor-pointer shadow-xs flex items-center gap-2"
+                  className="rounded-lg border border-zinc-200 hover:border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 px-3.5 py-2.5 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap flex-shrink-0"
                 >
-                  <Plus className="h-4 w-4 text-[#FF4400]" /> Create Album
+                  <Plus className="h-4 w-4 text-[#FF4400] flex-shrink-0" />
+                  <span>Create Album</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsUploadGalleryModalOpen(true)}
-                  className="rounded-lg bg-[#FF4400] hover:bg-[#E63D00] text-white px-4 py-2.5 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-[0.98] flex items-center gap-2"
+                  className="rounded-lg border border-[#FF4400] bg-[#FF4400] hover:bg-[#E63D00] text-white px-4 py-2.5 text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-2 whitespace-nowrap flex-shrink-0"
                 >
-                  <Plus className="h-4 w-4" /> Upload Photo
+                  <Plus className="h-4 w-4 flex-shrink-0" />
+                  <span>Upload Photo</span>
                 </button>
               </div>
             </div>
@@ -2292,8 +2294,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           onClick={() => setActiveGalleryTab(cat)}
                           className={`rounded-full px-4 py-2 text-xs font-bold uppercase transition-all cursor-pointer border flex items-center gap-2 ${
                             isActive
-                              ? 'bg-[#FF4400] text-white border-[#FF4400] shadow-xs'
-                              : 'border-zinc-200 text-zinc-600 hover:text-zinc-900 bg-white hover:bg-zinc-50'
+                              ? 'bg-[#FF4400] text-white border-[#FF4400]'
+                              : 'border-zinc-200 text-zinc-600 hover:text-zinc-900 bg-white hover:bg-zinc-50 hover:border-zinc-300'
                           }`}
                         >
                           <span>{label} ({count})</span>
@@ -2326,8 +2328,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
               if (filtered.length === 0) {
                 return (
-                  <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center space-y-4 shadow-sm my-6">
-                    <div className="h-12 w-12 rounded-full bg-orange-50 text-[#FF4400] flex items-center justify-center mx-auto border border-orange-100">
+                  <div className="bg-white rounded-xl border border-zinc-200/90 hover:border-zinc-300 p-12 text-center space-y-4 my-6 transition-colors">
+                    <div className="h-12 w-12 rounded-full bg-orange-50 text-[#FF4400] flex items-center justify-center mx-auto border border-orange-200/60">
                       <ImageIcon className="h-6 w-6" />
                     </div>
                     <div className="space-y-1 max-w-sm mx-auto">
@@ -2341,7 +2343,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsUploadGalleryModalOpen(true)}
-                      className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 hover:bg-black text-white text-xs font-bold px-4 py-2.5 transition-all cursor-pointer shadow-xs active:scale-[0.98]"
+                      className="inline-flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 hover:bg-black text-white text-xs font-bold px-4 py-2.5 transition-all cursor-pointer active:scale-[0.98]"
                     >
                       <Plus className="h-4 w-4 text-[#FF4400]" /> Upload First Photo
                     </button>
@@ -2354,7 +2356,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   {filtered.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-white rounded-xl border border-zinc-200 overflow-hidden hover:border-zinc-300 transition-all flex flex-col justify-between group shadow-xs hover:shadow-md"
+                      className="bg-white rounded-xl border border-zinc-200 overflow-hidden hover:border-[#FF4400] transition-all flex flex-col justify-between group"
                     >
                       <div>
                         <div className="h-40 bg-zinc-100 overflow-hidden relative cursor-pointer" onClick={() => setPreviewGalleryPhoto(item)}>
@@ -2374,7 +2376,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         <button
                           type="button"
                           onClick={() => setPreviewGalleryPhoto(item)}
-                          className="flex-1 h-8 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                          className="flex-1 h-8 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 text-zinc-700 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                         >
                           <Eye className="h-3.5 w-3.5 text-zinc-500" /> Preview
                         </button>
@@ -2385,7 +2387,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                             saveAdminGalleryItems(updated);
                             showToast(`Deleted "${item.title || 'photo'}" from gallery.`);
                           }}
-                          className="h-8 w-8 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-650 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                          className="h-8 w-8 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 hover:border-rose-300 text-rose-650 flex items-center justify-center transition-all cursor-pointer"
                           title="Delete Photo"
                         >
                           <Trash2 className="h-3.5 w-3.5" />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Image, Video, X, Maximize2, Play } from 'lucide-react';
 import { type GalleryItem, mockGalleryItems } from '../data/mockData';
 
