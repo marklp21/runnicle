@@ -27,7 +27,7 @@ export const Footer: React.FC<FooterProps> = ({ onPlatformClick }) => {
               NAVIGATION
             </h4>
             <ul className="space-y-3 text-xs font-normal text-white/80">
-              {['Dashboard', 'Events', 'Gallery', 'Merch', 'Contact'].map((item) => (
+              {['Dashboard', 'Events', 'Gallery', 'Contact'].map((item) => (
                 <li key={item}>
                   <button
                     onClick={() => onPlatformClick(item)}
